@@ -1,0 +1,62 @@
+.checkout {
+    max-width: 600px;
+    margin: auto;
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+  
+.checkout h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+  
+.checkout-label {
+    display: block;
+    margin-bottom: 10px;
+}
+  
+.checkout-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+  
+.checkout-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+  
+.checkout-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+  
+.checkout-button:hover {
+    background-color: #45a049;
+}
+  
+.checkout-deliverer {
+    font-size: 18px;
+    margin-top: 10px;
+}
+  
+.amount {
+    margin-top: 10px;
+} 
