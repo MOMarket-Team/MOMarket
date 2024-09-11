@@ -3,6 +3,7 @@ import './ProductDisplay.css'
 import star_icon from '../Assets/star_icon.png'
 import star_dull_icon from '../Assets/star_dull_icon.png'
 import { ProductContext } from '../../Context/ProductContext'
+import prodprice from '../../../utils/priceformat'
 
 const ProductDisplay = (props) => {
 
@@ -34,7 +35,7 @@ const ProductDisplay = (props) => {
                 <p>(111)</p>
             </div>
             <div className="right-prices">
-                <div className="price">${product.price}</div>
+                <div className="price">{prodprice.format(product.price)}</div>
             </div>
             <div className="description">
                 Best foods for life and strength
