@@ -5,6 +5,7 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const jwt = require('jsonwebtoken');
+const dbInstanceConnection = require("./db/dbInstance");
 
 const app = express();
 const port = 4000;
@@ -12,7 +13,7 @@ const port = 4000;
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect("mongodb+srv://khabertkcca:Khabert%2311@cluster0.mzb08dh.mongodb.net/kcca_online_marketing");
+dbInstanceConnection()
 
 // Model definitions
 const Product = mongoose.model("Product", {
