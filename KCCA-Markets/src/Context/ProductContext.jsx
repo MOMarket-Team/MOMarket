@@ -2,17 +2,17 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const ProductContext = createContext(null);
 
-const getDefacultCart = () => {
-    let cart = {};
-    for (let index = 0; index < 300; index++) {
-        cart[index] = 0;                        
-    }
-    return cart;
-}
+// const getDefacultCart = () => {
+//     let cart = {};
+//     for (let index = 0; index < 300; index++) {
+//         cart[index] = 0;                        
+//     }
+//     return cart;
+// }
 
 const ProductContextProvider = (props) => {
     const [all_product, setAll_Product] = useState([]);
-    const [cartItems, setCartItems] = useState(getDefacultCart());
+    const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
         fetch('http://localhost:4000/allproducts')
@@ -20,7 +20,7 @@ const ProductContextProvider = (props) => {
             .then((data) => setAll_Product(data));
 
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/getcart', {
+            fetch('http://localhost:4000/cart', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -33,16 +33,17 @@ const ProductContextProvider = (props) => {
     }, []);
 
     const addTocart = (itemId) => {
+
         setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/addtocart', {
+            fetch('http://localhost:4000/cart/add', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'auth-token': localStorage.getItem('auth-token'),
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ itemId }),
+                body: JSON.stringify({ product: [{"product": itemId, "quantity": 1}], totalPrice:5 }),
             })
                 .then((response) => response.json())
                 .then((data) => console.log(data));
