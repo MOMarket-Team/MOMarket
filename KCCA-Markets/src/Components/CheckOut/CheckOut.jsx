@@ -3,7 +3,7 @@ import { ProductContext } from '../../Context/ProductContext';
 import { FlutterWaveButton } from 'flutterwave-react-v3';
 import axios from 'axios';
 import './CheckOut.css';
-import logo from '../Assets/logo.png';
+import logo1 from '../Assets/logo.png';
 
 const CheckOut = () => {
   const { getTotalCartAmount, clearCart } = useContext(ProductContext);
@@ -51,7 +51,7 @@ const CheckOut = () => {
     customizations: {
       title: 'KCCA Market',
       description: 'Payment for items in cart',
-      logo: logo,
+      logo: logo1,
     },
   };
 

@@ -5,41 +5,27 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const jwt = require('jsonwebtoken');
+const dbInstanceConnection = require("./db/dbInstance");
+const Users = require("./model/userModel");
+const Product = require("./model/productModel");
+const Router = require("./routers/productRouter");
+const ProductRouter = require("./routers/productRouter");
 
 const app = express();
 const port = 4000;
 
 app.use(express.json());
 app.use(cors());
+app.use(ProductRouter)
 
-mongoose.connect("mongodb+srv://khabertkcca:Khabert%2311@cluster0.mzb08dh.mongodb.net/kcca_online_marketing");
+dbInstanceConnection()
 
-// Model definitions
-const Product = mongoose.model("Product", {
-    id: { type: Number, required: true },
-    name: { type: String, required: true },
-    image: { type: String, required: true },
-    category: { type: String, required: true },
-    price: { type: Number, required: true },
-    date: { type: Date, default: Date.now },
-    available: { type: Boolean, default: true },
-});
-
-const Users = mongoose.model('Users', {
-    name: { type: String },
-    email: { type: String, unique: true },
-    password: { type: String },
-    cartData: { type: Object },
-    date: { type: Date, default: Date.now },
-    phone: { type: String },
-    location: { type: String },
-});
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: './uploads/images',
     filename: (req, file, cb) => {
-        cb(null, $`{file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
     }
 });
 const upload = multer({ storage: storage });
@@ -51,7 +37,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/uploads", upload.single('product'), (req, res) => {
-    res.json({ success: 1, image_url: `http://localhost:${port}/images/${req.file.filename}`});
+    res.json({ success: 1, image_url: `http://localhost:${port}/images/${req.file.filename}` });
 });
 
 // Authentication middleware
@@ -84,54 +70,6 @@ const ensureCartNotEmpty = (req, res, next) => {
 };
 
 // Routes for product operations
-app.post('/addproduct', async (req, res) => {
-    try {
-        let products = await Product.find({});
-        let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
-
-        const product = new Product({
-            id: id,
-            name: req.body.name,
-            image: req.body.image,
-            category: req.body.category,
-            price: req.body.price,
-        });
-
-        await product.save();
-        res.json({ success: true, name: req.body.name });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Failed to save product', error });
-    }
-});
-
-app.post('/removeproduct', async (req, res) => {
-    try {
-        await Product.findOneAndDelete({ id: req.body.id });
-        res.json({ success: true, name: req.body.name });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Failed to remove product', error });
-    }
-});
-
-app.get('/allproducts', async (req, res) => {
-    try {
-        let products = await Product.find({});
-        res.send(products);
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Failed to fetch products', error });
-    }
-});
-app.get('/newcollections', async (req, res) => {
-    let products = await Product.find({});
-    let newcollection = products.slice(1).slice(-8);
-    res.send(newcollection);
-});
-
-app.get('/popularinfruit', async (req, res) => {
-    let products = await Product.find({ category: "Fruits" });
-    let popular_in_fruit = products.slice(0, 4);
-    res.send(popular_in_fruit);
-});
 
 // Routes for user authentication
 app.post('/signup', async (req, res) => {
