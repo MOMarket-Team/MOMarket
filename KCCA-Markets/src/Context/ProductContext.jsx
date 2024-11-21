@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const ProductContext = createContext(null);
 
-const getDefacultCart = () => {
+const getDefaultCart = () => {
     let cart = {};
     for (let index = 0; index < 300; index++) {
         cart[index] = 0;
@@ -13,9 +13,8 @@ const getDefacultCart = () => {
 const ProductContextProvider = (props) => {
     const [all_product, setAll_Product] = useState([]);
     const [cartItems, setCartItems] = useState(() => {
-        // Load cart from localStorage or initialize with default cart
         const storedCart = localStorage.getItem("cartItems");
-        return storedCart ? JSON.parse(storedCart) : getDefacultCart();
+        return storedCart ? JSON.parse(storedCart) : getDefaultCart();
     });
 
     useEffect(() => {
@@ -59,9 +58,7 @@ const ProductContextProvider = (props) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ itemId }),
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
+            }).then((response) => response.json());
         }
     };
 
@@ -81,9 +78,7 @@ const ProductContextProvider = (props) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ itemId }),
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
+            }).then((response) => response.json());
         }
     };
 
@@ -111,7 +106,7 @@ const ProductContextProvider = (props) => {
     };
 
     const clearCart = () => {
-        const defaultCart = getDefacultCart();
+        const defaultCart = getDefaultCart();
         setCartItems(defaultCart);
 
         if (localStorage.getItem("auth-token")) {
@@ -122,12 +117,16 @@ const ProductContextProvider = (props) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({}),
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
+            }).then((response) => response.json());
         }
 
         localStorage.setItem("cartItems", JSON.stringify(defaultCart));
+    };
+
+    const logout = () => {
+        // Clear the cart and remove the auth-token
+        clearCart();
+        localStorage.removeItem("auth-token");
     };
 
     const contextValue = {
@@ -138,6 +137,7 @@ const ProductContextProvider = (props) => {
         addTocart,
         removeFromcart,
         clearCart,
+        logout,
     };
 
     return (

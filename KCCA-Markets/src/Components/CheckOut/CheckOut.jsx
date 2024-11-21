@@ -63,50 +63,51 @@ const CheckOut = () => {
     }
   };
 
-  const handleCheckout = async (transaction_id) => {
+  const handleCheckout = async () => {
+    console.log('Phone:', phone);
+    console.log('Location:', location);
+    console.log('Payment Method:', paymentMethod);
+    console.log('Amount:', cartTotal);
+
+    // If the cart is empty, show an alert
     if (cartTotal === 0) {
       alert('Your cart is empty. Add items to your cart before checking out.');
       return;
     }
 
+    // Set transaction_id to null if payment method is cash on delivery
+    const transaction_id = paymentMethod === 'cash_on_delivery' ? null : generateTransactionId(); // Use a function to generate the transaction ID for mobile money if necessary
+
     try {
       const token = localStorage.getItem('auth-token');
-      const response = await axios.post('http://localhost:4000/checkout', {
-        phone,
-        location,
-        paymentMethod,
-        amount: cartTotal,
-        transaction_id
-      }, {
-        headers: {
-          'auth-token': token
+      const response = await axios.post(
+        'http://localhost:4000/checkout',
+        {
+          phone,
+          location,
+          paymentMethod,
+          amount: cartTotal,
+          transaction_id, // Send null if cash_on_delivery
+        },
+        {
+          headers: {
+            'auth-token': token,
+          },
         }
-      });
+      );
 
       if (response.data.success) {
         setDelivererNumber(response.data.deliveryContact);
         alert('Order placed successfully');
-
-        const clearCartResponse = await axios.post('http://localhost:4000/clearcart', {}, {
-          headers: {
-            'auth-token': token
-          }
-        });
-
-        if (clearCartResponse.data.success) {
-          clearCart();
-          alert('Cart cleared successfully');
-        } else {
-          alert(clearCartResponse.data.message);
-        }
+        clearCart(); // Clear cart after successful checkout
       } else {
-        alert(response.data.message);
+        alert(response.data.message); // Show the message from backend if failure
       }
     } catch (error) {
       console.error('Checkout error:', error);
       alert('Failed to checkout');
     }
-  };
+};
 
   return (
     <div className='checkout'>
