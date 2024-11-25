@@ -5,7 +5,6 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const jwt = require('jsonwebtoken');
-const { error } = require("console");
 
 const app = express();
 const port = 4000;
@@ -35,23 +34,20 @@ const Users = mongoose.model('Users', {
     phone: { type: String },
     location: { type: String },
 });
-// order model
-const Order = mongoose.model("Order", {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
+//Order Model
+const OrderSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true },
     cartData: [
         {
-            productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-            title: { type: String, required: true },
-            price: { type: Number, required: true },
+            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
             quantity: { type: Number, required: true },
         },
     ],
-    totalAmount: { type: Number, required: true },
-    paymentMethod: { type: String, required: true },
-    transactionId: { type: String, required: false },
     phone: { type: String, required: true },
     location: { type: String, required: true },
-    status: { type: String, default: "Pending" },
+    totalAmount: { type: Number, required: true },
+    paymentMethod: { type: String, enum: ['cash', 'mobile_money'], required: true },
+    status: { type: String, default: 'Pending' },
     date: { type: Date, default: Date.now },
 });
 
@@ -240,99 +236,90 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
     }
 });
 
- // Checkout route with Flutterwave integration and order handling
- app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
+app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
     try {
+        console.log('Checkout Request Data:', req.body); // Log request data
         const { phone, location, paymentMethod, amount, transaction_id } = req.body;
+        let userData = await Users.findById(req.user.id);
 
-        // Validate request data
         if (!phone || !location) {
-            return res.status(400).json({ success: false, message: "Phone number and location are required." });
+            console.log('Missing phone or location'); // Log failure point
+            return res.status(400).json({ success: false, message: "Phone number and location are required" });
         }
 
-        const userData = await Users.findById(req.user.id);
-        if (!userData) {
-            return res.status(404).json({ success: false, message: "User not found." });
+         // Further debug points
+         console.log('User:', req.user); // Ensure `req.user` exists
+         console.log('Processing cart data:', req.user.id); 
+
+        if (paymentMethod === 'mobile_money' && (!transaction_id || transaction_id.trim() === '')) {
+            return res.status(400).json({ success: false, message: "Transaction ID is required for mobile money payments" });
         }
 
-        const cartDetails = [];
         let cartTotal = 0;
+        const cartProducts = [];
 
-        // Fetch and validate cart items
         for (const [itemId, quantity] of Object.entries(userData.cartData)) {
-            if (quantity > 0) {
-                const product = await Product.findById(itemId);
-                if (!product) {
-                    return res.status(400).json({ 
-                        success: false, 
-                        message: `Product with ID ${itemId} not found. Please update your cart and try again.` 
-                    });
+            try {
+                if (!mongoose.Types.ObjectId.isValid(itemId)) {
+                    console.warn(`Skipping invalid product ID: ${itemId}`);
+                    continue; // Skip invalid product ID
                 }
-
-                cartDetails.push({
-                    productId: product._id,
-                    title: product.name,
-                    price: product.price,
-                    quantity,
-                });
-
+                const product = await Product.findOne({ _id: mongoose.Types.ObjectId(itemId) });
+                if (!product) {
+                    throw new Error(`Product not found for ID: ${itemId}`);
+                }
+        
                 cartTotal += product.price * quantity;
+                cartProducts.push({ product, quantity });
+            } catch (error) {
+                console.error('Error processing cart item:', error.message);
+                return res.status(400).json({ success: false, message: error.message });
             }
-        }
+        }                
 
-        // Check for mismatched payment amounts for mobile money
         if (paymentMethod === 'mobile_money' && cartTotal !== amount) {
-            return res.status(400).json({
-                success: false,
-                message: "The payment amount must equal the cart total for mobile money transactions.",
-            });
+            return res.status(400).json({ success: false, message: "The payment amount must equal the cart total for mobile money transactions" });
         }
 
-        // Create a new order with or without a transaction ID based on the payment method
-        const order = new Order({
+        // Save the order
+        const newOrder = new Order({
             userId: req.user.id,
-            cartData: cartDetails,
-            totalAmount: cartTotal,
-            paymentMethod,
-            transactionId: transaction_id || null, // Ensure it is null if not provided
+            cartData: cartProducts.map(({ product, quantity }) => ({
+                product: product._id,
+                quantity,
+            })),
             phone,
             location,
+            totalAmount: cartTotal,
+            paymentMethod,
+            transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
+            status: 'Pending',
             date: new Date(),
         });
 
-        await order.save();
+        await newOrder.save();
 
-        // Clear user's cart after successful checkout
-        userData.cartData = {};
+        userData.phone = phone;
+        userData.location = location;
         await userData.save();
 
-        res.json({
-            success: true,
-            message: "Checkout successful.",
-            deliveryContact: "+256 789 123 456", // Example contact for delivery
-        });
+        res.json({ success: true, message: "Checkout successful", deliveryContact: "+256 789 123 456" });
     } catch (error) {
-        console.error("Checkout failed:", error);
-        res.status(500).json({
-            success: false,
-            message: "An internal server error occurred during checkout. Please try again later.",
-            error: error.message || error,
-        });
+        console.error('Error in checkout:', error);
+        res.status(500).json({ success: false, message: 'Checkout failed', error: error.message, stack: error.stack });
     }
 });
 
 app.get('/admin/orders', async (req, res) => {
     try {
-        const orders = await Order.find()
-            .populate('userId', 'name email') // Populate user details
-            .populate('cartData.productId', 'name price'); // Populate product details (if needed)
-
+        const orders = await Order.find().populate('userId').populate('cartData.product');
         res.json({ success: true, orders });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
     }
 });
 
+// Checkout route with Flutterwave integration
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     const secret = 'FLWSECK_TEST-301513cfe5479f53a8fee5fcf0416b5a-X';
     const hash = req.headers['verif-hash'];

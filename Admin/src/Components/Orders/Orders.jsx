@@ -5,7 +5,7 @@ const AdminOrders = () => {
     const [orders, setOrders] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:4000/admin/orders') // Replace with your actual backend URL
+        fetch('http://localhost:4000/admin/orders')
             .then((response) => response.json())
             .then((data) => {
                 if (data.success) {
@@ -44,15 +44,11 @@ const AdminOrders = () => {
                             <td>{order.status}</td>
                             <td>{new Date(order.date).toLocaleString()}</td>
                             <td>
-                                {order.cartData.length > 0 ? (
-                                    order.cartData.map((product, index) => (
-                                        <div key={index}>
-                                            {product.title || 'N/A'}: Quantity: {product.quantity || 0}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div>No Products</div>
-                                )}
+                                {order.cartData.map((item, index) => (
+                                    <div key={index}>
+                                        {item.product.title || 'N/A'}: Quantity: {item.quantity}
+                                    </div>
+                                ))}
                             </td>
                         </tr>
                     ))}

@@ -64,50 +64,77 @@ const CheckOut = () => {
   };
 
   const handleCheckout = async () => {
-    console.log('Phone:', phone);
-    console.log('Location:', location);
-    console.log('Payment Method:', paymentMethod);
-    console.log('Amount:', cartTotal);
-
-    // If the cart is empty, show an alert
     if (cartTotal === 0) {
-      alert('Your cart is empty. Add items to your cart before checking out.');
-      return;
+        alert('Your cart is empty. Add items to your cart before checking out.');
+        return;
     }
-
-    // Set transaction_id to null if payment method is cash on delivery
-    const transaction_id = paymentMethod === 'cash_on_delivery' ? null : generateTransactionId(); // Use a function to generate the transaction ID for mobile money if necessary
 
     try {
-      const token = localStorage.getItem('auth-token');
-      const response = await axios.post(
-        'http://localhost:4000/checkout',
-        {
-          phone,
-          location,
-          paymentMethod,
-          amount: cartTotal,
-          transaction_id, // Send null if cash_on_delivery
-        },
-        {
-          headers: {
-            'auth-token': token,
-          },
-        }
-      );
+        const token = localStorage.getItem('auth-token');
+        const transaction_id = paymentMethod === 'cash_on_delivery' ? null : someTransactionIdVariable; // Set transaction_id conditionally
 
-      if (response.data.success) {
-        setDelivererNumber(response.data.deliveryContact);
-        alert('Order placed successfully');
-        clearCart(); // Clear cart after successful checkout
-      } else {
-        alert(response.data.message); // Show the message from backend if failure
-      }
+        // Log the data being sent in the request
+        console.log('Checkout Request Data:', {
+            phone,
+            location,
+            paymentMethod,
+            amount: cartTotal,
+            transaction_id,
+        });
+
+        const response = await axios.post(
+            'http://localhost:4000/checkout',
+            {
+                phone,
+                location,
+                paymentMethod,
+                amount: cartTotal,
+                transaction_id,
+            },
+            {
+                headers: {
+                    'auth-token': token,
+                },
+            }
+        );
+
+        // Log the API response
+        console.log('Checkout Response:', response.data);
+
+        if (response.data.success) {
+            setDelivererNumber(response.data.deliveryContact);
+            alert('Order placed successfully');
+
+            const clearCartResponse = await axios.post(
+                'http://localhost:4000/clearcart',
+                {},
+                {
+                    headers: {
+                        'auth-token': token,
+                    },
+                }
+            );
+
+            if (clearCartResponse.data.success) {
+                clearCart();
+                alert('Cart cleared successfully');
+            } else {
+                alert(clearCartResponse.data.message);
+            }
+        } else {
+            alert(response.data.message);
+        }
     } catch (error) {
-      console.error('Checkout error:', error);
-      alert('Failed to checkout');
+        // Log the error object
+        console.error('Checkout error:', error);
+        if (error.response) {
+            console.error('Error Response Data:', error.response.data);
+            console.error('Error Response Status:', error.response.status);
+            console.error('Error Response Headers:', error.response.headers);
+        }
+        alert('Failed to checkout');
     }
-};
+};  
 
   return (
     <div className='checkout'>
