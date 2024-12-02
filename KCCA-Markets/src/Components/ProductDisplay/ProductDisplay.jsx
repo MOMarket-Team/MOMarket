@@ -47,7 +47,7 @@ const ProductDisplay = (props) => {
                 <div className="description">
                     Best foods for life and strength
                 </div>
-                <button onClick={() => addTocart(product.id)}>ADD TO CART</button>
+                <button onClick={() => addTocart(product)}>ADD TO CART</button>
                 <p className="right-category"><span>Category :</span> Fruits, for life</p>
                 <p className="right-category"><span>Tags :</span> Fresh and lively</p>
             </div>

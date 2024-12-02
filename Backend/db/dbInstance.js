@@ -5,7 +5,7 @@ const mongoose = require ("mongoose")
 
 const dbInstanceConnection = async() => {
 try {
-    await mongoose.connect(process.env.dburls)
+    await mongoose.connect("mongodb+srv://khabertkcca:Khabert%2311@cluster0.mzb08dh.mongodb.net/kcca_online_marketing")
     console.log("connection successful");
     
 } catch (error) {

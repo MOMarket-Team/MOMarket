@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Navbar.css';
 import { Link } from 'react-router-dom';
 import logo from '../Assets/logo.png';
@@ -8,9 +8,19 @@ import dropdown_icon from '../Assets/dropdown_icon.png'
 
 const Navbar = () => {
     const [menu, setMenu] = useState("Products");
-    const {getTotalItems} = useContext(ProductContext);
+    const [cartItems, setCartItems] = useState([]);
+    // const {getTotalItems, cartItems} = useContext(ProductContext);
     // for hiding the menu bar at certain width
     const menuRef = useRef();
+
+    // Get cartItems from local storage
+    useEffect(() => {
+        if (localStorage.getItem("cartItems")) {
+          setCartItems(JSON.parse(localStorage.getItem("cartItems")));
+        }
+        console.log('');
+        
+      }, []);
 
     const dropdown_toggle = (e)=>{
         menuRef.current.classList.toggle('nav-menu-visible');
@@ -20,8 +30,8 @@ const Navbar = () => {
     return (
         <div className='navbar'>
             <div className="nav-logo">
-                <img src={logo} alt="" />
-                <p>KCCA ONLINE <br/>  MARKETS</p>                
+                {/* <img src={logo} alt="" /> */}
+                <p>ZZZZ<br/>  MARKETS</p>                
             </div>
             <img className='nav-dropdown' onClick={dropdown_toggle} src={dropdown_icon} alt="" />
             <ul ref={menuRef} className='nav-menu'>
@@ -51,7 +61,7 @@ const Navbar = () => {
                 <button onClick={()=>{localStorage.removeItem('auth-token');window.location.replace("/")}}>Logout</button>
                 :<Link to='/login'><button>Login</button></Link>}                
                 <Link to='/cart'><img src={cart_icon} alt="" /></Link>
-                <div className="nav-cart-count">{getTotalItems()}</div>
+                <div className="nav-cart-count">{cartItems.length}</div>
             </div>
         </div>
     );
