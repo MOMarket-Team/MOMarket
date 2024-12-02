@@ -189,6 +189,22 @@ app.post('/login', async (req, res) => {
     }
 });
 
+app.get('/getuser', (req, res) => {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'Access Denied' });
+    }
+
+    try {
+        const data = jwt.verify(token, 'secret_ecom');
+        Users.findById(data.user.id, { name: 1, email: 1 })
+            .then(user => res.json({ success: true, user }))
+            .catch(() => res.status(500).json({ success: false, message: 'Internal Error' }));
+    } catch {
+        res.status(401).json({ success: false, message: 'Invalid Token' });
+    }
+});
+
 // Fetch customer details
 app.get('/customer', fetchUser, async (req, res) => {
     try {
@@ -206,16 +222,33 @@ app.get('/customer', fetchUser, async (req, res) => {
 // Routes for cart operations
 app.post('/addtocart', fetchUser, async (req, res) => {
     try {
+        const { itemId } = req.body;
+
+        // Validate itemId as a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(itemId)) {
+            return res.status(400).json({ success: false, message: 'Invalid product ID' });
+        }
+
+        // Check if the product exists
+        const product = await Product.findById(itemId);
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Retrieve user data
         let userData = await Users.findById(req.user.id);
         if (!userData) {
             return res.status(400).json({ success: false, message: 'User not found' });
         }
 
-        userData.cartData[req.body.itemId] += 1;
+        // Add to cart or increment quantity
+        userData.cartData[itemId] = (userData.cartData[itemId] || 0) + 1;
         await Users.findByIdAndUpdate(req.user.id, { cartData: userData.cartData });
-        res.json({ message: "Added" });
+
+        res.json({ success: true, message: 'Product added to cart' });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Failed to add to cart', error });
+        console.error('Error adding to cart:', error);
+        res.status(500).json({ success: false, message: 'Failed to add to cart', error: error.message });
     }
 });
 
@@ -238,18 +271,15 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 
 app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
     try {
-        console.log('Checkout Request Data:', req.body); // Log request data
+        console.log('Checkout Request Data:', req.body);
+
         const { phone, location, paymentMethod, amount, transaction_id } = req.body;
         let userData = await Users.findById(req.user.id);
 
         if (!phone || !location) {
-            console.log('Missing phone or location'); // Log failure point
+            console.log('Missing phone or location');
             return res.status(400).json({ success: false, message: "Phone number and location are required" });
         }
-
-         // Further debug points
-         console.log('User:', req.user); // Ensure `req.user` exists
-         console.log('Processing cart data:', req.user.id); 
 
         if (paymentMethod === 'mobile_money' && (!transaction_id || transaction_id.trim() === '')) {
             return res.status(400).json({ success: false, message: "Transaction ID is required for mobile money payments" });
@@ -260,28 +290,32 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
 
         for (const [itemId, quantity] of Object.entries(userData.cartData)) {
             try {
-                if (!mongoose.Types.ObjectId.isValid(itemId)) {
+                const validItemId = mongoose.Types.ObjectId.isValid(itemId) ? itemId : null;
+                if (!validItemId) {
                     console.warn(`Skipping invalid product ID: ${itemId}`);
-                    continue; // Skip invalid product ID
+                    continue;
                 }
-                const product = await Product.findOne({ _id: mongoose.Types.ObjectId(itemId) });
+        
+                const product = await Product.findById(validItemId);
                 if (!product) {
-                    throw new Error(`Product not found for ID: ${itemId}`);
+                    console.warn(`Skipping non-existent product ID: ${itemId}`);
+                    continue;
                 }
         
                 cartTotal += product.price * quantity;
                 cartProducts.push({ product, quantity });
             } catch (error) {
-                console.error('Error processing cart item:', error.message);
-                return res.status(400).json({ success: false, message: error.message });
+                console.error(`Error processing cart item ${itemId}:`, error.message);
             }
-        }                
+        }        
+        if (cartProducts.length === 0) {
+            return res.status(400).json({ success: false, message: "No valid items in cart for checkout" });
+        }
 
         if (paymentMethod === 'mobile_money' && cartTotal !== amount) {
             return res.status(400).json({ success: false, message: "The payment amount must equal the cart total for mobile money transactions" });
         }
 
-        // Save the order
         const newOrder = new Order({
             userId: req.user.id,
             cartData: cartProducts.map(({ product, quantity }) => ({
@@ -306,7 +340,7 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
         res.json({ success: true, message: "Checkout successful", deliveryContact: "+256 789 123 456" });
     } catch (error) {
         console.error('Error in checkout:', error);
-        res.status(500).json({ success: false, message: 'Checkout failed', error: error.message, stack: error.stack });
+        res.status(500).json({ success: false, message: 'Checkout failed', error: error.message });
     }
 });
 

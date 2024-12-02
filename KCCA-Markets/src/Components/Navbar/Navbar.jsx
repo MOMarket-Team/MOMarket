@@ -1,29 +1,56 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import './Navbar.css';
 import { Link } from 'react-router-dom';
 import logo from '../Assets/logo.png';
 import cart_icon from '../Assets/cart_icon.png';
 import { ProductContext } from '../../Context/ProductContext';
-import dropdown_icon from '../Assets/dropdown_icon.png'
+import dropdown_icon from '../Assets/dropdown_icon.png';
 
 const Navbar = () => {
     const [menu, setMenu] = useState("Products");
-    const {getTotalItems} = useContext(ProductContext);
-    // for hiding the menu bar at certain width
+    const { getTotalItems } = useContext(ProductContext);
+    const [user, setUser] = useState(null); // To store user information
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
     const menuRef = useRef();
 
-    const dropdown_toggle = (e)=>{
+    useEffect(() => {
+        // Fetch user information from the token
+        const token = localStorage.getItem('auth-token');
+        if (token) {
+            // Decode token to get user info (dummy logic for this example)
+            fetch('http://localhost:4000/getuser', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) setUser(data.user); // Assuming backend returns a `user` object
+                })
+                .catch(() => setUser(null));
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('auth-token');
+        setUser(null);
+        window.location.replace('/');
+    };
+
+    const dropdownToggle = (e) => {
         menuRef.current.classList.toggle('nav-menu-visible');
         e.target.classList.toggle('open');
-    }
+    };
 
     return (
         <div className='navbar'>
             <div className="nav-logo">
-                <img src={logo} alt="" />
-                <p>KCCA ONLINE <br/>  MARKETS</p>                
+                <img src={logo} alt="Logo" />
+                <p>KCCA ONLINE <br /> MARKETS</p>
             </div>
-            <img className='nav-dropdown' onClick={dropdown_toggle} src={dropdown_icon} alt="" />
+            <img className='nav-dropdown' onClick={dropdownToggle} src={dropdown_icon} alt="Dropdown Icon" />
             <ul ref={menuRef} className='nav-menu'>
                 <li onClick={() => { setMenu("Products") }}>
                     <Link style={{ textDecoration: 'none' }} to='/'>Products</Link>
@@ -47,10 +74,21 @@ const Navbar = () => {
                 </li>
             </ul>
             <div className="nav-logo-cart">
-                {localStorage.getItem('auth-token')?
-                <button onClick={()=>{localStorage.removeItem('auth-token');window.location.replace("/")}}>Logout</button>
-                :<Link to='/login'><button>Login</button></Link>}                
-                <Link to='/cart'><img src={cart_icon} alt="" /></Link>
+                {user ? (
+                    <div className="user-dropdown">
+                        <button onClick={() => setDropdownOpen(!dropdownOpen)}>
+                            {user.name || user.email}
+                        </button>
+                        {dropdownOpen && (
+                            <div className="dropdown-menu">
+                                <p onClick={handleLogout}>Logout</p>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <Link to='/login'><button>Login</button></Link>
+                )}
+                <Link to='/cart'><img src={cart_icon} alt="Cart Icon" /></Link>
                 <div className="nav-cart-count">{getTotalItems()}</div>
             </div>
         </div>
