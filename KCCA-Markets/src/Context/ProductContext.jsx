@@ -14,29 +14,8 @@ const ProductContextProvider = (props) => {
     fetch("http://localhost:4000/allproducts")
       .then((response) => response.json())
       .then((data) => setAll_Product(data));
-
-    // Fetch cart from backend if user is logged in
-    // if (localStorage.getItem("auth-token")) {
-    //   fetch("http://localhost:4000/getcart", {
-    //     method: "POST",
-    //     headers: {
-    //       Accept: "application/json",
-    //       "auth-token": localStorage.getItem("auth-token"),
-    //       "Content-Type": "application/json",
-    //     },
-    //   })
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //       setCartItems(data);
-    //       localStorage.setItem("cartItems", JSON.stringify(data));
-    //     });
-    // }
   }, []);
 
-  // useEffect(() => {
-  //   // Save cart to localStorage whenever it changes
-  //   localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  // }, [cartItems]);
 
   const addTocart = (product) => {
     const itemId = product.id;
