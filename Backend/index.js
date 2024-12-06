@@ -343,7 +343,6 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
         res.status(500).json({ success: false, message: 'Checkout failed', error: error.message });
     }
 });
-
 app.get('/admin/orders', async (req, res) => {
     try {
         const orders = await Order.find().populate('userId').populate('cartData.product');
@@ -397,6 +396,33 @@ app.post('/clearcart', fetchUser, async (req, res) => {
         res.json({ success: true, message: 'Cart cleared successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to clear cart', error });
+    }
+});
+
+app.get('/search', async (req, res) => {
+    try {
+        const query = req.query.q ? req.query.q.toLowerCase() : '';
+
+        // Handle empty query
+        if (!query.trim()) {
+            return res.json({ success: true, products: [] });
+        }
+
+        // Search products using MongoDB query
+        const filteredProducts = await Product.find({
+            name: { $regex: query, $options: 'i' }, // Case-insensitive search
+        });
+
+        res.json({
+            success: true,
+            products: filteredProducts,
+        });
+    } catch (error) {
+        console.error('Error during search:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to perform search',
+        });
     }
 });
 

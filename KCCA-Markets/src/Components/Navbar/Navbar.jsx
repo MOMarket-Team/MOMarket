@@ -11,6 +11,8 @@ const Navbar = () => {
     const { getTotalItems } = useContext(ProductContext);
     const [user, setUser] = useState(null); // To store user information
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
 
     const menuRef = useRef();
 
@@ -18,7 +20,6 @@ const Navbar = () => {
         // Fetch user information from the token
         const token = localStorage.getItem('auth-token');
         if (token) {
-            // Decode token to get user info (dummy logic for this example)
             fetch('http://localhost:4000/getuser', {
                 method: 'GET',
                 headers: {
@@ -27,7 +28,7 @@ const Navbar = () => {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    if (data.success) setUser(data.user); // Assuming backend returns a `user` object
+                    if (data.success) setUser(data.user); 
                 })
                 .catch(() => setUser(null));
         }
@@ -42,6 +43,35 @@ const Navbar = () => {
     const dropdownToggle = (e) => {
         menuRef.current.classList.toggle('nav-menu-visible');
         e.target.classList.toggle('open');
+    };
+
+    // Handle Search
+    const handleSearch = async (e) => {
+        setSearchTerm(e.target.value);
+        if (e.target.value.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:4000/search?q=${e.target.value}`);
+            if (!response.ok) throw new Error('Failed to fetch search results');
+            const data = await response.json();
+            if (data.success) {
+                setSearchResults(data.products);
+            } else {
+                setSearchResults([]);
+            }
+        } catch (error) {
+            console.error('Error fetching search results:', error);
+            setSearchResults([]);
+        }
+    };    
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchTerm.trim() !== '') {
+            navigate(`/search?q=${searchTerm}`);
+        }
     };
 
     return (
@@ -73,6 +103,30 @@ const Navbar = () => {
                     {menu === "Sauce" ? <hr /> : null}
                 </li>
             </ul>
+            <div className="nav-search">
+                <form onSubmit={handleSearchSubmit}>
+                <input
+                    type="text"
+                    placeholder="What are you looking for?"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                />
+                </form>
+                {searchResults.length > 0 && (
+                    <div className="search-results">
+                        {searchResults.map((product) => (
+                            <Link to={`/product/${product.id}`} key={product.id}
+                            onClick={() => {
+                                setSearchResults([]); // Clear results
+                                setSearchTerm(''); // Clear input
+                            }}
+                            >
+                                {product.name}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
             <div className="nav-logo-cart">
                 {user ? (
                     <div className="user-dropdown">
