@@ -2,12 +2,9 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const ProductContext = createContext(null);
 
-
 const ProductContextProvider = (props) => {
   const [all_product, setAll_Product] = useState([]);
-  const [cartItems, setCartItems] = useState([
-
-  ]);
+  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
     // Fetch all products
@@ -16,19 +13,22 @@ const ProductContextProvider = (props) => {
       .then((data) => setAll_Product(data));
   }, []);
 
+  // Get cartItems from localstorage
+  useEffect(() => {
+    if (localStorage.getItem("cartItems")) {
+      setCartItems(JSON.parse(localStorage.getItem("cartItems")));
+    }
+  }, []);
+
 
   const addTocart = (product) => {
-    const itemId = product.id;
-    const localCart = localStorage.getItem('cartItems')
 
     const existingItem = cartItems.find((item) => item.id === product.id);
 
     // Check if product exists in local storage
-    
-
 
     if (existingItem) {
-        alert('product already exists')
+      alert("product already exists");
       return;
     }
 
@@ -37,31 +37,25 @@ const ProductContextProvider = (props) => {
 
     setCartItems([...cartItems, product]);
 
+    console.log(cartItems, "cartItems");
+    
+
     // Add to local storage
     localStorage.setItem("cartItems", JSON.stringify([...cartItems, product]));
-
   };
 
-  const removeFromcart = (itemId) => {
-
+  const removeFromcart = async (itemId) => {
     setCartItems(cartItems.filter((item) => item.id !== itemId));
 
-    if (localStorage.getItem("auth-token")) {
-      fetch("http://localhost:4000/removefromcart", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "auth-token": localStorage.getItem("auth-token"),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ itemId }),
-      }).then((response) => response.json());
-    }
+    await localStorage.setItem(
+      "cartItems",
+      JSON.stringify(cartItems.filter((item) => item.id !== itemId))
+    );
   };
-  
+
   const getTotalCartAmount = () => {
     let totalAmount = 0;
-    
+
     for (const item in cartItems) {
       totalAmount += cartItems[item].price * cartItems[item].quantity;
     }
@@ -78,21 +72,9 @@ const ProductContextProvider = (props) => {
   };
 
   const clearCart = () => {
-    const defaultCart = getDefaultCart();
-    setCartItems(defaultCart);
-
-    if (localStorage.getItem("auth-token")) {
-      fetch("http://localhost:4000/clearcart", {
-        method: "POST",
-        headers: {
-          "auth-token": localStorage.getItem("auth-token"),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      }).then((response) => response.json());
-    }
-
-    localStorage.setItem("cartItems", JSON.stringify(defaultCart));
+  //  Remove everything from cart and local storage
+    setCartItems([]);
+    localStorage.removeItem("cartItems");
   };
 
   const logout = () => {

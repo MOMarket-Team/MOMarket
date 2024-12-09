@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./CartItems.css";
 import { ProductContext } from "../../Context/ProductContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
@@ -8,7 +8,37 @@ import prodprice from "../../../utils/priceformat";
 const CartItems = () => {
   const { getTotalCartAmount, all_product, cartItems, removeFromcart } =
     useContext(ProductContext);
+  const [cartItem, setCartItem] = useState([]);
+  const [cartTotal, setCartTotal] = useState(0)
   const navigate = useNavigate();
+
+   // Update cart items from context whenever cartItems changes
+   useEffect(() => {
+    const updatedCart = localStorage.getItem("cartItems")
+      ? JSON.parse(localStorage.getItem("cartItems"))
+      : cartItems;
+    setCartItem(updatedCart);
+
+    // Calculate cart total
+    const total = updatedCart.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    setCartTotal(total);
+  }, [cartItems]); // Dependency on cartItems
+
+  const handleRemoveFromCart = (id) => {
+    removeFromcart(id);
+
+    // Update local storage
+    const updatedCart = cartItems.filter((item) => item.id !== id);
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+
+    // Trigger re-render by updating state
+    setCartItem(updatedCart);
+  };
+
+
 
   const handleCheckout = () => {
     navigate('/checkout');
@@ -27,10 +57,10 @@ const CartItems = () => {
         <p>Remove</p>
       </div>
       <hr />
-      {cartItems.length === 0 ? (
+      {cartItem.length === 0 ? (
         <h1>Cart is empty</h1>
       ) : (
-        cartItems.map((e) => {
+        cartItem.map((e) => {
           console.log(e, "e carfft");
 
           return (
@@ -45,7 +75,7 @@ const CartItems = () => {
                   className="remove-icon"
                   src={remove_icon}
                   onClick={() => {
-                    removeFromcart(e.id);
+                    handleRemoveFromCart(e.id);
                   }}
                   alt=""
                 />
@@ -61,7 +91,7 @@ const CartItems = () => {
           <div>
             <div className="total-item">
               <p>Subtotal</p>
-              <p>{prodprice.format(getTotalCartAmount())}</p>
+              <p>{prodprice.format(cartTotal)}</p>
             </div>
             <hr />
             <div className="total-item">
@@ -71,7 +101,7 @@ const CartItems = () => {
             <hr />
             <div className="total-item">
               <h3>Total</h3>
-              <h3>{prodprice.format(getTotalCartAmount())}</h3>
+              <h3>{prodprice.format(cartTotal)}</h3>
             </div>
           </div>
           <button onClick={handleCheckout}>PROCEED TO CHECKOUT</button>

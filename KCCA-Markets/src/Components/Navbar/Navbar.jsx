@@ -8,19 +8,19 @@ import dropdown_icon from '../Assets/dropdown_icon.png'
 
 const Navbar = () => {
     const [menu, setMenu] = useState("Products");
-    const [cartItems, setCartItems] = useState([]);
-    // const {getTotalItems, cartItems} = useContext(ProductContext);
+    // const [cartItems, setCartItems] = useState([]);
+    const {getTotalItems, cartItems} = useContext(ProductContext);
     // for hiding the menu bar at certain width
     const menuRef = useRef();
 
     // Get cartItems from local storage
-    useEffect(() => {
-        if (localStorage.getItem("cartItems")) {
-          setCartItems(JSON.parse(localStorage.getItem("cartItems")));
-        }
-        console.log('');
+    // useEffect(() => {
+    //     if (localStorage.getItem("cartItems")) {
+    //       setCartItems(JSON.parse(localStorage.getItem("cartItems")));
+    //     }
+    //     console.log('');
         
-      }, []);
+    //   }, []);
 
     const dropdown_toggle = (e)=>{
         menuRef.current.classList.toggle('nav-menu-visible');

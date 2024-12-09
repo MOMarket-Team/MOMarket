@@ -45,7 +45,7 @@ const CheckOut = () => {
   const handleCheckout = async () => {
     console.log('Payment Method:');
     
-    if (cartTotal === 0) {
+    if (cartItems.length === 0) {
         alert('Your cart is empty. Add items to your cart before checking out.');
         return;
     }
