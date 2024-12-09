@@ -13,6 +13,7 @@ import food_banner from './Components/Assets/Foods_banner.jpg'
 import veg_banner from './Components/Assets/vegetable_banner.jpg'
 import sauce_banner from './Components/Assets/Meat_banner.jpg'
 import Checkout from "./pages/Checkout.jsx";
+import SearchResults from "./pages/SearchResults.jsx";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path='/cart' element={<Cart />} />
           <Route path='/login' element={<LoginSignup />} />
           <Route path='/checkout' element={<Checkout/>} />
+          <Route path='/search' element={<SearchResults/>} />
         </Routes>
         <Footer />
       </BrowserRouter>

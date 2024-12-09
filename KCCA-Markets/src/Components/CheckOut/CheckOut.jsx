@@ -3,37 +3,16 @@ import { ProductContext } from '../../Context/ProductContext';
 import { FlutterWaveButton } from 'flutterwave-react-v3';
 import axios from 'axios';
 import './CheckOut.css';
-import logo from '../Assets/logo.png';
+import logo1 from '../Assets/logo.png';
 
 const CheckOut = () => {
-  const { getTotalCartAmount, clearCart } = useContext(ProductContext);
+  const { getTotalCartAmount, clearCart, cartItems } = useContext(ProductContext);
   const [phone, setPhone] = useState('');
   const [location, setLocation] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
   const [amount, setAmount] = useState(0);
   const [delivererNumber, setDelivererNumber] = useState('');
   const [customer, setCustomer] = useState({ email: '', name: '' });
-
-  useEffect(() => {
-    const fetchCustomerDetails = async () => {
-      const token = localStorage.getItem('auth-token');
-      try {
-        const response = await axios.get('http://localhost:4000/customer', {
-          headers: {
-            'auth-token': token
-          }
-        });
-        if (response.data.success) {
-          setCustomer(response.data.customer);
-        } else {
-          console.error('Failed to fetch customer details:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching customer details:', error);
-      }
-    };
-    fetchCustomerDetails();
-  }, []);
 
   const cartTotal = getTotalCartAmount();
 
@@ -51,7 +30,7 @@ const CheckOut = () => {
     customizations: {
       title: 'KCCA Market',
       description: 'Payment for items in cart',
-      logo: logo,
+      logo: logo1,
     },
   };
 
@@ -63,54 +42,85 @@ const CheckOut = () => {
     }
   };
 
-  const handleCheckout = async (transaction_id) => {
-    if (cartTotal === 0) {
-      alert('Your cart is empty. Add items to your cart before checking out.');
-      return;
+  const handleCheckout = async () => {
+    console.log('Payment Method:');
+    
+    if (cartItems.length === 0) {
+        alert('Your cart is empty. Add items to your cart before checking out.');
+        return;
     }
 
     try {
-      const token = localStorage.getItem('auth-token');
-      const response = await axios.post('http://localhost:4000/checkout', {
-        phone,
-        location,
-        paymentMethod,
-        amount: cartTotal,
-        transaction_id
-      }, {
-        headers: {
-          'auth-token': token
-        }
-      });
+        const token = localStorage.getItem('auth-token');
+        const transaction_id = paymentMethod === 'cash_on_delivery' ? null : someTransactionIdVariable; // Set transaction_id conditionally
 
-      if (response.data.success) {
-        setDelivererNumber(response.data.deliveryContact);
-        alert('Order placed successfully');
-
-        const clearCartResponse = await axios.post('http://localhost:4000/clearcart', {}, {
-          headers: {
-            'auth-token': token
-          }
+        // Log the data being sent in the request
+        console.log('Checkout Request Data:', {
+            phone,
+            location,
+            paymentMethod,
+            amount: cartTotal,
+            transaction_id,
         });
 
-        if (clearCartResponse.data.success) {
-          clearCart();
-          alert('Cart cleared successfully');
+        const response = await axios.post(
+            'http://localhost:4000/checkout',
+            {
+                phone,
+                location,
+                paymentMethod,
+                amount: cartTotal,
+                transaction_id,
+                cartData: cartItems
+            },
+            {
+                headers: {
+                    'auth-token': token,
+                },
+            }
+        );
+
+        // Log the API response
+        console.log('Checkout Response:', response.data);
+
+        if (response.data.success) {
+            setDelivererNumber(response.data.deliveryContact);
+            alert('Order placed successfully');
+
+            const clearCartResponse = await axios.post(
+                'http://localhost:4000/clearcart',
+                {},
+                {
+                    headers: {
+                        'auth-token': token,
+                    },
+                }
+            );
+
+            if (clearCartResponse.data.success) {
+                clearCart();
+                alert('Cart cleared successfully');
+            } else {
+                alert(clearCartResponse.data.message);
+            }
         } else {
-          alert(clearCartResponse.data.message);
+            alert(response.data.message);
         }
-      } else {
-        alert(response.data.message);
-      }
     } catch (error) {
-      console.error('Checkout error:', error);
-      alert('Failed to checkout');
+        // Log the error object
+        console.error('Checkout error:', error);
+        if (error.response) {
+            console.error('Error Response Data:', error.response.data);
+            console.error('Error Response Status:', error.response.status);
+            console.error('Error Response Headers:', error.response.headers);
+        }
+        alert('Failed to checkout');
     }
-  };
+};  
 
   return (
     <div className='checkout'>
-      <h2>Checkout</h2>
+      <h2 className='checkout_h1'>Checkout</h2>
       <label className='checkout-label'>Phone Number:</label>
       <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} className='checkout-input' />
 

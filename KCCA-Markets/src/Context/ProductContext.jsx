@@ -2,114 +2,103 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const ProductContext = createContext(null);
 
-const getDefacultCart = () => {
-    let cart = {};
-    for (let index = 0; index < 300; index++) {
-        cart[index] = 0;                        
-    }
-    return cart;
-}
-
 const ProductContextProvider = (props) => {
-    const [all_product, setAll_Product] = useState([]);
-    const [cartItems, setCartItems] = useState(getDefacultCart());
+  const [all_product, setAll_Product] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
 
-    useEffect(() => {
-        fetch('http://localhost:4000/allproducts')
-            .then((response) => response.json())
-            .then((data) => setAll_Product(data));
+  useEffect(() => {
+    // Fetch all products
+    fetch("http://localhost:4000/allproducts")
+      .then((response) => response.json())
+      .then((data) => setAll_Product(data));
+  }, []);
 
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/getcart', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'auth-token': localStorage.getItem('auth-token'),
-                    'Content-Type': 'application/json',
-                },
-            }).then((response) => response.json())
-                .then((data) => setCartItems(data));
-        }
-    }, []);
+  // Get cartItems from localstorage
+  useEffect(() => {
+    if (localStorage.getItem("cartItems")) {
+      setCartItems(JSON.parse(localStorage.getItem("cartItems")));
+    }
+  }, []);
 
-    const addTocart = (itemId) => {
-        setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/addtocart', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'auth-token': localStorage.getItem('auth-token'),
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ itemId }),
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
-        }
+
+  const addTocart = (product) => {
+
+    const existingItem = cartItems.find((item) => item.id === product.id);
+
+    // Check if product exists in local storage
+
+    if (existingItem) {
+      alert("product already exists");
+      return;
     }
 
-    const removeFromcart = (itemId) => {
-        setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/removefromcart', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'auth-token': localStorage.getItem('auth-token'),
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ itemId }),
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
-        }
-    }
+    // Add quantity to product
+    product.quantity = 1;
 
-    const getTotalCartAmount = () => {
-        let totalAmount = 0;
-        for (const item in cartItems) {
-            if (cartItems[item] > 0) {
-                let itemInfo = all_product.find((Product) => Product.id === Number(item));
-                totalAmount += itemInfo.price * cartItems[item];
-            }
-        }
-        return totalAmount;
-    }
+    setCartItems([...cartItems, product]);
 
-    const getTotalItems = () => {
-        let totalItem = 0;
-        for (const item in cartItems) {
-            if (cartItems[item] > 0) {
-                totalItem += cartItems[item];
-            }
-        }
-        return totalItem;
-    }
+    console.log(cartItems, "cartItems");
+    
 
-    const clearCart = () => {
-        setCartItems(getDefacultCart());
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/clearcart', {
-                method: 'POST',
-                headers: {
-                    'auth-token': localStorage.getItem('auth-token'),
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({}),
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
-        }
-    }
+    // Add to local storage
+    localStorage.setItem("cartItems", JSON.stringify([...cartItems, product]));
+  };
 
-    const contextValue = { getTotalItems, getTotalCartAmount, all_product, cartItems, addTocart, removeFromcart, clearCart };
+  const removeFromcart = async (itemId) => {
+    setCartItems(cartItems.filter((item) => item.id !== itemId));
 
-    return (
-        <ProductContext.Provider value={contextValue}>
-            {props.children}
-        </ProductContext.Provider>
+    await localStorage.setItem(
+      "cartItems",
+      JSON.stringify(cartItems.filter((item) => item.id !== itemId))
     );
+  };
+
+  const getTotalCartAmount = () => {
+    let totalAmount = 0;
+
+    for (const item in cartItems) {
+      totalAmount += cartItems[item].price * cartItems[item].quantity;
+    }
+
+    return totalAmount;
+  };
+
+  const getTotalItems = () => {
+    let totalItem = 0;
+    for (const item in cartItems) {
+      totalItem += cartItems[item];
+    }
+    return totalItem;
+  };
+
+  const clearCart = () => {
+  //  Remove everything from cart and local storage
+    setCartItems([]);
+    localStorage.removeItem("cartItems");
+  };
+
+  const logout = () => {
+    // Clear the cart and remove the auth-token
+    clearCart();
+    localStorage.removeItem("auth-token");
+  };
+
+  const contextValue = {
+    getTotalItems,
+    getTotalCartAmount,
+    all_product,
+    cartItems,
+    addTocart,
+    removeFromcart,
+    clearCart,
+    logout,
+  };
+
+  return (
+    <ProductContext.Provider value={contextValue}>
+      {props.children}
+    </ProductContext.Provider>
+  );
 };
 
 export default ProductContextProvider;

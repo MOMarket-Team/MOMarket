@@ -1,88 +1,93 @@
-.banner{
+.banner {
     display: block;
     margin: 30px auto;
     width: 82%;
 }
-.indexsort{
+.indexsort {
     display: flex;
     margin: 0px 170px;
     justify-content: space-between;
     align-items: center;
 }
-.sort{
+.sort {
     padding: 10px 20px;
     border-radius: 40px;
     border: 1px solid #888;
 }
-.indexsort p span{
+.indexsort p span {
     font-weight: 600;
 }
-.category-products{
+.category-products {
     margin: 20px 170px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     row-gap: 80px;
 }
-.loadmore{
+.loadmore {
+    cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 150px auto;
-    width: 233px;
-    height: 69px;
-    border-radius: 75px;
-    background: #ededed;
-    color: #787878;
+    padding: 10px 20px; /* Updated */
+    width: fit-content; /* Updated */
+    height: auto; /* Adjust height dynamically */
+    border-radius: 5px; /* Updated */
+    background-color: #007bff; /* Updated */
+    color: white; /* Updated */
     font-size: 18px;
     font-weight: 500;
+    text-align: center; /* Updated */
 }
-@media(max-width:1280px){
-    .banner{
+.loadmore:hover {
+    background-color: #0056b3; /* Added hover effect */
+}
+@media (max-width: 1280px) {
+    .banner {
         margin: 20px auto;
         width: 90%;
     }
-    .indexsort{
+    .indexsort {
         width: 90%;
         margin: auto;
     }
-    .sort{
+    .sort {
         padding: 5px 10px;
         font-size: 12px;
     }
-    .indexsort p{
+    .indexsort p {
         font-size: 12px;
     }
-    .category-products{
+    .category-products {
         width: 90%;
         margin: 10px auto;
         row-gap: 40px;
     }
-    .category-products .item{
+    .category-products .item {
         margin: auto;
     }
-    .loadmore{
+    .loadmore {
         margin: 100px auto;
-        width: 200px;
-        height: 60px;
+        width: 200px; /* Adjusted for responsiveness */
         font-size: 16px;
     }
 }
-@media(max-width:800px){
-    .banner{
+@media (max-width: 800px) {
+    .banner {
         width: 95%;
     }
-    .category-products{
+    .category-products {
         width: 95%;
     }
-    .loadmore{
+    .loadmore {
         margin: 60px auto;
-        width: 150px;
-        height: 40px;
-        font-size: 13px;
+        width: 150px; /* Adjusted */
+        height: auto; /* Adjusted */
+        font-size: 13px; /* Adjusted */
     }
 }
-@media(max-width:500px){
-    .category-products{
+@media (max-width: 500px) {
+    .category-products {
         grid-template-columns: 1fr 1fr;
     }
 }
