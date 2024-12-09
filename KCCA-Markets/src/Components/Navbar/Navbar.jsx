@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import './Navbar.css';
 import { Link } from 'react-router-dom';
 import logo from '../Assets/logo.png';
 import cart_icon from '../Assets/cart_icon.png';
 import { ProductContext } from '../../Context/ProductContext';
-import dropdown_icon from '../Assets/dropdown_icon.png'
+import dropdown_icon from '../Assets/dropdown_icon.png';
 
 const Navbar = () => {
     const [menu, setMenu] = useState("Products");
@@ -25,15 +25,44 @@ const Navbar = () => {
     const dropdown_toggle = (e)=>{
         menuRef.current.classList.toggle('nav-menu-visible');
         e.target.classList.toggle('open');
-    }
+    };
+
+    // Handle Search
+    const handleSearch = async (e) => {
+        setSearchTerm(e.target.value);
+        if (e.target.value.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:4000/search?q=${e.target.value}`);
+            if (!response.ok) throw new Error('Failed to fetch search results');
+            const data = await response.json();
+            if (data.success) {
+                setSearchResults(data.products);
+            } else {
+                setSearchResults([]);
+            }
+        } catch (error) {
+            console.error('Error fetching search results:', error);
+            setSearchResults([]);
+        }
+    };    
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchTerm.trim() !== '') {
+            navigate(`/search?q=${searchTerm}`);
+        }
+    };
 
     return (
         <div className='navbar'>
             <div className="nav-logo">
-                {/* <img src={logo} alt="" /> */}
-                <p>ZZZZ<br/>  MARKETS</p>                
+                <img src={logo} alt="Logo" />
+                <p>KCCA ONLINE <br /> MARKETS</p>
             </div>
-            <img className='nav-dropdown' onClick={dropdown_toggle} src={dropdown_icon} alt="" />
+            <img className='nav-dropdown' onClick={dropdownToggle} src={dropdown_icon} alt="Dropdown Icon" />
             <ul ref={menuRef} className='nav-menu'>
                 <li onClick={() => { setMenu("Products") }}>
                     <Link style={{ textDecoration: 'none' }} to='/'>Products</Link>
@@ -56,6 +85,30 @@ const Navbar = () => {
                     {menu === "Sauce" ? <hr /> : null}
                 </li>
             </ul>
+            <div className="nav-search">
+                <form onSubmit={handleSearchSubmit}>
+                <input
+                    type="text"
+                    placeholder="What are you looking for?"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                />
+                </form>
+                {searchResults.length > 0 && (
+                    <div className="search-results">
+                        {searchResults.map((product) => (
+                            <Link to={`/product/${product.id}`} key={product.id}
+                            onClick={() => {
+                                setSearchResults([]); // Clear results
+                                setSearchTerm(''); // Clear input
+                            }}
+                            >
+                                {product.name}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
             <div className="nav-logo-cart">
                 {localStorage.getItem('auth-token')?
                 <button onClick={()=>{localStorage.removeItem('auth-token');window.location.replace("/")}}>Logout</button>

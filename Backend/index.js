@@ -216,6 +216,22 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.get('/getuser', (req, res) => {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'Access Denied' });
+    }
+
+    try {
+        const data = jwt.verify(token, 'secret_ecom');
+        Users.findById(data.user.id, { name: 1, email: 1 })
+            .then(user => res.json({ success: true, user }))
+            .catch(() => res.status(500).json({ success: false, message: 'Internal Error' }));
+    } catch {
+        res.status(401).json({ success: false, message: 'Invalid Token' });
+    }
+});
+
 // Fetch customer details
 app.get("/customer", fetchUser, async (req, res) => {
   try {
@@ -429,6 +445,33 @@ app.post("/clearcart", fetchUser, async (req, res) => {
       .status(500)
       .json({ success: false, message: "Failed to clear cart", error });
   }
+});
+
+app.get('/search', async (req, res) => {
+    try {
+        const query = req.query.q ? req.query.q.toLowerCase() : '';
+
+        // Handle empty query
+        if (!query.trim()) {
+            return res.json({ success: true, products: [] });
+        }
+
+        // Search products using MongoDB query
+        const filteredProducts = await Product.find({
+            name: { $regex: query, $options: 'i' }, // Case-insensitive search
+        });
+
+        res.json({
+            success: true,
+            products: filteredProducts,
+        });
+    } catch (error) {
+        console.error('Error during search:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to perform search',
+        });
+    }
 });
 
 app.listen(port, () => {
