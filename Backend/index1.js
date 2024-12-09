@@ -10,6 +10,7 @@ const Users = require("./model/userModel");
 const Product = require("./model/productModel");
 const Router = require("./routers/productRouter");
 const ProductRouter = require("./routers/productRouter");
+const { log } = require("console");
 
 const app = express();
 const port = 4000;
@@ -160,6 +161,8 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 
 // Checkout route with Flutterwave integration
 app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
+    console.log('Checkout Request Data:', req.body);
+    
     try {
         const { phone, location, paymentMethod, amount, transaction_id } = req.body;
         let userData = await Users.findById(req.user.id);

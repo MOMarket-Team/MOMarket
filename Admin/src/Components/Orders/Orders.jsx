@@ -35,20 +35,17 @@ const AdminOrders = () => {
                 <tbody>
                     {orders.map((order) => (
                         <tr key={order._id}>
-                            <td>{order._id}</td>
-                            <td>{order.userId?.name || 'N/A'} ({order.userId?.email})</td>
+                          
+                            <td>{order.userId?.name || 'N/A'}</td>
                             <td>{order.phone}</td>
                             <td>{order.location}</td>
                             <td>${order.totalAmount}</td>
                             <td>{order.paymentMethod}</td>
                             <td>{order.status}</td>
                             <td>{new Date(order.date).toLocaleString()}</td>
+                            <td>{order.cartData[0].product.name}</td>
                             <td>
-                                {order.cartData.map((item, index) => (
-                                    <div key={index}>
-                                        {item.product.title || 'N/A'}: Quantity: {item.quantity}
-                                    </div>
-                                ))}
+                            {order.cartData[0].quantity}
                             </td>
                         </tr>
                     ))}

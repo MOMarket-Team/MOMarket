@@ -8,39 +8,21 @@ import dropdown_icon from '../Assets/dropdown_icon.png';
 
 const Navbar = () => {
     const [menu, setMenu] = useState("Products");
-    const { getTotalItems } = useContext(ProductContext);
-    const [user, setUser] = useState(null); // To store user information
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-
+    // const [cartItems, setCartItems] = useState([]);
+    const {getTotalItems, cartItems} = useContext(ProductContext);
+    // for hiding the menu bar at certain width
     const menuRef = useRef();
 
-    useEffect(() => {
-        // Fetch user information from the token
-        const token = localStorage.getItem('auth-token');
-        if (token) {
-            fetch('http://localhost:4000/getuser', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) setUser(data.user); 
-                })
-                .catch(() => setUser(null));
-        }
-    }, []);
+    // Get cartItems from local storage
+    // useEffect(() => {
+    //     if (localStorage.getItem("cartItems")) {
+    //       setCartItems(JSON.parse(localStorage.getItem("cartItems")));
+    //     }
+    //     console.log('');
+        
+    //   }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('auth-token');
-        setUser(null);
-        window.location.replace('/');
-    };
-
-    const dropdownToggle = (e) => {
+    const dropdown_toggle = (e)=>{
         menuRef.current.classList.toggle('nav-menu-visible');
         e.target.classList.toggle('open');
     };
@@ -128,22 +110,11 @@ const Navbar = () => {
                 )}
             </div>
             <div className="nav-logo-cart">
-                {user ? (
-                    <div className="user-dropdown">
-                        <button onClick={() => setDropdownOpen(!dropdownOpen)}>
-                            {user.name || user.email}
-                        </button>
-                        {dropdownOpen && (
-                            <div className="dropdown-menu">
-                                <p onClick={handleLogout}>Logout</p>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <Link to='/login'><button>Login</button></Link>
-                )}
-                <Link to='/cart'><img src={cart_icon} alt="Cart Icon" /></Link>
-                <div className="nav-cart-count">{getTotalItems()}</div>
+                {localStorage.getItem('auth-token')?
+                <button onClick={()=>{localStorage.removeItem('auth-token');window.location.replace("/")}}>Logout</button>
+                :<Link to='/login'><button>Login</button></Link>}                
+                <Link to='/cart'><img src={cart_icon} alt="" /></Link>
+                <div className="nav-cart-count">{cartItems.length}</div>
             </div>
         </div>
     );

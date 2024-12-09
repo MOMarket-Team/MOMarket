@@ -2,149 +2,103 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const ProductContext = createContext(null);
 
-const getDefaultCart = () => {
-    let cart = {};
-    for (let index = 0; index < 300; index++) {
-        cart[index] = 0;
-    }
-    return cart;
-};
-
 const ProductContextProvider = (props) => {
-    const [all_product, setAll_Product] = useState([]);
-    const [cartItems, setCartItems] = useState(() => {
-        const storedCart = localStorage.getItem("cartItems");
-        return storedCart ? JSON.parse(storedCart) : getDefaultCart();
-    });
+  const [all_product, setAll_Product] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
 
-    useEffect(() => {
-        // Fetch all products
-        fetch("http://localhost:4000/allproducts")
-            .then((response) => response.json())
-            .then((data) => setAll_Product(data));
+  useEffect(() => {
+    // Fetch all products
+    fetch("http://localhost:4000/allproducts")
+      .then((response) => response.json())
+      .then((data) => setAll_Product(data));
+  }, []);
 
-        // Fetch cart from backend if user is logged in
-        if (localStorage.getItem("auth-token")) {
-            fetch("http://localhost:4000/getcart", {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "auth-token": localStorage.getItem("auth-token"),
-                    "Content-Type": "application/json",
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    setCartItems(data);
-                    localStorage.setItem("cartItems", JSON.stringify(data));
-                });
-        }
-    }, []);
+  // Get cartItems from localstorage
+  useEffect(() => {
+    if (localStorage.getItem("cartItems")) {
+      setCartItems(JSON.parse(localStorage.getItem("cartItems")));
+    }
+  }, []);
 
-    useEffect(() => {
-        // Save cart to localStorage whenever it changes
-        localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    }, [cartItems]);
 
-    const addTocart = (itemId) => {
-        setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
+  const addTocart = (product) => {
 
-        if (localStorage.getItem("auth-token")) {
-            fetch("http://localhost:4000/addtocart", {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "auth-token": localStorage.getItem("auth-token"),
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ itemId }),
-            }).then((response) => response.json());
-        }
-    };
+    const existingItem = cartItems.find((item) => item.id === product.id);
 
-    const removeFromcart = (itemId) => {
-        setCartItems((prev) => {
-            const updatedCart = { ...prev, [itemId]: prev[itemId] - 1 };
-            if (updatedCart[itemId] <= 0) delete updatedCart[itemId];
-            return updatedCart;
-        });
+    // Check if product exists in local storage
 
-        if (localStorage.getItem("auth-token")) {
-            fetch("http://localhost:4000/removefromcart", {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "auth-token": localStorage.getItem("auth-token"),
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ itemId }),
-            }).then((response) => response.json());
-        }
-    };
+    if (existingItem) {
+      alert("product already exists");
+      return;
+    }
 
-    const getTotalCartAmount = () => {
-        let totalAmount = 0;
-        for (const item in cartItems) {
-            if (cartItems[item] > 0) {
-                let itemInfo = all_product.find(
-                    (Product) => Product.id === Number(item)
-                );
-                if (itemInfo) {
-                    totalAmount += itemInfo.price * cartItems[item];
-                }
-            }
-        }
-        return totalAmount;
-    };
+    // Add quantity to product
+    product.quantity = 1;
 
-    const getTotalItems = () => {
-        let totalItem = 0;
-        for (const item in cartItems) {
-            totalItem += cartItems[item];
-        }
-        return totalItem;
-    };
+    setCartItems([...cartItems, product]);
 
-    const clearCart = () => {
-        const defaultCart = getDefaultCart();
-        setCartItems(defaultCart);
+    console.log(cartItems, "cartItems");
+    
 
-        if (localStorage.getItem("auth-token")) {
-            fetch("http://localhost:4000/clearcart", {
-                method: "POST",
-                headers: {
-                    "auth-token": localStorage.getItem("auth-token"),
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({}),
-            }).then((response) => response.json());
-        }
+    // Add to local storage
+    localStorage.setItem("cartItems", JSON.stringify([...cartItems, product]));
+  };
 
-        localStorage.setItem("cartItems", JSON.stringify(defaultCart));
-    };
+  const removeFromcart = async (itemId) => {
+    setCartItems(cartItems.filter((item) => item.id !== itemId));
 
-    const logout = () => {
-        // Clear the cart and remove the auth-token
-        clearCart();
-        localStorage.removeItem("auth-token");
-    };
-
-    const contextValue = {
-        getTotalItems,
-        getTotalCartAmount,
-        all_product,
-        cartItems,
-        addTocart,
-        removeFromcart,
-        clearCart,
-        logout,
-    };
-
-    return (
-        <ProductContext.Provider value={contextValue}>
-            {props.children}
-        </ProductContext.Provider>
+    await localStorage.setItem(
+      "cartItems",
+      JSON.stringify(cartItems.filter((item) => item.id !== itemId))
     );
+  };
+
+  const getTotalCartAmount = () => {
+    let totalAmount = 0;
+
+    for (const item in cartItems) {
+      totalAmount += cartItems[item].price * cartItems[item].quantity;
+    }
+
+    return totalAmount;
+  };
+
+  const getTotalItems = () => {
+    let totalItem = 0;
+    for (const item in cartItems) {
+      totalItem += cartItems[item];
+    }
+    return totalItem;
+  };
+
+  const clearCart = () => {
+  //  Remove everything from cart and local storage
+    setCartItems([]);
+    localStorage.removeItem("cartItems");
+  };
+
+  const logout = () => {
+    // Clear the cart and remove the auth-token
+    clearCart();
+    localStorage.removeItem("auth-token");
+  };
+
+  const contextValue = {
+    getTotalItems,
+    getTotalCartAmount,
+    all_product,
+    cartItems,
+    addTocart,
+    removeFromcart,
+    clearCart,
+    logout,
+  };
+
+  return (
+    <ProductContext.Provider value={contextValue}>
+      {props.children}
+    </ProductContext.Provider>
+  );
 };
 
 export default ProductContextProvider;
