@@ -94,7 +94,7 @@
     position: absolute;
     top: 100%;
     right: 0;
-    background-color: white;
+    /* background-color: white; */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     padding: 10px 15px;
     z-index: 10;
@@ -234,13 +234,16 @@
         cursor: pointer;
     }
     .nav-menu{
+        position: absolute;
         display: none;
         height: 80px;
-        width: 100px;
-        position: absolute;
-        background-color: white;
+        left: 0;
+        margin: 0;
+        width: 100%;
+        background-color: wheat;
         justify-content: center;
         top: 50px;
+        padding: 0;
     }
     .nav-menu-visible{
         display: flex;
@@ -261,6 +264,7 @@
     .navbar{
         padding: 8px 0px;
         gap: 0;
+        align-items: center;
     }
     .nav-logo{
         transform: scale(0.8);
@@ -270,9 +274,9 @@
     }
     .nav-menu{
         height: 60px;
-        top: 40px;
+        /* width: 100%; */
+        top: 8%;
         gap: 10px;
-        font-size: 10px;
     }
     .nav-logo-cart{
         transform: scale(0.8);
@@ -280,5 +284,13 @@
     .nav-search input {
         width: 100%;
         font-size: 12px;
+    }
+    .nav-search {
+        display: none;
+    }
+
+    .offers {
+        width: 0;
+        gap: 10px;
     }
 }

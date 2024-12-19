@@ -32,9 +32,6 @@ const ProductContextProvider = (props) => {
       return;
     }
 
-    // Add quantity to product
-    product.quantity = 1;
-
     setCartItems([...cartItems, product]);
 
     console.log(cartItems, "cartItems");
