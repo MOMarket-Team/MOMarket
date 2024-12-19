@@ -5,6 +5,9 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
+const twilio = require('twilio');
+// const client = twilio('TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN');
 
 const app = express();
 const port = 4000;
@@ -290,106 +293,96 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   }
 });
 
-app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
-  console.log("Payment Method:", req.body);
-
-  const { phone, location, paymentMethod, amount, transaction_id } = req.body;
+app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
+  const { phone, location, paymentMethod, amount, transaction_id, cartData } = req.body;
 
   try {
-    // console.log('Checkout Request Data:', req.body); // Log request data
-    // const { phone, location, paymentMethod, amount, transaction_id } = req.body;
-    // let userData = await Users.findById(req.user.id);
-
-    // if (!phone || !location) {
-    //     console.log('Missing phone or location'); // Log failure point
-    //     return res.status(400).json({ success: false, message: "Phone number and location are required" });
-    // }
-
-    //  // Further debug points
-    //  console.log('User:', req.user); // Ensure `req.user` exists
-    //  console.log('Processing cart data:', req.user.id);
-
-    // if (paymentMethod === 'mobile_money' && (!transaction_id || transaction_id.trim() === '')) {
-    //     return res.status(400).json({ success: false, message: "Transaction ID is required for mobile money payments" });
-    // }
-
-    // let cartTotal = 0;
-    // const cartProducts = [];
-
-    // for (const [itemId, quantity] of Object.entries(userData.cartData)) {
-    //     try {
-    //         if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    //             console.warn(`Skipping invalid product ID: ${itemId}`);
-    //             continue; // Skip invalid product ID
-    //         }
-    //         const product = await Product.findOne({ _id: mongoose.Types.ObjectId(itemId) });
-    //         if (!product) {
-    //             throw new Error(`Product not found for ID: ${itemId}`);
-    //         }
-
-    //         cartTotal += product.price * quantity;
-    //         cartProducts.push({ product, quantity });
-    //     } catch (error) {
-    //         console.error('Error processing cart item:', error.message);
-    //         return res.status(400).json({ success: false, message: error.message });
-    //     }
-    // }
-
-    // if (paymentMethod === 'mobile_money' && cartTotal !== amount) {
-    //     return res.status(400).json({ success: false, message: "The payment amount must equal the cart total for mobile money transactions" });
-    // }
-
-    // Save the order
-    const newOrder = new Order({
-      userId: req.user.id,
-      cartData: req.body.cartData.map(({ _id, quantity }) => ({
-        product: _id,
-        quantity,
-      })),
-      phone,
-      location,
-      totalAmount: amount,
-      paymentMethod,
-      transaction_id:
-        paymentMethod === "cash_on_delivery" ? null : transaction_id,
-      status: "Pending",
-      date: new Date(),
-    });
-
-    await newOrder.save();
-
-    // userData.phone = phone;
-    // userData.location = location;
-    // await userData.save();
-
-    res.json({
-      success: true,
-      message: "Checkout successful",
-      deliveryContact: "+256 789 123 456",
-    });
-  } catch (error) {
-    console.error("Error in checkout:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Checkout failed",
-        error: error.message,
-        stack: error.stack,
+      // Save the order to the database
+      const newOrder = new Order({
+          userId: req.user.id,
+          cartData: cartData.map(({ _id, quantity }) => ({
+              product: _id,
+              quantity,
+          })),
+          phone,
+          location,
+          totalAmount: amount,
+          paymentMethod,
+          transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
+          status: 'Pending',
+          date: new Date(),
       });
+
+      await newOrder.save();
+
+      // Notify admin via email
+      // const transporter = nodemailer.createTransport({
+      //     service: 'Gmail',
+      //     auth: {
+      //         user: 'your-email',
+      //         pass: 'your-password',
+      //     },
+      // });
+
+      // const emailMessage = `A new order has been placed.
+      // Phone: ${phone}
+      // Location: ${location}
+      // Total Amount: ${amount}
+      // Payment Method: ${paymentMethod}
+      // Products: 
+      // ${cartData.map((item) => `${item.product.name} (Qty: ${item.quantity})`).join('\n')}
+      // `;
+
+      // await transporter.sendMail({
+      //     from: 'admin-email',
+      //     to: 'delivery-email',
+      //     subject: `New Order Placed (#${newOrder._id})`,
+      //     text: emailMessage,
+      // });
+
+      // // Notify admin via WhatsApp
+      // const whatsappMessage = `New Order Placed:
+      // Phone: ${phone}
+      // Location: ${location}
+      // Total Amount: ${amount}
+      // Payment Method: ${paymentMethod}
+      // Products:
+      // ${cartData.map((item) => `${item.product.name} (Qty: ${item.quantity})`).join('\n')}
+      // `;
+
+      // await client.messages.create({
+      //     from: 'whatsapp:+14155238886', // Twilio's WhatsApp number
+      //     to: 'whatsapp:your-number',
+      //     body: whatsappMessage,
+      // });
+
+      res.json({
+          success: true,
+          message: 'Checkout successful',
+          deliveryContact: '+256 789 123 456',
+      });
+  } catch (error) {
+      console.error('Error during checkout:', error);
+      res.status(500).json({ success: false, message: 'Checkout failed', error: error.message });
   }
 });
 
-app.get("/admin/orders", async (req, res) => {
+const isAdmin = (req, res, next) => {
+  // Assuming `req.user` contains the decoded JWT payload
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+  next();
+};
+
+app.get('/admin/orders', fetchUser, isAdmin, async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("userId")
-      .populate("cartData.product");
+      .populate('userId')
+      .populate('cartData.product');
     res.json({ success: true, orders });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch orders", error });
+    res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
   }
 });
 
@@ -472,6 +465,37 @@ app.get('/search', async (req, res) => {
             message: 'Failed to perform search',
         });
     }
+});
+
+// for statuses on delivery 
+app.patch('/admin/orders/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    
+      const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
+      if (!order) {
+          return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+      res.json({ success: true, order });
+  } catch (error) {
+      res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.get('/my-orders', fetchUser, async (req, res) => {
+  try {
+    const userId = req.user?.id; // Ensure `fetchUser` middleware adds `req.user`
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const orders = await Order.find({ userId }).populate('cartData.product');
+    res.json({ success: true, orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
+  }
 });
 
 app.listen(port, () => {

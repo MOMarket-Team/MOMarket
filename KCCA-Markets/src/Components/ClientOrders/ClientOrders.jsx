@@ -1,34 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import './Orders.css';
+import './ClientOrders.css';
 
-const AdminOrders = () => {
+const ClientOrders = () => {
     const [orders, setOrders] = useState([]);
+    const token = localStorage.getItem('auth-token');
 
-    // Fetch orders
     useEffect(() => {
-        fetch('http://localhost:4000/admin/orders')
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    setOrders(data.orders);
-                }
-            })
-            .catch((error) => console.error('Error fetching orders:', error));
-    }, []);
-
-    // Function to update order status
+        const fetchOrders = async () => {
+          try {
+            const response = await fetch('http://localhost:4000/my-orders', {
+              headers: { 'auth-token': token },
+            });
+            const data = await response.json();
+      
+            if (data.success) {
+              setOrders(data.orders);
+            } else {
+              console.error('Failed to fetch orders:', data.message);
+            }
+          } catch (error) {
+            console.error('Error fetching client orders:', error);
+          }
+        };
+      
+        fetchOrders();
+      }, [token]);
+      
     const updateOrderStatus = (orderId, newStatus) => {
-        fetch(`http://localhost:4000/admin/orders/${orderId}/status`, {
-            method: 'PUT',
+        fetch(`http://localhost:4000/orders/${orderId}/status`, {
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
+                'auth-token': token,
             },
             body: JSON.stringify({ status: newStatus }),
         })
             .then((response) => response.json())
             .then((data) => {
                 if (data.success) {
-                    // Update the status in the local state
                     setOrders((prevOrders) =>
                         prevOrders.map((order) =>
                             order._id === orderId ? { ...order, status: newStatus } : order
@@ -43,25 +52,22 @@ const AdminOrders = () => {
     };
 
     return (
-        <div className="admin-orders">
-            <h1>All Orders</h1>
+        <div className="client-orders">
+            <h1>My Orders</h1>
             <table>
                 <thead>
                     <tr>
-                        <th>Customer</th>
                         <th>Phone</th>
                         <th>Location</th>
                         <th>Total Amount</th>
                         <th>Payment Method</th>
                         <th>Status</th>
                         <th>Date</th>
-                        <th>Products</th>
                     </tr>
                 </thead>
                 <tbody>
                     {orders.map((order) => (
                         <tr key={order._id}>
-                            <td>{order.userId?.name || 'N/A'}</td>
                             <td>{order.phone}</td>
                             <td>{order.location}</td>
                             <td>${order.totalAmount}</td>
@@ -72,14 +78,11 @@ const AdminOrders = () => {
                                     onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                                 >
                                     <option value="pending">Pending</option>
-                                    <option value="shipped">Shipped</option>
                                     <option value="delivered">Delivered</option>
                                     <option value="cancelled">Cancelled</option>
                                 </select>
                             </td>
                             <td>{new Date(order.date).toLocaleString()}</td>
-                            <td>{order.cartData[0]?.product?.name || 'N/A'}</td>
-                            <td>{order.cartData[0]?.quantity || 0}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -88,4 +91,4 @@ const AdminOrders = () => {
     );
 };
 
-export default AdminOrders;
+export default ClientOrders;

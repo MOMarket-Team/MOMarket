@@ -38,8 +38,6 @@ const CartItems = () => {
     setCartItem(updatedCart);
   };
 
-
-
   const handleCheckout = () => {
     navigate('/checkout');
     console.log(cartItems, "cartItems");
