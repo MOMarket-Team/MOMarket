@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState, useEffect } from "react";
+import  { useContext, useRef, useState } from "react";
 import "./Navbar.css";
 import { Link } from "react-router-dom";
 import logo from "../Assets/logo.png";
@@ -11,18 +11,18 @@ const Navbar = () => {
   // const [cartItems, setCartItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState("");
-  const { getTotalItems, cartItems } = useContext(ProductContext);
+  const { cartItems } = useContext(ProductContext);
   // for hiding the menu bar at certain width
   const menuRef = useRef();
 
-  // Get cartItems from local storage
-  // useEffect(() => {
-  //     if (localStorage.getItem("cartItems")) {
-  //       setCartItems(JSON.parse(localStorage.getItem("cartItems")));
-  //     }
-  //     console.log('');
+//   Get cartItems from local storage
+//   useEffect(() => {
+//       if (localStorage.getItem("cartItems")) {
+//         setCartItems(JSON.parse(localStorage.getItem("cartItems")));
+//       }
+//       console.log('');
 
-  //   }, []);
+//     }, []);
 
   const dropdown_toggle = (e) => {
     menuRef.current.classList.toggle("nav-menu-visible");
@@ -56,6 +56,7 @@ const Navbar = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchTerm.trim() !== "") {
+      // eslint-disable-next-line no-undef
       navigate(`/search?q=${searchTerm}`);
     }
   };

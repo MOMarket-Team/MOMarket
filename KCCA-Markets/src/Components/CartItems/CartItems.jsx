@@ -9,11 +9,11 @@ const CartItems = () => {
   const { getTotalCartAmount, all_product, cartItems, removeFromcart } =
     useContext(ProductContext);
   const [cartItem, setCartItem] = useState([]);
-  const [cartTotal, setCartTotal] = useState(0)
+  const [cartTotal, setCartTotal] = useState(0);
   const navigate = useNavigate();
 
-   // Update cart items from context whenever cartItems changes
-   useEffect(() => {
+  // Update cart items from context whenever cartItems changes
+  useEffect(() => {
     const updatedCart = localStorage.getItem("cartItems")
       ? JSON.parse(localStorage.getItem("cartItems"))
       : cartItems;
@@ -25,23 +25,33 @@ const CartItems = () => {
       0
     );
     setCartTotal(total);
-  }, [cartItems]); // Dependency on cartItems
+  }, [cartItems]);
 
-  const handleRemoveFromCart = (id) => {
-    removeFromcart(id);
-
-    // Update local storage
-    const updatedCart = cartItems.filter((item) => item.id !== id);
-    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-
-    // Trigger re-render by updating state
+  const updateCartAndTotal = (updatedCart) => {
     setCartItem(updatedCart);
+    setCartTotal(
+      updatedCart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    );
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
   };
 
+  const handleRemoveFromCart = (id) => {
+    const updatedCart = cartItem.filter((item) => item.id !== id);
+    updateCartAndTotal(updatedCart);
+    removeFromcart(id); // Update global context
+  };
 
+  const handleQuantityChange = (id, newQuantity) => {
+    if (newQuantity < 1) return; // Prevent quantity less than 1
+
+    const updatedCart = cartItem.map((item) =>
+      item.id === id ? { ...item, quantity: newQuantity } : item
+    );
+    updateCartAndTotal(updatedCart);
+  };
 
   const handleCheckout = () => {
-    navigate('/checkout');
+    navigate("/checkout");
     console.log(cartItems, "cartItems");
     console.log(all_product, "all_product");
   };
@@ -60,30 +70,48 @@ const CartItems = () => {
       {cartItem.length === 0 ? (
         <h1>Cart is empty</h1>
       ) : (
-        cartItem.map((e) => {
-          console.log(e, "e carfft");
-
-          return (
-            <div key={e.id}>
-              <div className="format format-main">
-                <img src={e.image} alt="" className="product-icon" />
-                <p>{e.name}</p>
-                <p>{prodprice.format(e.price)}</p>
-                <button className="quantity">{e.quantity}</button>
-                <p>{prodprice.format(e.price * 1)}</p>
-                <img
-                  className="remove-icon"
-                  src={remove_icon}
-                  onClick={() => {
-                    handleRemoveFromCart(e.id);
+        cartItem.map((e) => (
+          <div key={e.id}>
+            <div className="format format-main">
+              <img src={e.image} alt="" className="product-icon" />
+              <p>{e.name}</p>
+              <p>{prodprice.format(e.price)}</p>
+              <div className="quantity-control">
+                {/* <button
+                  onClick={() =>
+                    handleQuantityChange(e.id, e.quantity - 1)
+                  }
+                >
+                  -
+                </button> */}
+                <input
+                  type="number"
+                  className="quantity"
+                  value={e.quantity}
+                  onChange={(event) => {
+                    const newQuantity = parseInt(event.target.value, 10);
+                    handleQuantityChange(e.id, newQuantity || 1); // Default to 1 if empty
                   }}
-                  alt=""
                 />
+                {/* <button
+                  onClick={() =>
+                    handleQuantityChange(e.id, e.quantity + 1)
+                  }
+                >
+                  +
+                </button> */}
               </div>
-              <hr />
+              <p>{prodprice.format(e.price * e.quantity)}</p>
+              <img
+                className="remove-icon"
+                src={remove_icon}
+                onClick={() => handleRemoveFromCart(e.id)}
+                alt=""
+              />
             </div>
-          );
-        })
+            <hr />
+          </div>
+        ))
       )}
       <div className="down">
         <div className="total">
