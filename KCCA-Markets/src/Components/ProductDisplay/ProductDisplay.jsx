@@ -44,7 +44,7 @@ const ProductDisplay = (props) => {
       updateLocalStorageQuantity(newQuantity);
     }
   };
-
+  
   // Handle undefined product gracefully
   if (!product) {
     return (
@@ -60,8 +60,8 @@ const ProductDisplay = (props) => {
         <div className="img-list">
           <img src={product.image} alt="Product Thumbnail 1" />
           <img src={product.image} alt="Product Thumbnail 2" />
-          <img src={product.image} alt="Product Thumbnail 3" />
-          <img src={product.image} alt="Product Thumbnail 4" />
+          {/* <img src={product.image} alt="Product Thumbnail 3" />
+          <img src={product.image} alt="Product Thumbnail 4" /> */}
         </div>
         <div className="display-img">
           <img className="main-img" src={product.image} alt="Product" />
