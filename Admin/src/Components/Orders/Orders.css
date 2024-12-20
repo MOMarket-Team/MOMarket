@@ -68,6 +68,21 @@
     font-style: italic;
 }
 
+.delete-button {
+    padding: 8px 12px;
+    background-color: #dc3545; /* Red for delete */
+    color: white;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #b02a37; /* Darker red on hover */
+}
+
 /* Responsive design for smaller screens */
 @media screen and (max-width: 768px) {
     .admin-orders table {

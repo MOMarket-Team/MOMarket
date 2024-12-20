@@ -42,6 +42,26 @@ const AdminOrders = () => {
             .catch((error) => console.error('Error updating order status:', error));
     };
 
+    // Function to delete an order
+const deleteOrder = (orderId) => {
+    if (window.confirm('Are you sure you want to delete this order?')) {
+        fetch(`http://localhost:4000/admin/orders/${orderId}`, {
+            method: 'DELETE',
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    // Remove the deleted order from the local state
+                    setOrders((prevOrders) => prevOrders.filter((order) => order._id !== orderId));
+                    alert('Order deleted successfully');
+                } else {
+                    alert('Failed to delete order');
+                }
+            })
+            .catch((error) => console.error('Error deleting order:', error));
+    }
+};
+
     return (
         <div className="admin-orders">
             <h1>All Orders</h1>
@@ -72,7 +92,6 @@ const AdminOrders = () => {
                                     onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                                 >
                                     <option value="pending">Pending</option>
-                                    <option value="shipped">Shipped</option>
                                     <option value="delivered">Delivered</option>
                                     <option value="cancelled">Cancelled</option>
                                 </select>
@@ -80,9 +99,18 @@ const AdminOrders = () => {
                             <td>{new Date(order.date).toLocaleString()}</td>
                             <td>{order.cartData[0]?.product?.name || 'N/A'}</td>
                             <td>{order.cartData[0]?.quantity || 0}</td>
+                            <td>
+                                <button
+                                    onClick={() => deleteOrder(order._id)}
+                                    className="delete-button"
+                                >
+                                    Delete
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
+
             </table>
         </div>
     );

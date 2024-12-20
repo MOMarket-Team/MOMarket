@@ -63,7 +63,11 @@ const Order = mongoose.model("Order", {
     enum: ["cash_on_delivery", "mobile_money"],
     required: true,
   },
-  status: { type: String, default: "Pending" },
+  status: {
+    type: String,
+    enum: ["pending", "shipped", "delivered", "cancelled"],
+    default: "pending", // Ensure default is "pending"
+  },
   date: { type: Date, default: Date.now },
 });
 
@@ -309,7 +313,7 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
           totalAmount: amount,
           paymentMethod,
           transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
-          status: 'Pending',
+          status: 'pending',
           date: new Date(),
       });
 
@@ -367,15 +371,7 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
   }
 });
 
-const isAdmin = (req, res, next) => {
-  // Assuming `req.user` contains the decoded JWT payload
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Access denied' });
-  }
-  next();
-};
-
-app.get('/admin/orders', fetchUser, isAdmin, async (req, res) => {
+app.get('/admin/orders', async (req, res) => {
   try {
     const orders = await Order.find()
       .populate('userId')
@@ -468,19 +464,32 @@ app.get('/search', async (req, res) => {
 });
 
 // for statuses on delivery 
-app.patch('/admin/orders/:id/status', async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+app.put('/admin/orders/:id/status', async (req, res) => { 
+  const { id } = req.params; // Extract the order ID
+  const { status } = req.body; // Extract the new status from the request body
+
+  // Validate the new status
+  const validStatuses = ["pending", "delivered", "cancelled"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ success: false, message: "Invalid status" });
+  }
 
   try {
-    
-      const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
-      if (!order) {
-          return res.status(404).json({ success: false, message: 'Order not found' });
-      }
-      res.json({ success: true, order });
+    // Update the order status in the database
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true } // Return the updated document
+    );
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, message: "Order status updated successfully", order });
   } catch (error) {
-      res.status(500).json({ success: false, message: 'Server error' });
+    console.error("Error updating order status:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -495,6 +504,22 @@ app.get('/my-orders', fetchUser, async (req, res) => {
     res.json({ success: true, orders });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
+  }
+});
+
+// Delete an order by ID
+app.delete('/admin/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedOrder = await Order.findByIdAndDelete(id);
+
+    if (!deletedOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    res.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete order', error });
   }
 });
 

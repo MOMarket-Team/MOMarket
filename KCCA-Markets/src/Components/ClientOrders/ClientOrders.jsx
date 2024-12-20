@@ -5,45 +5,42 @@ const ClientOrders = () => {
     const [orders, setOrders] = useState([]);
     const token = localStorage.getItem('auth-token');
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-          try {
+    // Fetch orders function
+    const fetchOrders = async () => {
+        try {
             const response = await fetch('http://localhost:4000/my-orders', {
-              headers: { 'auth-token': token },
+                headers: { 'auth-token': token },
             });
             const data = await response.json();
-      
+
             if (data.success) {
-              setOrders(data.orders);
+                setOrders(data.orders);
             } else {
-              console.error('Failed to fetch orders:', data.message);
+                console.error('Failed to fetch orders:', data.message);
             }
-          } catch (error) {
+        } catch (error) {
             console.error('Error fetching client orders:', error);
-          }
-        };
-      
+        }
+    };
+
+    useEffect(() => {
         fetchOrders();
-      }, [token]);
-      
+    }, [token]);
+
     const updateOrderStatus = (orderId, newStatus) => {
-        fetch(`http://localhost:4000/orders/${orderId}/status`, {
-            method: 'PATCH',
+        fetch(`http://localhost:4000/admin/orders/${orderId}/status`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'auth-token': token,
             },
             body: JSON.stringify({ status: newStatus }),
         })
             .then((response) => response.json())
             .then((data) => {
                 if (data.success) {
-                    setOrders((prevOrders) =>
-                        prevOrders.map((order) =>
-                            order._id === orderId ? { ...order, status: newStatus } : order
-                        )
-                    );
                     alert('Order status updated successfully');
+                    // Fetch updated orders
+                    fetchOrders();
                 } else {
                     alert('Failed to update order status');
                 }

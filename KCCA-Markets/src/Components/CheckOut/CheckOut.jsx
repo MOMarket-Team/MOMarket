@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { ProductContext } from '../../Context/ProductContext';
 import { FlutterWaveButton } from 'flutterwave-react-v3';
 import axios from 'axios';
-import ClientOrders from '../ClientOrders/ClientOrders';// Import for modal
+import ClientOrders from '../ClientOrders/ClientOrders'; // Import for modal
 import './CheckOut.css';
 import logo1 from '../Assets/logo.png';
 
@@ -62,15 +62,11 @@ const CheckOut = () => {
         cartData: cartItems,
       };
 
-      console.log('Checkout Request Data:', checkoutData);
-
       const response = await axios.post('http://localhost:4000/checkout', checkoutData, {
         headers: {
           'auth-token': token,
         },
       });
-
-      console.log('Checkout Response:', response.data);
 
       if (response.data.success) {
         setDelivererNumber(response.data.deliveryContact);
@@ -102,62 +98,68 @@ const CheckOut = () => {
   };
 
   return (
-    <div className='checkout'>
-      <h2 className='checkout_h1'>Checkout</h2>
+    <div className='checkout-container'>
+      <h1>Checkout</h1>
 
-      <label className='checkout-label'>Phone Number:</label>
-      <input
-        type='text'
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        className='checkout-input'
-      />
-
-      <label className='checkout-label'>Location:</label>
-      <input
-        type='text'
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        className='checkout-input'
-      />
-
-      <label className='checkout-label'>Payment Method:</label>
-      <select
-        value={paymentMethod}
-        onChange={(e) => setPaymentMethod(e.target.value)}
-        className='checkout-select'
-      >
-        <option value='cash_on_delivery'>Cash on Delivery</option>
-        <option value='mobile_money'>Mobile Money</option>
-      </select>
-
-      {paymentMethod === 'mobile_money' && (
-        <div>
-          <label className='checkout-label amount'>Amount:</label>
-          <input
-            type='number'
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className='checkout-input'
-          />
-        </div>
-      )}
-
-      {paymentMethod === 'mobile_money' ? (
-        <FlutterWaveButton
-          {...config}
-          text='Pay with Flutterwave'
-          callback={handleFlutterwavePayment}
+      <form>
+        <label htmlFor='phone'>Phone Number:</label>
+        <input
+          id='phone'
+          type='text'
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder='Enter your phone number'
         />
-      ) : (
-        <button onClick={() => handleCheckout()} className='checkout-button'>
-          Checkout
-        </button>
-      )}
+
+        <label htmlFor='location'>Location:</label>
+        <input
+          id='location'
+          type='text'
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder='Enter your delivery location'
+        />
+
+        <label htmlFor='payment-method'>Payment Method:</label>
+        <select
+          id='payment-method'
+          value={paymentMethod}
+          onChange={(e) => setPaymentMethod(e.target.value)}
+        >
+          <option value='cash_on_delivery'>Cash on Delivery</option>
+          <option value='mobile_money'>Mobile Money</option>
+        </select>
+
+        {paymentMethod === 'mobile_money' && (
+          <>
+            <label htmlFor='amount'>Amount:</label>
+            <input
+              id='amount'
+              type='number'
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder='Enter the amount to pay'
+            />
+          </>
+        )}
+
+        {paymentMethod === 'mobile_money' ? (
+          <FlutterWaveButton
+            {...config}
+            text='Pay with Flutterwave'
+            callback={handleFlutterwavePayment}
+            className='checkout-button'
+          />
+        ) : (
+          <button onClick={() => handleCheckout()} className='checkout-button'>
+            Checkout
+          </button>
+        )}
+      </form>
 
       {delivererNumber && (
-        <div>
-          <h3 className='checkout-deliverer'>Deliverer's Number: {delivererNumber}</h3>
+        <div className='delivery-info'>
+          <p>Deliverer's Contact: {delivererNumber}</p>
         </div>
       )}
 
@@ -167,6 +169,15 @@ const CheckOut = () => {
           <ClientOrders delivererNumber={delivererNumber} />
           <button onClick={() => setIsOrderStatusVisible(false)} className='close-modal'>
             Close
+          </button>
+        </div>
+      )}
+
+      {/* "Review Your Order" Button */}
+      {!isOrderStatusVisible && delivererNumber && (
+        <div className='review-order'>
+          <button onClick={() => setIsOrderStatusVisible(true)} className='review-button'>
+            Review Your Order
           </button>
         </div>
       )}
