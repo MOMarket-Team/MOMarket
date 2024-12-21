@@ -37,6 +37,7 @@ const CheckOut = () => {
   };
 
   const handleFlutterwavePayment = async (response) => {
+    console.log('Flutterwave response:', response);
     if (response.status === 'successful') {
       await handleCheckout(response.transaction_id);
     } else {
@@ -45,13 +46,16 @@ const CheckOut = () => {
   };
 
   const handleCheckout = async (transaction_id = null) => {
+    console.log('Starting checkout process...');
     if (cartItems.length === 0) {
       alert('Your cart is empty. Add items to your cart before checking out.');
+      console.log('Checkout aborted: Cart is empty');
       return;
     }
 
     try {
       const token = localStorage.getItem('auth-token');
+      console.log('Auth token:', token);
 
       const checkoutData = {
         phone,
@@ -62,11 +66,15 @@ const CheckOut = () => {
         cartData: cartItems,
       };
 
+      console.log('Checkout data:', checkoutData);
+
       const response = await axios.post('http://localhost:4000/checkout', checkoutData, {
         headers: {
           'auth-token': token,
         },
       });
+
+      console.log('Checkout response:', response.data);
 
       if (response.data.success) {
         setDelivererNumber(response.data.deliveryContact);
@@ -78,6 +86,8 @@ const CheckOut = () => {
             'auth-token': token,
           },
         });
+
+        console.log('Clear cart response:', clearCartResponse.data);
 
         if (clearCartResponse.data.success) {
           clearCart();
@@ -101,7 +111,7 @@ const CheckOut = () => {
     <div className='checkout-container'>
       <h1>Checkout</h1>
 
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <label htmlFor='phone'>Phone Number:</label>
         <input
           id='phone'
@@ -151,7 +161,13 @@ const CheckOut = () => {
             className='checkout-button'
           />
         ) : (
-          <button onClick={() => handleCheckout()} className='checkout-button'>
+          <button
+            onClick={() => {
+              console.log('Cash on Delivery checkout clicked');
+              handleCheckout();
+            }}
+            className='checkout-button'
+          >
             Checkout
           </button>
         )}
@@ -163,7 +179,6 @@ const CheckOut = () => {
         </div>
       )}
 
-      {/* Client Order Status Modal */}
       {isOrderStatusVisible && (
         <div className='modal'>
           <ClientOrders delivererNumber={delivererNumber} />
@@ -173,7 +188,6 @@ const CheckOut = () => {
         </div>
       )}
 
-      {/* "Review Your Order" Button */}
       {!isOrderStatusVisible && delivererNumber && (
         <div className='review-order'>
           <button onClick={() => setIsOrderStatusVisible(true)} className='review-button'>
