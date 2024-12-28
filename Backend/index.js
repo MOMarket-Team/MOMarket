@@ -523,6 +523,33 @@ app.delete('/admin/orders/:id', async (req, res) => {
   }
 });
 
+// API to get products by category
+app.get('/api/products/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+    if (!category) {
+      return res.status(400).json({ error: 'Category parameter is required' });
+    }
+
+    console.log(`Category received: "${category}"`);
+
+    // Case-insensitive search for matching products
+    const products = await Product.find({
+      category: { $regex: new RegExp(`^${category.trim()}`, 'i') },
+    });
+
+    if (products.length === 0) {
+      console.log('No products found for this category.');
+    }
+
+    console.log(`Products fetched: ${JSON.stringify(products)}`);
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).send('Failed to fetch products');
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
