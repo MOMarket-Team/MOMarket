@@ -153,6 +153,26 @@ app.post("/addproduct", async (req, res) => {
   }
 });
 
+app.post("/updateproduct", async (req, res) => {
+  try {
+    const { id, name, image, category, price } = req.body;
+
+    const updatedProduct = await Product.findOneAndUpdate(
+      { id: id },
+      { name, image, category, price },
+      { new: true } // Return the updated product
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.json({ success: true, product: updatedProduct });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to update product", error });
+  }
+});
+
 app.post("/removeproduct", async (req, res) => {
   try {
     await Product.findOneAndDelete({ id: req.body.id });
