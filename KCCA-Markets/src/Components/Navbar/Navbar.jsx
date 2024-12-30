@@ -53,7 +53,7 @@ const Navbar = () => {
       <div className="nav-logo">
         <img src={logo} alt="Logo" />
         <p>
-          KCCA ONLINE <br /> MARKETS
+          MANGU ONLINE <br /> MARKET
         </p>
       </div>
       <img
