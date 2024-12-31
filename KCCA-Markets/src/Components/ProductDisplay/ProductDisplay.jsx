@@ -1,4 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import RelatedProducts from "../RelatedProducts/RelatedProducts";
 import "./ProductDisplay.css";
 import star_icon from "../Assets/star_icon.png";
 import star_dull_icon from "../Assets/star_dull_icon.png";
@@ -6,11 +8,13 @@ import { ProductContext } from "../../Context/ProductContext";
 import prodprice from "../../../utils/priceformat";
 
 const ProductDisplay = (props) => {
+  const location = useLocation();
   const { product } = props;
   const { addTocart } = useContext(ProductContext);
-  const [quantity, setQuantity] = useState(1); // Initial quantity
+  const [quantity, setQuantity] = useState(1);
 
-  // Fetch quantity from localStorage
+  const selectedCategory = location.state?.category || product.category;
+
   useEffect(() => {
     if (product?.id) {
       const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -18,7 +22,6 @@ const ProductDisplay = (props) => {
     }
   }, [product]);
 
-  // Helper to update localStorage
   const updateLocalStorageQuantity = (newQuantity) => {
     const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
     const updatedCartItems = cartItems.map((item) => {
@@ -30,7 +33,6 @@ const ProductDisplay = (props) => {
     localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
   };
 
-  // Handlers for quantity changes
   const increaseQuantity = () => {
     const newQuantity = quantity + 1;
     setQuantity(newQuantity);
@@ -44,14 +46,9 @@ const ProductDisplay = (props) => {
       updateLocalStorageQuantity(newQuantity);
     }
   };
-  
-  // Handle undefined product gracefully
+
   if (!product) {
-    return (
-      <div className="productdisplay">
-        <p>Loading product details...</p>
-      </div>
-    );
+    return <p>Loading product details...</p>;
   }
 
   return (
@@ -60,8 +57,6 @@ const ProductDisplay = (props) => {
         <div className="img-list">
           <img src={product.image} alt="Product Thumbnail 1" />
           <img src={product.image} alt="Product Thumbnail 2" />
-          {/* <img src={product.image} alt="Product Thumbnail 3" />
-          <img src={product.image} alt="Product Thumbnail 4" /> */}
         </div>
         <div className="display-img">
           <img className="main-img" src={product.image} alt="Product" />
@@ -82,34 +77,25 @@ const ProductDisplay = (props) => {
         </div>
         <div className="description">Best foods for life and strength</div>
 
-        {/* Quantity Controls */}
         <div className="quantity-control">
-          <span onClick={decreaseQuantity} className="span__button">
-            -
-          </span>
-          <input
-            type="number"
-            className="quantity-input"
-            value={quantity}
-            readOnly
-          />
-          <span onClick={increaseQuantity} className="span__button">
-            +
-          </span>
+          <span onClick={decreaseQuantity} className="span__button">-</span>
+          <input type="number" className="quantity-input" value={quantity} readOnly />
+          <span onClick={increaseQuantity} className="span__button">+</span>
         </div>
 
-        {/* Add to Cart Button */}
         <button onClick={() => addTocart({ ...product, quantity })}>
           ADD TO CART
         </button>
 
         <p className="right-category">
-          <span>Category :</span> Fruits, for life
+          <span>Category :</span> {product.category}
         </p>
         <p className="right-category">
           <span>Tags :</span> Fresh and lively
         </p>
       </div>
+
+      <RelatedProducts selectedCategory={selectedCategory} />
     </div>
   );
 };

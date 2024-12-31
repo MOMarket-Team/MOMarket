@@ -1,4 +1,4 @@
-import  { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import "./Navbar.css";
 import { Link } from "react-router-dom";
 import logo from "../Assets/logo.png";
@@ -8,28 +8,16 @@ import dropdown_icon from "../Assets/dropdown_icon.png";
 
 const Navbar = () => {
   const [menu, setMenu] = useState("Products");
-  // const [cartItems, setCartItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState("");
   const { cartItems } = useContext(ProductContext);
-  // for hiding the menu bar at certain width
   const menuRef = useRef();
-
-//   Get cartItems from local storage
-//   useEffect(() => {
-//       if (localStorage.getItem("cartItems")) {
-//         setCartItems(JSON.parse(localStorage.getItem("cartItems")));
-//       }
-//       console.log('');
-
-//     }, []);
 
   const dropdown_toggle = (e) => {
     menuRef.current.classList.toggle("nav-menu-visible");
     e.target.classList.toggle("open");
   };
 
-  // Handle Search
   const handleSearch = async (e) => {
     setSearchTerm(e.target.value);
     if (e.target.value.trim() === "") {
@@ -56,7 +44,6 @@ const Navbar = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchTerm.trim() !== "") {
-      // eslint-disable-next-line no-undef
       navigate(`/search?q=${searchTerm}`);
     }
   };
@@ -66,7 +53,7 @@ const Navbar = () => {
       <div className="nav-logo">
         <img src={logo} alt="Logo" />
         <p>
-          KCCA ONLINE <br /> MARKETS
+          MANGU ONLINE <br /> MARKET
         </p>
       </div>
       <img
@@ -157,6 +144,16 @@ const Navbar = () => {
               Sauce
             </Link>
             {menu === "Sauce" ? <hr /> : null}
+          </li>
+          <li
+            onClick={() => {
+              setMenu("Spices");
+            }}
+          >
+            <Link style={{ textDecoration: "none" }} to="/Spices">
+              Spices
+            </Link>
+            {menu === "Spices" ? <hr /> : null}
           </li>
         </ul>
       </div>

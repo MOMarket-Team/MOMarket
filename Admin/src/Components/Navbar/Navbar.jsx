@@ -9,9 +9,9 @@ const Navbar = () => {
         <div className="navbar">
             <img src={logo} alt="Logo" className="nav-logo" />
             <p className="title">
-                KCCA <br />
-                MARKET <br />
-                MASTERS
+                MANGU<br />
+                ONLINE <br />
+                MARKET
             </p>
             <div className="nav-links">
                 <Link to="/admin/orders">Orders</Link>
