@@ -28,7 +28,6 @@ const AdminOrders = () => {
             .then((response) => response.json())
             .then((data) => {
                 if (data.success) {
-                    // Update the status in the local state
                     setOrders((prevOrders) =>
                         prevOrders.map((order) =>
                             order._id === orderId ? { ...order, status: newStatus } : order
@@ -43,24 +42,25 @@ const AdminOrders = () => {
     };
 
     // Function to delete an order
-const deleteOrder = (orderId) => {
-    if (window.confirm('Are you sure you want to delete this order?')) {
-        fetch(`http://localhost:4000/admin/orders/${orderId}`, {
-            method: 'DELETE',
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    // Remove the deleted order from the local state
-                    setOrders((prevOrders) => prevOrders.filter((order) => order._id !== orderId));
-                    alert('Order deleted successfully');
-                } else {
-                    alert('Failed to delete order');
-                }
+    const deleteOrder = (orderId) => {
+        if (window.confirm('Are you sure you want to delete this order?')) {
+            fetch(`http://localhost:4000/admin/orders/${orderId}`, {
+                method: 'DELETE',
             })
-            .catch((error) => console.error('Error deleting order:', error));
-    }
-};
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        setOrders((prevOrders) =>
+                            prevOrders.filter((order) => order._id !== orderId)
+                        );
+                        alert('Order deleted successfully');
+                    } else {
+                        alert('Failed to delete order');
+                    }
+                })
+                .catch((error) => console.error('Error deleting order:', error));
+        }
+    };
 
     return (
         <div className="admin-orders">
@@ -76,6 +76,7 @@ const deleteOrder = (orderId) => {
                         <th>Status</th>
                         <th>Date</th>
                         <th>Products</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,8 +98,14 @@ const deleteOrder = (orderId) => {
                                 </select>
                             </td>
                             <td>{new Date(order.date).toLocaleString()}</td>
-                            <td>{order.cartData[0]?.product?.name || 'N/A'}</td>
-                            <td>{order.cartData[0]?.quantity || 0}</td>
+                            <td>
+                                {order.cartData
+                                    ?.map(
+                                        (item) =>
+                                            `${item.product?.name || 'Unknown Product'} X${item.quantity}`
+                                    )
+                                    .join(', ')}
+                            </td>
                             <td>
                                 <button
                                     onClick={() => deleteOrder(order._id)}
@@ -110,7 +117,6 @@ const deleteOrder = (orderId) => {
                         </tr>
                     ))}
                 </tbody>
-
             </table>
         </div>
     );

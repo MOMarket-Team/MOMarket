@@ -12,6 +12,7 @@ const ProductDisplay = (props) => {
   const { product } = props;
   const { addTocart } = useContext(ProductContext);
   const [quantity, setQuantity] = useState(1);
+  const [showAlert, setShowAlert] = useState(false);
 
   const selectedCategory = location.state?.category || product.category;
 
@@ -45,6 +46,12 @@ const ProductDisplay = (props) => {
       setQuantity(newQuantity);
       updateLocalStorageQuantity(newQuantity);
     }
+  };
+
+  const handleAddToCart = () => {
+    addTocart({ ...product, quantity });
+    setShowAlert(true); // Show the alert
+    setTimeout(() => setShowAlert(false), 3000); // Hide alert after 3 seconds
   };
 
   if (!product) {
@@ -83,9 +90,11 @@ const ProductDisplay = (props) => {
           <span onClick={increaseQuantity} className="span__button">+</span>
         </div>
 
-        <button onClick={() => addTocart({ ...product, quantity })}>
+        <button onClick={handleAddToCart}>
           ADD TO CART
         </button>
+
+        {showAlert && <div className="alert-message">Product added to Cart</div>}
 
         <p className="right-category">
           <span>Category :</span> {product.category}

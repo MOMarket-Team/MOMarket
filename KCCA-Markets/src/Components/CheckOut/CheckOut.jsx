@@ -1,8 +1,9 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ProductContext } from '../../Context/ProductContext';
 import { FlutterWaveButton } from 'flutterwave-react-v3';
 import axios from 'axios';
-import ClientOrders from '../ClientOrders/ClientOrders'; // Import for modal
+import ClientOrders from '../ClientOrders/ClientOrders';
 import './CheckOut.css';
 import logo1 from '../Assets/logo.png';
 
@@ -14,10 +15,21 @@ const CheckOut = () => {
   const [amount, setAmount] = useState(0);
   const [delivererNumber, setDelivererNumber] = useState('');
   const [customer, setCustomer] = useState({ email: '', name: '' });
-  const [isOrderStatusVisible, setIsOrderStatusVisible] = useState(false); // Modal visibility state
+  const [isOrderStatusVisible, setIsOrderStatusVisible] = useState(false);
 
+  const navigate = useNavigate();
+  const locationState = useLocation(); // To track previous route
   const cartTotal = getTotalCartAmount();
 
+  useEffect(() => {
+    const token = localStorage.getItem('auth-token');
+    if (!token) {
+      alert('You need to log in to proceed to checkout.');
+      navigate('/login', { state: { from: locationState.pathname } });
+    }
+  }, [navigate, locationState.pathname]);
+
+  // Flutterwave configuration
   const config = {
     public_key: 'FLWPUBK_TEST-37204d00156d46b5e6c40d9a27f4c5bc-X',
     tx_ref: Date.now(),
@@ -41,22 +53,18 @@ const CheckOut = () => {
     if (response.status === 'successful') {
       await handleCheckout(response.transaction_id);
     } else {
-      alert('Payment failed');
+      alert('Payment failed. Please try again.');
     }
   };
 
   const handleCheckout = async (transaction_id = null) => {
-    console.log('Starting checkout process...');
     if (cartItems.length === 0) {
-      alert('Your cart is empty. Add items to your cart before checking out.');
-      console.log('Checkout aborted: Cart is empty');
+      alert('Your cart is empty. Please add items to your cart before checking out.');
       return;
     }
 
     try {
       const token = localStorage.getItem('auth-token');
-      console.log('Auth token:', token);
-
       const checkoutData = {
         phone,
         location,
@@ -66,20 +74,16 @@ const CheckOut = () => {
         cartData: cartItems,
       };
 
-      console.log('Checkout data:', checkoutData);
-
       const response = await axios.post('http://localhost:4000/checkout', checkoutData, {
         headers: {
           'auth-token': token,
         },
       });
 
-      console.log('Checkout response:', response.data);
-
       if (response.data.success) {
         setDelivererNumber(response.data.deliveryContact);
-        setIsOrderStatusVisible(true); // Show the order status modal
-        alert('Order placed successfully');
+        setIsOrderStatusVisible(true);
+        alert('Order placed successfully.');
 
         const clearCartResponse = await axios.post('http://localhost:4000/clearcart', {}, {
           headers: {
@@ -87,25 +91,26 @@ const CheckOut = () => {
           },
         });
 
-        console.log('Clear cart response:', clearCartResponse.data);
-
         if (clearCartResponse.data.success) {
           clearCart();
-          alert('Cart cleared successfully');
         } else {
-          alert(clearCartResponse.data.message);
+          alert('Failed to clear the cart: ' + clearCartResponse.data.message);
         }
       } else {
-        alert(response.data.message);
+        alert('Checkout failed: ' + response.data.message);
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      if (error.response) {
-        console.error('Error Response Data:', error.response.data);
-      }
-      alert('Failed to checkout');
+      alert('An error occurred during checkout. Please try again.');
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth-token');
+    if (token && locationState?.state?.from) {
+      navigate(locationState.state.from);
+    }
+  }, [navigate, locationState]);
 
   return (
     <div className='checkout-container'>
@@ -141,8 +146,8 @@ const CheckOut = () => {
         </select>
 
         {paymentMethod === 'mobile_money' && (
-          <>
-            <label htmlFor='amount'>Amount:</label>
+          <label htmlFor='amount'>
+            Amount:
             <input
               id='amount'
               type='number'
@@ -150,7 +155,7 @@ const CheckOut = () => {
               onChange={(e) => setAmount(e.target.value)}
               placeholder='Enter the amount to pay'
             />
-          </>
+          </label>
         )}
 
         {paymentMethod === 'mobile_money' ? (
@@ -162,10 +167,7 @@ const CheckOut = () => {
           />
         ) : (
           <button
-            onClick={() => {
-              console.log('Cash on Delivery checkout clicked');
-              handleCheckout();
-            }}
+            onClick={() => handleCheckout()}
             className='checkout-button'
           >
             Checkout
@@ -182,18 +184,21 @@ const CheckOut = () => {
       {isOrderStatusVisible && (
         <div className='modal'>
           <ClientOrders delivererNumber={delivererNumber} />
-          <button onClick={() => setIsOrderStatusVisible(false)} className='close-modal'>
+          <button
+            onClick={() => setIsOrderStatusVisible(false)}
+            className='close-modal'
+          >
             Close
           </button>
         </div>
       )}
 
       {!isOrderStatusVisible && delivererNumber && (
-        <div className='review-order'>
-          <button onClick={() => setIsOrderStatusVisible(true)} className='review-button'>
-            Review Your Order
-          </button>
-        </div>
+            <div className='review-order'>
+              <button onClick={() => setIsOrderStatusVisible(true)} className='review-button'>
+                Review Your Order
+              </button>
+            </div>
       )}
     </div>
   );
