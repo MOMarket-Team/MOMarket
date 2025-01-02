@@ -146,14 +146,18 @@ const Navbar = () => {
       <div className="nav-logo-cart">
         {localStorage.getItem("auth-token") ? (
           <div className="user-dropdown">
-            <button onClick={toggleDropdown}>{userName}</button>
-            {dropdownOpen && (
-              <div className="dropdown-menu">
-                <p onClick={handleLogout}>Logout</p>
-                <p>Profile</p>
-                <p>Orders</p>
-              </div>
-            )}
+              <button onClick={toggleDropdown}>{userName}</button>
+              {dropdownOpen && (
+                  <div className="dropdown-menu">
+                      <p>
+                          <Link to="/client-orders" style={{ textDecoration: "none", color: "inherit" }}>
+                              Orders
+                          </Link>
+                      </p>
+                      <p onClick={handleLogout}>Logout</p>
+                      <p>Profile</p>
+                  </div>
+              )}
           </div>
         ) : (
           <Link to="/login">
