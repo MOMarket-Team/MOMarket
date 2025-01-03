@@ -1,6 +1,6 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 
-export const fetchUser = async (req, res, next) => {
+const fetchUser = async (req, res, next) => {
   const token = req.header("auth-token");
 
   if (!token)
@@ -20,7 +20,7 @@ export const fetchUser = async (req, res, next) => {
   }
 };
 
-export const ensureCartNotEmpty = (req, res, next) => {
+const ensureCartNotEmpty = (req, res, next) => {
   console.log("Processing cart data:", req.user.id);
 
   console.log("request body", req.body);
@@ -34,4 +34,9 @@ export const ensureCartNotEmpty = (req, res, next) => {
   }
 
   next();
+};
+
+module.exports = {
+  fetchUser,
+  ensureCartNotEmpty,
 };
