@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import RelatedProducts from "../RelatedProducts/RelatedProducts";
 import "./ProductDisplay.css";
@@ -18,7 +19,9 @@ const ProductDisplay = (props) => {
   useEffect(() => {
     if (product?.id) {
       const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-      setQuantity(cartItems.find((item) => item.id === product.id)?.quantity || 1);
+      setQuantity(
+        cartItems.find((item) => item.id === product.id)?.quantity || 1
+      );
     }
   }, [product]);
 
@@ -78,9 +81,18 @@ const ProductDisplay = (props) => {
         <div className="description">Best foods for life and strength</div>
 
         <div className="quantity-control">
-          <span onClick={decreaseQuantity} className="span__button">-</span>
-          <input type="number" className="quantity-input" value={quantity} readOnly />
-          <span onClick={increaseQuantity} className="span__button">+</span>
+          <span onClick={decreaseQuantity} className="span__button">
+            -
+          </span>
+          <input
+            type="number"
+            className="quantity-input"
+            value={quantity}
+            readOnly
+          />
+          <span onClick={increaseQuantity} className="span__button">
+            +
+          </span>
         </div>
 
         <button onClick={() => addTocart({ ...product, quantity })}>

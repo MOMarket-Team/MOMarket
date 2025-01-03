@@ -1,6 +1,6 @@
 import { useContext, useRef, useState } from "react";
 import "./Navbar.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../Assets/logo.png";
 import cart_icon from "../Assets/cart_icon.png";
 import { ProductContext } from "../../Context/ProductContext";
@@ -12,6 +12,8 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState("");
   const { cartItems } = useContext(ProductContext);
   const menuRef = useRef();
+
+  const navigate = useNavigate();
 
   const dropdown_toggle = (e) => {
     menuRef.current.classList.toggle("nav-menu-visible");
@@ -26,7 +28,7 @@ const Navbar = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:4000/search?q=${e.target.value}`
+        `http://localhost:4000/api/products/search?q=${e.target.value}`
       );
       if (!response.ok) throw new Error("Failed to fetch search results");
       const data = await response.json();

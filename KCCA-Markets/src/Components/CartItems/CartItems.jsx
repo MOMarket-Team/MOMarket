@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./CartItems.css";
 import { ProductContext } from "../../Context/ProductContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
@@ -6,8 +6,7 @@ import { useNavigate } from "react-router-dom";
 import prodprice from "../../../utils/priceformat";
 
 const CartItems = () => {
-  const { getTotalCartAmount, all_product, cartItems, removeFromcart } =
-    useContext(ProductContext);
+  const { all_product, cartItems, removeFromcart } = useContext(ProductContext);
   const [cartItem, setCartItem] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   const navigate = useNavigate();

@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from "react";
+/* eslint-disable react/prop-types */
+import { createContext, useState, useEffect } from "react";
 
 export const ProductContext = createContext(null);
 
@@ -8,7 +9,7 @@ const ProductContextProvider = (props) => {
 
   useEffect(() => {
     // Fetch all products
-    fetch("http://localhost:4000/allproducts")
+    fetch("http://localhost:4000/api/products/allproducts")
       .then((response) => response.json())
       .then((data) => setAll_Product(data));
   }, []);
@@ -20,9 +21,7 @@ const ProductContextProvider = (props) => {
     }
   }, []);
 
-
   const addTocart = (product) => {
-
     const existingItem = cartItems.find((item) => item.id === product.id);
 
     // Check if product exists in local storage
@@ -35,7 +34,6 @@ const ProductContextProvider = (props) => {
     setCartItems([...cartItems, product]);
 
     console.log(cartItems, "cartItems");
-    
 
     // Add to local storage
     localStorage.setItem("cartItems", JSON.stringify([...cartItems, product]));
@@ -69,7 +67,7 @@ const ProductContextProvider = (props) => {
   };
 
   const clearCart = () => {
-  //  Remove everything from cart and local storage
+    //  Remove everything from cart and local storage
     setCartItems([]);
     localStorage.removeItem("cartItems");
   };
