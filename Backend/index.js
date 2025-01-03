@@ -2,7 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const cors = require("cors");
 const dbInstanceConnection = require("./db/dbInstance");
-const { upload } = require("./middleware/multer");
+const upload = require("./middleware/multer");
 
 // const client = twilio('TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN');
 
