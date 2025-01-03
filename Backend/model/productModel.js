@@ -10,6 +10,6 @@ const ProductSchema = new mongoose.Schema({
   available: { type: Boolean, default: true },
 });
 
-const Product = mongoose.model("product", ProductSchema);
+const Product = mongoose.model("Product", ProductSchema);
 
 module.exports = Product;

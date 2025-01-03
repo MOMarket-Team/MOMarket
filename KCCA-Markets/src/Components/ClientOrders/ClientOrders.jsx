@@ -3,53 +3,89 @@ import "./ClientOrders.css";
 
 const ClientOrders = () => {
   const [orders, setOrders] = useState([]);
-  const token = localStorage.getItem("auth-token");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch orders function
-  const fetchOrders = async () => {
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const token = localStorage.getItem("auth-token");
+
+      if (!token) {
+        setError("Not authenticated. Please log in.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "http://localhost:4000/api/orders/my-orders",
+          {
+            headers: {
+              "auth-token": token,
+            },
+          }
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          setOrders(data.orders);
+        } else {
+          setError(data.message || "Failed to fetch orders");
+        }
+      } catch (error) {
+        setError("Error fetching orders. Please try again later.");
+        console.error("Error fetching client orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []); // Removed token dependency since we're getting it inside useEffect
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    const token = localStorage.getItem("auth-token");
+
+    if (!token) {
+      alert("Please log in to update orders");
+      return;
+    }
+
     try {
       const response = await fetch(
-        "http://localhost:4000/api/orders/my-orders",
+        `http://localhost:4000/admin/orders/${orderId}/status`,
         {
-          headers: { "auth-token": token },
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": token,
+          },
+          body: JSON.stringify({ status: newStatus }),
         }
       );
+
       const data = await response.json();
 
       if (data.success) {
-        setOrders(data.orders);
+        // Update order locally to avoid refetch
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
       } else {
-        console.error("Failed to fetch orders:", data.message);
+        alert(data.message || "Failed to update order status");
       }
     } catch (error) {
-      console.error("Error fetching client orders:", error);
+      alert("Error updating order status. Please try again.");
+      console.error("Error updating order status:", error);
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, [token]);
-
-  const updateOrderStatus = (orderId, newStatus) => {
-    fetch(`http://localhost:4000/admin/orders/${orderId}/status`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: newStatus }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          alert("Order status updated successfully");
-          // Fetch updated orders
-          fetchOrders();
-        } else {
-          alert("Failed to update order status");
-        }
-      })
-      .catch((error) => console.error("Error updating order status:", error));
-  };
+  if (loading) return <div className="client-orders">Loading...</div>;
+  if (error) return <div className="client-orders error">{error}</div>;
+  if (!orders.length)
+    return <div className="client-orders">No orders found</div>;
 
   return (
     <div className="client-orders">

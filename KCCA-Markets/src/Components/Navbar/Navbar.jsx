@@ -2,8 +2,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
-import { Link, useNavigate } from "react-router-dom";
-
 import logo from "../Assets/logo.png";
 import cart_icon from "../Assets/cart_icon.png";
 import dropdown_icon from "../Assets/dropdown_icon.png";
@@ -27,9 +25,12 @@ const Navbar = () => {
       if (!token) return;
 
       try {
-        const response = await fetch("http://localhost:4000/getuser", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(
+          "http://localhost:4000/api/users/getuser",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await response.json();
         if (data.success && data.user) {
           setUserName(data.user.name || "User");
@@ -41,8 +42,6 @@ const Navbar = () => {
 
     fetchUserName();
   }, []);
-
-  const navigate = useNavigate();
 
   const dropdown_toggle = (e) => {
     menuRef.current.classList.toggle("nav-menu-visible");
@@ -57,7 +56,6 @@ const Navbar = () => {
     }
 
     try {
-
       const response = await fetch(
         `http://localhost:4000/api/products/search?q=${e.target.value}`
       );
@@ -159,18 +157,21 @@ const Navbar = () => {
       <div className="nav-logo-cart">
         {localStorage.getItem("auth-token") ? (
           <div className="user-dropdown">
-              <button onClick={toggleDropdown}>{userName}</button>
-              {dropdownOpen && (
-                  <div className="dropdown-menu">
-                      <p>
-                          <Link to="/client-orders" style={{ textDecoration: "none", color: "inherit" }}>
-                              Orders
-                          </Link>
-                      </p>
-                      <p onClick={handleLogout}>Logout</p>
-                      <p>Profile</p>
-                  </div>
-              )}
+            <button onClick={toggleDropdown}>{userName}</button>
+            {dropdownOpen && (
+              <div className="dropdown-menu">
+                <p>
+                  <Link
+                    to="/client-orders"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    Orders
+                  </Link>
+                </p>
+                <p onClick={handleLogout}>Logout</p>
+                <p>Profile</p>
+              </div>
+            )}
           </div>
         ) : (
           <Link to="/login">

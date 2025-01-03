@@ -1,13 +1,11 @@
-
-import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ProductContext } from '../../Context/ProductContext';
-import { FlutterWaveButton } from 'flutterwave-react-v3';
-import axios from 'axios';
-import ClientOrders from '../ClientOrders/ClientOrders';
-import './CheckOut.css';
-import logo1 from '../Assets/logo.png';
-
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ProductContext } from "../../Context/ProductContext";
+import { FlutterWaveButton } from "flutterwave-react-v3";
+import axios from "axios";
+import ClientOrders from "../ClientOrders/ClientOrders";
+import "./CheckOut.css";
+import logo1 from "../Assets/logo.png";
 
 const CheckOut = () => {
   const { getTotalCartAmount, clearCart, cartItems } =
@@ -22,16 +20,15 @@ const CheckOut = () => {
   const [customer, setCustomer] = useState({ email: "", name: "" });
   const [isOrderStatusVisible, setIsOrderStatusVisible] = useState(false); // Modal visibility state
 
-
   const navigate = useNavigate();
   const locationState = useLocation(); // To track previous route
   const cartTotal = getTotalCartAmount();
 
   useEffect(() => {
-    const token = localStorage.getItem('auth-token');
+    const token = localStorage.getItem("auth-token");
     if (!token) {
-      alert('You need to log in to proceed to checkout.');
-      navigate('/login', { state: { from: locationState.pathname } });
+      alert("You need to log in to proceed to checkout.");
+      navigate("/login", { state: { from: locationState.pathname } });
     }
   }, [navigate, locationState.pathname]);
 
@@ -59,23 +56,21 @@ const CheckOut = () => {
     if (response.status === "successful") {
       await handleCheckout(response.transaction_id);
     } else {
-
-      alert('Payment failed. Please try again.');
-
+      alert("Payment failed. Please try again.");
     }
   };
 
   const handleCheckout = async (transaction_id = null) => {
-
     if (cartItems.length === 0) {
-      alert('Your cart is empty. Please add items to your cart before checking out.');
+      alert(
+        "Your cart is empty. Please add items to your cart before checking out."
+      );
 
       return;
     }
 
     try {
-
-      const token = localStorage.getItem('auth-token');
+      const token = localStorage.getItem("auth-token");
 
       const checkoutData = {
         phone,
@@ -87,9 +82,10 @@ const CheckOut = () => {
       };
 
       console.log("Checkout data:", checkoutData);
+      console.log("Tokenhjjjjjjjjjjj:", token);
 
       const response = await axios.post(
-        "http://localhost:4000/checkout",
+        "http://localhost:4000/api/orders/checkout",
         checkoutData,
         {
           headers: {
@@ -105,40 +101,22 @@ const CheckOut = () => {
         setIsOrderStatusVisible(true); // Show the order status modal
         alert("Order placed successfully");
 
-
-        const clearCartResponse = await axios.post(
-          "http://localhost:4000/clearcart",
-          {},
-          {
-            headers: {
-              "auth-token": token,
-            },
-          }
-        );
-
-
-        if (clearCartResponse.data.success) {
-          clearCart();
-
-        } else {
-          alert('Failed to clear the cart: ' + clearCartResponse.data.message);
-        }
+        clearCart();
+        setAmount(0);
       } else {
-        alert('Checkout failed: ' + response.data.message);
+        alert("Checkout failed: " + response.data.message);
       }
     } catch (error) {
-
       console.error("Checkout error:", error);
       if (error.response) {
         console.error("Error Response Data:", error.response.data);
       }
       alert("Failed to checkout");
-
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('auth-token');
+    const token = localStorage.getItem("auth-token");
     if (token && locationState?.state?.from) {
       navigate(locationState.state.from);
     }
@@ -177,7 +155,6 @@ const CheckOut = () => {
           <option value="mobile_money">Mobile Money</option>
         </select>
 
-
         {paymentMethod === "mobile_money" && (
           <>
             <label htmlFor="amount">Amount:</label>
@@ -189,7 +166,7 @@ const CheckOut = () => {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter the amount to pay"
             />
-          </label>
+          </>
         )}
 
         {paymentMethod === "mobile_money" ? (
@@ -200,12 +177,7 @@ const CheckOut = () => {
             className="checkout-button"
           />
         ) : (
-          <button
-
-            onClick={() => handleCheckout()}
-            className='checkout-button'
-
-          >
+          <button onClick={() => handleCheckout()} className="checkout-button">
             Checkout
           </button>
         )}
@@ -222,9 +194,7 @@ const CheckOut = () => {
           <ClientOrders delivererNumber={delivererNumber} />
           <button
             onClick={() => setIsOrderStatusVisible(false)}
-
             className="close-modal"
-
           >
             Close
           </button>
@@ -240,7 +210,6 @@ const CheckOut = () => {
             Review Your Order
           </button>
         </div>
-
       )}
     </div>
   );
