@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
 import "./RelatedProducts.css";
 import Item from "../Item/Item";
 
@@ -15,8 +16,12 @@ const RelatedProducts = ({ selectedCategory }) => {
       }
 
       try {
-        console.log(`Fetching related products for category: ${selectedCategory}`);
-        const response = await fetch(`http://localhost:4000/api/products/${selectedCategory}`);
+        console.log(
+          `Fetching related products for category: ${selectedCategory}`
+        );
+        const response = await fetch(
+          `http://localhost:4000/api/products/${selectedCategory}`
+        );
 
         if (!response.ok) {
           console.error(`Server returned status: ${response.status}`);

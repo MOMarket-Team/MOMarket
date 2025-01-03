@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./CartItems.css";
 import { ProductContext } from "../../Context/ProductContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
@@ -6,43 +6,54 @@ import { useNavigate } from "react-router-dom";
 import prodprice from "../../../utils/priceformat";
 
 const CartItems = () => {
-  const { getTotalCartAmount, all_product, cartItems, removeFromcart } =
-    useContext(ProductContext);
+  const { all_product, cartItems, removeFromcart } = useContext(ProductContext);
   const [cartItem, setCartItem] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
+  const [laborFee, setLaborFee] = useState(0);
   const navigate = useNavigate();
 
-  // Update cart items from context whenever cartItems changes
+  const calculateLaborFee = (total) => {
+    if (total > 20000) {
+      return 20000;
+    } else if (total > 10000) {
+      return 10000;
+    }
+    return 0;
+  };
+
   useEffect(() => {
     const updatedCart = localStorage.getItem("cartItems")
       ? JSON.parse(localStorage.getItem("cartItems"))
       : cartItems;
     setCartItem(updatedCart);
 
-    // Calculate cart total
     const total = updatedCart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
     setCartTotal(total);
+    setLaborFee(calculateLaborFee(total));
   }, [cartItems]);
 
   const updateCartAndTotal = (updatedCart) => {
-    setCartItem(updatedCart);
-    setCartTotal(
-      updatedCart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const subtotal = updatedCart.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
     );
+    setCartItem(updatedCart);
+    setCartTotal(subtotal);
+    setLaborFee(calculateLaborFee(subtotal));
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
   };
 
   const handleRemoveFromCart = (id) => {
     const updatedCart = cartItem.filter((item) => item.id !== id);
     updateCartAndTotal(updatedCart);
-    removeFromcart(id); // Update global context
+    removeFromcart(id);
   };
 
   const handleQuantityChange = (id, newQuantity) => {
-    if (newQuantity < 1) return; // Prevent quantity less than 1
+    if (newQuantity < 0.5) return; // Prevent quantity less than 0.5 kg
 
     const updatedCart = cartItem.map((item) =>
       item.id === id ? { ...item, quantity: newQuantity } : item
@@ -56,13 +67,15 @@ const CartItems = () => {
     console.log(all_product, "all_product");
   };
 
+  const finalTotal = cartTotal + laborFee;
+
   return (
     <div className="cartitems">
       <div className="format-main">
         <p>Products</p>
         <p>Title</p>
-        <p>Price</p>
-        <p>Quantity</p>
+        <p>Price per kg</p>
+        <p>Weight (kg)</p>
         <p>Total</p>
         <p>Remove</p>
       </div>
@@ -77,29 +90,19 @@ const CartItems = () => {
               <p>{e.name}</p>
               <p>{prodprice.format(e.price)}</p>
               <div className="quantity-control">
-                {/* <button
-                  onClick={() =>
-                    handleQuantityChange(e.id, e.quantity - 1)
-                  }
-                >
-                  -
-                </button> */}
                 <input
                   type="number"
                   className="quantity"
                   value={e.quantity}
+                  min="0.5"
+                  step="0.5"
                   onChange={(event) => {
-                    const newQuantity = parseInt(event.target.value, 10);
-                    handleQuantityChange(e.id, newQuantity || 1); // Default to 1 if empty
+                    const newQuantity = parseFloat(event.target.value) || 0.5;
+                    handleQuantityChange(e.id, Math.max(0.5, newQuantity));
                   }}
+                  style={{ width: "70px" }}
                 />
-                {/* <button
-                  onClick={() =>
-                    handleQuantityChange(e.id, e.quantity + 1)
-                  }
-                >
-                  +
-                </button> */}
+                <span>kg</span>
               </div>
               <p>{prodprice.format(e.price * e.quantity)}</p>
               <img
@@ -108,6 +111,12 @@ const CartItems = () => {
                 onClick={() => handleRemoveFromCart(e.id)}
                 alt=""
               />
+            </div>
+            <div className="weight-price-info">
+              <p>
+                {e.quantity} kg × {prodprice.format(e.price)}/kg ={" "}
+                {prodprice.format(e.price * e.quantity)}
+              </p>
             </div>
             <hr />
           </div>
@@ -128,8 +137,13 @@ const CartItems = () => {
             </div>
             <hr />
             <div className="total-item">
+              <p>Labor Fee</p>
+              <p>{prodprice.format(laborFee)}</p>
+            </div>
+            <hr />
+            <div className="total-item">
               <h3>Total</h3>
-              <h3>{prodprice.format(cartTotal)}</h3>
+              <h3>{prodprice.format(finalTotal)}</h3>
             </div>
           </div>
           <button onClick={handleCheckout}>PROCEED TO CHECKOUT</button>
