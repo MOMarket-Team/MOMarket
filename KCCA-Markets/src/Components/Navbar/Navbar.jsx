@@ -1,17 +1,46 @@
-import { useContext, useRef, useState } from "react";
-import "./Navbar.css";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "./Navbar.css";
+
+import { Link, useNavigate } from "react-router-dom";
+
 import logo from "../Assets/logo.png";
 import cart_icon from "../Assets/cart_icon.png";
-import { ProductContext } from "../../Context/ProductContext";
 import dropdown_icon from "../Assets/dropdown_icon.png";
+import { ProductContext } from "../../Context/ProductContext";
 
 const Navbar = () => {
   const [menu, setMenu] = useState("Products");
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userName, setUserName] = useState("User"); // Initialize with "User"
+
   const { cartItems } = useContext(ProductContext);
   const menuRef = useRef();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch the user's name after login
+    const fetchUserName = async () => {
+      const token = localStorage.getItem("auth-token");
+      if (!token) return;
+
+      try {
+        const response = await fetch("http://localhost:4000/getuser", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.success && data.user) {
+          setUserName(data.user.name || "User");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserName();
+  }, []);
 
   const navigate = useNavigate();
 
@@ -26,11 +55,15 @@ const Navbar = () => {
       setSearchResults([]);
       return;
     }
+
     try {
+
       const response = await fetch(
         `http://localhost:4000/api/products/search?q=${e.target.value}`
       );
+
       if (!response.ok) throw new Error("Failed to fetch search results");
+
       const data = await response.json();
       if (data.success) {
         setSearchResults(data.products);
@@ -50,6 +83,15 @@ const Navbar = () => {
     }
   };
 
+  const toggleDropdown = () => {
+    setDropdownOpen((prev) => !prev);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("auth-token");
+    window.location.replace("/");
+  };
+
   return (
     <div className="navbar">
       <div className="nav-logo">
@@ -58,18 +100,15 @@ const Navbar = () => {
           MANGU ONLINE <br /> MARKET
         </p>
       </div>
+
       <img
         className="nav-dropdown"
         onClick={dropdown_toggle}
         src={dropdown_icon}
         alt="Dropdown Icon"
       />
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
         <div className="nav-search">
           <form onSubmit={handleSearchSubmit}>
             <input
@@ -79,6 +118,7 @@ const Navbar = () => {
               onChange={handleSearch}
             />
           </form>
+
           {searchResults.length > 0 && (
             <div className="search-results">
               {searchResults.map((product) => (
@@ -86,8 +126,8 @@ const Navbar = () => {
                   to={`/product/${product.id}`}
                   key={product.id}
                   onClick={() => {
-                    setSearchResults([]); // Clear results
-                    setSearchTerm(""); // Clear input
+                    setSearchResults([]);
+                    setSearchTerm("");
                   }}
                 >
                   {product.name}
@@ -96,86 +136,50 @@ const Navbar = () => {
             </div>
           )}
         </div>
+
         <ul ref={menuRef} className="nav-menu">
-          <li
-            onClick={() => {
-              setMenu("Products");
-            }}
-          >
-            <Link style={{ textDecoration: "none" }} to="/">
-              Products
-            </Link>
-            {menu === "Products" ? <hr /> : null}
-          </li>
-          <li
-            onClick={() => {
-              setMenu("Fruits");
-            }}
-          >
-            <Link style={{ textDecoration: "none" }} to="/Fruits">
-              Fruits
-            </Link>
-            {menu === "Fruits" ? <hr /> : null}
-          </li>
-          <li
-            onClick={() => {
-              setMenu("Foods");
-            }}
-          >
-            <Link style={{ textDecoration: "none" }} to="/Foods">
-              Foods
-            </Link>
-            {menu === "Foods" ? <hr /> : null}
-          </li>
-          <li
-            onClick={() => {
-              setMenu("Vegetables");
-            }}
-          >
-            <Link style={{ textDecoration: "none" }} to="/Vegetables">
-              Vegetables
-            </Link>
-            {menu === "Vegetables" ? <hr /> : null}
-          </li>
-          <li
-            onClick={() => {
-              setMenu("Sauce");
-            }}
-          >
-            <Link style={{ textDecoration: "none" }} to="/Sauce">
-              Sauce
-            </Link>
-            {menu === "Sauce" ? <hr /> : null}
-          </li>
-          <li
-            onClick={() => {
-              setMenu("Spices");
-            }}
-          >
-            <Link style={{ textDecoration: "none" }} to="/Spices">
-              Spices
-            </Link>
-            {menu === "Spices" ? <hr /> : null}
-          </li>
+          {[
+            { name: "Products", path: "/" },
+            { name: "Fruits", path: "/Fruits" },
+            { name: "Foods", path: "/Foods" },
+            { name: "Vegetables", path: "/Vegetables" },
+            { name: "Sauce", path: "/Sauce" },
+            { name: "Spices", path: "/Spices" },
+          ].map((item) => (
+            <li key={item.name} onClick={() => setMenu(item.name)}>
+              <Link style={{ textDecoration: "none" }} to={item.path}>
+                {item.name}
+              </Link>
+              {menu === item.name && <hr />}
+            </li>
+          ))}
         </ul>
       </div>
+
       <div className="nav-logo-cart">
         {localStorage.getItem("auth-token") ? (
-          <button
-            onClick={() => {
-              localStorage.removeItem("auth-token");
-              window.location.replace("/");
-            }}
-          >
-            Logout
-          </button>
+          <div className="user-dropdown">
+              <button onClick={toggleDropdown}>{userName}</button>
+              {dropdownOpen && (
+                  <div className="dropdown-menu">
+                      <p>
+                          <Link to="/client-orders" style={{ textDecoration: "none", color: "inherit" }}>
+                              Orders
+                          </Link>
+                      </p>
+                      <p onClick={handleLogout}>Logout</p>
+                      <p>Profile</p>
+                  </div>
+              )}
+          </div>
         ) : (
           <Link to="/login">
             <button>Login</button>
           </Link>
         )}
+
         <Link to="/cart">
-          <img src={cart_icon} alt="" />
+          <img src={cart_icon} alt="Cart" />
         </Link>
         <div className="nav-cart-count">{cartItems.length}</div>
       </div>

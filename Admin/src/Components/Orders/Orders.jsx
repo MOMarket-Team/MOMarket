@@ -115,6 +115,7 @@ const AdminOrders = () => {
       </table>
     </div>
   );
+
 };
 
 export default AdminOrders;

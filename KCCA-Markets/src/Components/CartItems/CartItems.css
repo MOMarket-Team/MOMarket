@@ -1,58 +1,73 @@
-.cartitems{
+/* General Cart Items Container */
+.cartitems {
     margin: 100px 170px;
 }
-.cartitems hr{
+
+.cartitems hr {
     height: 3px;
     background: #e2e2e2;
-    border: 0;
+    border: none;
 }
+
+/* Product Listing Header */
 .format-main {
     display: grid;
     grid-template-columns: 0.5fr 2fr 1fr 1fr 1fr 1fr;
     align-items: center;
     gap: 75px;
-    padding: 20px 0px;
+    padding: 20px 0;
     color: #454545;
     font-size: 18px;
     font-weight: 600;
 }
-.format{
+
+.format {
     font-size: 17px;
     font-weight: 500;
 }
-.product-icon{
+
+/* Product Images */
+.product-icon {
     height: 65px;
 }
-.remove-icon{
+
+/* Remove Icon */
+.remove-icon {
     width: 15px;
-    margin: 0px 40px;
+    margin: 0 40px;
     cursor: pointer;
 }
-.quantity{
+
+/* Quantity Control */
+.quantity {
     width: 40px;
-    /* height: 50px; */
     border: 2px solid #ebebeb;
     background: white;
     font-size: 18px;
-    padding: 10px 10px;
+    padding: 10px;
 }
-.down{
+
+/* Checkout and Promocode Section */
+.down {
     display: flex;
-    margin: 100px 0px;
+    margin: 100px 0;
+    gap: 40px;
 }
-.total{
+
+.total {
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-right: 200px;
     gap: 40px;
 }
-.total-item{
+
+.total-item {
     display: flex;
     justify-content: space-between;
-    padding: 15px 0px;
+    padding: 15px 0;
 }
-.total button{
+
+.total button {
     width: 262px;
     height: 58px;
     outline: none;
@@ -63,30 +78,39 @@
     font-weight: 600;
     cursor: pointer;
 }
+
+/* Promocode Section */
 .promocode {
     flex: 1;
     font-size: 16px;
     font-weight: 500;
 }
-.promocode p{
+
+.promocode p {
     color: #555;
 }
-.promobox{
+
+.promobox {
     width: 504px;
     margin-top: 15px;
     padding-left: 20px;
     height: 58px;
     background: #eaeaea;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.promobox input{
+
+.promobox input {
     border: none;
     outline: none;
     background: transparent;
     font-size: 16px;
-    width: 330px;
+    width: calc(100% - 170px);
     height: 50px;
 }
-.promobox button{
+
+.promobox button {
     width: 170px;
     height: 58px;
     font-size: 16px;
@@ -94,58 +118,104 @@
     color: white;
     cursor: pointer;
 }
-@media(max-width:1280px){
-    .cartitems{
+
+/* Responsive Design - Medium Screens */
+@media (max-width: 1280px) {
+    .cartitems {
         margin: 60px 50px;
     }
-    .format-main{
+
+    .format-main {
         grid-template-columns: 0.5fr 3fr 0.5fr 0.5fr 0.5fr 0.5fr;
         gap: 20px;
-        padding: 15px 0px;
+        padding: 15px 0;
         font-size: 15px;
     }
-    .product-icon{
+
+    .product-icon {
         height: 50px;
     }
-    .remove-icon{
+
+    .remove-icon {
         margin: auto;
     }
-    .quantity{
-        width: 40px;
+
+    .quantity {
+        width: 60px;
         height: 30px;
+        border: 2px solid #ebebeb;
+        background: white;
+        font-size: 16px; /* Adjusted size for dropdown numbers */
+        text-align: center; /* Align text in the center */
+        padding: 5px;
+        appearance: textfield; /* Prevent spinner buttons (cross-browser) */
     }
-    .down{
-        margin: 80px 0px;
-        flex-direction: column;
-        gap: 80px;
-    }
-    .total{
-        margin: 0;
-    }
-    .total button{
-        max-width: 200px;
-        height: 45px;
-        font-size: 13px;
-    }
-    .promobox{
-        width: auto;
-        max-width: 500px;
-    }
-    .promobox input{
-        width: 100%;
-    }
-    .promobox button{
-        width: 120px;
-        margin: -125px;
-    }
-}
-@media(max-width:500px){
-    .format-main{
-        display: none;
-        grid-template-columns: 0.5fr 3fr 0.5fr;
+    /* Quantity Control Styling */
+    .quantity-control {
+        display: flex;
+        align-items: center;
         gap: 10px;
     }
-    .format{
+
+    .down {
+        margin: 80px 0;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .total button {
+        max-width: 200px;
+        height: 45px;
+        font-size: 14px;
+    }
+
+    .promobox {
+        width: 100%;
+    }
+
+    .promobox input {
+        width: calc(100% - 120px);
+    }
+
+    .promobox button {
+        width: 120px;
+    }
+}
+
+/* Responsive Design - Small Screens */
+@media (max-width: 500px) {
+    .format-main {
+        display: none; /* Hide table headers on small screens */
+    }
+
+    .format {
         display: grid;
+        grid-template-columns: 0.5fr 3fr 0.5fr;
+        gap: 10px;
+        font-size: 14px;
+    }
+
+    .product-icon {
+        height: 40px;
+    }
+
+    .quantity {
+        width: 30px;
+        font-size: 14px;
+    }
+
+    .down {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .promobox {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .promobox button {
+        width: 100%;
+        margin-top: 10px;
     }
 }
