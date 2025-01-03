@@ -1,6 +1,9 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
+
+import { Link, useNavigate } from "react-router-dom";
+
 import logo from "../Assets/logo.png";
 import cart_icon from "../Assets/cart_icon.png";
 import dropdown_icon from "../Assets/dropdown_icon.png";
@@ -39,6 +42,8 @@ const Navbar = () => {
     fetchUserName();
   }, []);
 
+  const navigate = useNavigate();
+
   const dropdown_toggle = (e) => {
     menuRef.current.classList.toggle("nav-menu-visible");
     e.target.classList.toggle("open");
@@ -52,7 +57,11 @@ const Navbar = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:4000/search?q=${e.target.value}`);
+
+      const response = await fetch(
+        `http://localhost:4000/api/products/search?q=${e.target.value}`
+      );
+
       if (!response.ok) throw new Error("Failed to fetch search results");
 
       const data = await response.json();
