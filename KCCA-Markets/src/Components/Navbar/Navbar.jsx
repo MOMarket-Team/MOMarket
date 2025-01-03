@@ -129,15 +129,19 @@ const Navbar = () => {
         </div>
 
         <ul ref={menuRef} className="nav-menu">
-          {["Products", "Fruits", "Foods", "Vegetables", "Sauce", "Spices"].map((item) => (
-            <li
-              key={item}
-              onClick={() => setMenu(item)}
-            >
-              <Link style={{ textDecoration: "none" }} to={`/${item}`}>
-                {item}
+          {[
+            { name: "Products", path: "/" },
+            { name: "Fruits", path: "/Fruits" },
+            { name: "Foods", path: "/Foods" },
+            { name: "Vegetables", path: "/Vegetables" },
+            { name: "Sauce", path: "/Sauce" },
+            { name: "Spices", path: "/Spices" },
+          ].map((item) => (
+            <li key={item.name} onClick={() => setMenu(item.name)}>
+              <Link style={{ textDecoration: "none" }} to={item.path}>
+                {item.name}
               </Link>
-              {menu === item && <hr />}
+              {menu === item.name && <hr />}
             </li>
           ))}
         </ul>
