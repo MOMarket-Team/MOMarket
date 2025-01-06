@@ -6,13 +6,19 @@ import prodprice from '../../../utils/priceformat';
 const Item = (props) => {
   return (
     <div className='item'>
-      {/* Pass the category to the product details page */}
+      {/* Link for the image */}
       <Link to={`/product/${props.id}`} state={{ category: props.category }}>
-        <img onClick={() => window.scrollTo(0, 0)} src={props.image} alt="" />
+        <img onClick={() => window.scrollTo(0, 0)} src={props.image} alt={props.name} />
       </Link>
-      <p>{props.name}</p>
+      
+      {/* Link for the product name */}
+      <Link to={`/product/${props.id}`} state={{ category: props.category }} className="item-name">
+        <p>{props.name}</p>
+      </Link>
+      
+      {/* Price with /KG */}
       <div className="prices">
-        {prodprice.format(props.price)}
+        {prodprice.format(props.price)} <span className="unit">/KG</span>
       </div>
     </div>
   );
