@@ -16,6 +16,7 @@ const CheckOut = () => {
   const [delivererNumber, setDelivererNumber] = useState('');
   const [customer, setCustomer] = useState({ email: '', name: '' });
   const [isOrderStatusVisible, setIsOrderStatusVisible] = useState(false);
+  const [deliveryTime, setDeliveryTime] = useState('');
 
   const navigate = useNavigate();
   const locationState = useLocation(); // To track previous route
@@ -115,7 +116,7 @@ const CheckOut = () => {
   return (
     <div className='checkout-container'>
       <h1>Checkout</h1>
-
+  
       <form onSubmit={(e) => e.preventDefault()}>
         <label htmlFor='phone'>Phone Number:</label>
         <input
@@ -125,7 +126,7 @@ const CheckOut = () => {
           onChange={(e) => setPhone(e.target.value)}
           placeholder='Enter your phone number'
         />
-
+  
         <label htmlFor='location'>Location:</label>
         <input
           id='location'
@@ -134,7 +135,7 @@ const CheckOut = () => {
           onChange={(e) => setLocation(e.target.value)}
           placeholder='Enter your delivery location'
         />
-
+  
         <label htmlFor='payment-method'>Payment Method:</label>
         <select
           id='payment-method'
@@ -144,7 +145,7 @@ const CheckOut = () => {
           <option value='cash_on_delivery'>Cash on Delivery</option>
           <option value='mobile_money'>Mobile Money</option>
         </select>
-
+  
         {paymentMethod === 'mobile_money' && (
           <label htmlFor='amount'>
             Amount:
@@ -157,7 +158,28 @@ const CheckOut = () => {
             />
           </label>
         )}
-
+  
+        {/* Optional Delivery Time Dropdown */}
+        <label htmlFor='delivery-time'>Delivery Time (Optional):</label>
+        <select
+          id='delivery-time'
+          value={deliveryTime}
+          onChange={(e) => setDeliveryTime(e.target.value)}
+        >
+          <option value=''>Select Delivery Time</option>
+          <option value='now'>Now</option>
+          <option value='morning'>Morning(Today)</option>
+          <option value='afternoon'>Afternoon(Today)</option>
+          <option value='evening'>Evening(Today)</option>
+          <option value='Monday'>Monday</option>
+          <option value='Tuesday'>Tuesday</option>
+          <option value='Wednesday'>Wednesday</option>
+          <option value='Thursday'>Thursday</option>
+          <option value='Friday'>Friday</option>
+          <option value='Saturday'>Saturday</option>
+          <option value='Sunday'>Sunday</option>
+        </select>
+  
         {paymentMethod === 'mobile_money' ? (
           <FlutterWaveButton
             {...config}
@@ -174,13 +196,13 @@ const CheckOut = () => {
           </button>
         )}
       </form>
-
+  
       {delivererNumber && (
         <div className='delivery-info'>
           <p>Deliverer's Contact: {delivererNumber}</p>
         </div>
       )}
-
+  
       {isOrderStatusVisible && (
         <div className='modal'>
           <ClientOrders delivererNumber={delivererNumber} />
@@ -192,16 +214,16 @@ const CheckOut = () => {
           </button>
         </div>
       )}
-
+  
       {!isOrderStatusVisible && delivererNumber && (
-            <div className='review-order'>
-              <button onClick={() => setIsOrderStatusVisible(true)} className='review-button'>
-                Review Your Order
-              </button>
-            </div>
+        <div className='review-order'>
+          <button onClick={() => setIsOrderStatusVisible(true)} className='review-button'>
+            Review Your Order
+          </button>
+        </div>
       )}
     </div>
-  );
+  );  
 };
 
 export default CheckOut;

@@ -64,62 +64,64 @@ const AdminOrders = () => {
 
     return (
         <div className="admin-orders">
-            <h1>All Orders</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Customer</th>
-                        <th>Phone</th>
-                        <th>Location</th>
-                        <th>Total Amount</th>
-                        <th>Payment Method</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Products</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders.map((order) => (
-                        <tr key={order._id}>
-                            <td>{order.userId?.name || 'N/A'}</td>
-                            <td>{order.phone}</td>
-                            <td>{order.location}</td>
-                            <td>${order.totalAmount}</td>
-                            <td>{order.paymentMethod}</td>
-                            <td>
-                                <select
-                                    value={order.status}
-                                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                                >
-                                    <option value="pending">Pending</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
-                                </select>
-                            </td>
-                            <td>{new Date(order.date).toLocaleString()}</td>
-                            <td>
-                                {order.cartData
-                                    ?.map(
-                                        (item) =>
-                                            `${item.product?.name || 'Unknown Product'} X${item.quantity}`
-                                    )
-                                    .join(', ')}
-                            </td>
-                            <td>
-                                <button
-                                    onClick={() => deleteOrder(order._id)}
-                                    className="delete-button"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+          <h1>All Orders</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Delivery Time</th>
+                <th>Total Amount</th>
+                <th>Payment Method</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Products</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order._id}>
+                  <td>{order.userId?.name || 'N/A'}</td>
+                  <td>{order.phone}</td>
+                  <td>{order.location}</td>
+                  <td>{order.deliveryTime || 'N/A'}</td>
+                  <td>${order.totalAmount}</td>
+                  <td>{order.paymentMethod}</td>
+                  <td>
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </td>
+                  <td>{new Date(order.date).toLocaleString()}</td>
+                  <td>
+                    {order.cartData
+                      ?.map(
+                        (item) =>
+                          `${item.product?.name || 'Unknown Product'} X${item.quantity}`
+                      )
+                      .join(', ')}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => deleteOrder(order._id)}
+                      className="delete-button"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-    );
+      );      
 };
 
 export default AdminOrders;

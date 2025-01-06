@@ -7,7 +7,6 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
 const twilio = require('twilio');
-// const client = twilio('TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN');
 
 const app = express();
 const port = 4000;
@@ -63,10 +62,16 @@ const Order = mongoose.model("Order", {
     enum: ["cash_on_delivery", "mobile_money"],
     required: true,
   },
+  deliveryTime: {
+    type: String, // Could be an enum if needed
+    enum: ["now", "morning(Today)", "afternoon(Today)", "evening(Today)", 
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    default: "now", // Default to "now"
+  },
   status: {
     type: String,
     enum: ["pending", "shipped", "delivered", "cancelled"],
-    default: "pending", // Ensure default is "pending"
+    default: "pending",
   },
   date: { type: Date, default: Date.now },
 });
@@ -333,53 +338,12 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
           totalAmount: amount,
           paymentMethod,
           transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
+          deliveryTime: deliveryTime || "now", // Default to "now" if not provided
           status: 'pending',
           date: new Date(),
       });
 
       await newOrder.save();
-
-      // Notify admin via email
-      // const transporter = nodemailer.createTransport({
-      //     service: 'Gmail',
-      //     auth: {
-      //         user: 'your-email',
-      //         pass: 'your-password',
-      //     },
-      // });
-
-      // const emailMessage = `A new order has been placed.
-      // Phone: ${phone}
-      // Location: ${location}
-      // Total Amount: ${amount}
-      // Payment Method: ${paymentMethod}
-      // Products: 
-      // ${cartData.map((item) => `${item.product.name} (Qty: ${item.quantity})`).join('\n')}
-      // `;
-
-      // await transporter.sendMail({
-      //     from: 'admin-email',
-      //     to: 'delivery-email',
-      //     subject: `New Order Placed (#${newOrder._id})`,
-      //     text: emailMessage,
-      // });
-
-      // // Notify admin via WhatsApp
-      // const whatsappMessage = `New Order Placed:
-      // Phone: ${phone}
-      // Location: ${location}
-      // Total Amount: ${amount}
-      // Payment Method: ${paymentMethod}
-      // Products:
-      // ${cartData.map((item) => `${item.product.name} (Qty: ${item.quantity})`).join('\n')}
-      // `;
-
-      // await client.messages.create({
-      //     from: 'whatsapp:+14155238886', // Twilio's WhatsApp number
-      //     to: 'whatsapp:your-number',
-      //     body: whatsappMessage,
-      // });
-
       res.json({
           success: true,
           message: 'Checkout successful',
