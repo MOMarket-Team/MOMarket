@@ -1,84 +1,145 @@
+/* General Styles */
 .checkout-container {
+    font-family: 'Arial', sans-serif;
     max-width: 600px;
     margin: 40px auto;
     padding: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #333;
 }
 
-.checkout {
-    padding-left: 200px;
-    padding-right: 200px;
-    padding-block: 50px;
-}
-
-.checkout_h1 {
-    padding-bottom: 30px;
-}
-
-.checkout-container h2 {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 20px;
+.checkout-container h1 {
     text-align: center;
+    color: #007bff;
+    margin-bottom: 20px;
+    font-size: 28px;
 }
 
-.checkout-container form {
+form {
     display: flex;
     flex-direction: column;
+    gap: 15px;
 }
 
 label {
     font-size: 16px;
-    margin-bottom: 8px;
     font-weight: 500;
 }
 
-input[type="text"], select {
+input,
+select {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 16px;
-    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 16px;
     box-sizing: border-box;
 }
 
-button {
-    /* padding: 14px; */
-    background-color: #4CAF50;
+input:focus,
+select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+button,
+.flutterwave-button {
+    padding: 12px;
+    background-color: #007bff;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    /* margin-top: 10px; */
+    text-align: center;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #0056b3;
 }
 
 .delivery-info {
     margin-top: 20px;
-    padding: 10px;
-    background-color: #e0ffe0;
-    border: 1px solid #4CAF50;
+    padding: 15px;
+    background-color: #e6ffed;
+    border: 1px solid #4caf50;
     border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
 }
 
-.delivery-info p {
-    font-size: 18px;
-    color: #333;
+/* Review Order Button Styles */
+.review-order {
+    margin-top: 20px;
+    text-align: center; /* Center the button horizontally */
 }
 
+.review-button {
+    padding: 12px 20px;
+    background-color: #28a745; /* Green color to indicate a positive action */
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.review-button:hover {
+    background-color: #218838; /* Darker green on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.review-button:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Subtle focus effect */
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .checkout-container {
         width: 90%;
+        padding: 15px;
+    }
+
+    input,
+    select {
+        font-size: 14px;
+        padding: 8px;
     }
 
     button {
-        font-size: 16px;
+        font-size: 14px;
+        padding: 10px;
+    }
+    .review-button {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkout-container {
+        width: 100%;
+        padding: 10px;
+    }
+
+    input,
+    select {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    button {
+        font-size: 12px;
+        padding: 8px;
+    }
+    .review-button {
+        font-size: 12px;
+        padding: 8px 12px;
     }
 }

@@ -9,8 +9,11 @@ const DescriptionBox = () => {
             <div className="nav-box-fade">Reviews (111)</div>
         </div>
         <div className="descript">
-            <p>An e-commerce website for Kampala Capital City Authority(KCCA) that facilitates the selling and 
-                buying of goods from within kampala markets to the people
+            <p>At Mangu Online Market (MOMarket), we battle for freshness so you 
+              can enjoy it! We bring market-fresh products directly to your doorstep 
+              at the actual market prices. The only extra cost? A small labor fee that 
+              scales with your purchase size. Experience convenience, transparency, and 
+              unmatched quality. Learn more about us today!
             </p>
         </div>
     </div>

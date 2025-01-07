@@ -5,6 +5,8 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
+const twilio = require('twilio');
 
 const app = express();
 const port = 4000;
@@ -60,7 +62,17 @@ const Order = mongoose.model("Order", {
     enum: ["cash_on_delivery", "mobile_money"],
     required: true,
   },
-  status: { type: String, default: "Pending" },
+  deliveryTime: {
+    type: String, // Could be an enum if needed
+    enum: ["now", "morning(Today)", "afternoon(Today)", "evening(Today)", 
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    default: "now", // Default to "now"
+  },
+  status: {
+    type: String,
+    enum: ["pending", "shipped", "delivered", "cancelled"],
+    default: "pending",
+  },
   date: { type: Date, default: Date.now },
 });
 
@@ -70,7 +82,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     cb(
       null,
-      $`{file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
     );
   },
 });
@@ -143,6 +155,26 @@ app.post("/addproduct", async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to save product", error });
+  }
+});
+
+app.post("/updateproduct", async (req, res) => {
+  try {
+    const { id, name, image, category, price } = req.body;
+
+    const updatedProduct = await Product.findOneAndUpdate(
+      { id: id },
+      { name, image, category, price },
+      { new: true } // Return the updated product
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.json({ success: true, product: updatedProduct });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to update product", error });
   }
 });
 
@@ -290,106 +322,47 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   }
 });
 
-app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
-  console.log("Payment Method:", req.body);
-
-  const { phone, location, paymentMethod, amount, transaction_id } = req.body;
+app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
+  const { phone, location, paymentMethod, amount, transaction_id, cartData } = req.body;
 
   try {
-    // console.log('Checkout Request Data:', req.body); // Log request data
-    // const { phone, location, paymentMethod, amount, transaction_id } = req.body;
-    // let userData = await Users.findById(req.user.id);
-
-    // if (!phone || !location) {
-    //     console.log('Missing phone or location'); // Log failure point
-    //     return res.status(400).json({ success: false, message: "Phone number and location are required" });
-    // }
-
-    //  // Further debug points
-    //  console.log('User:', req.user); // Ensure `req.user` exists
-    //  console.log('Processing cart data:', req.user.id);
-
-    // if (paymentMethod === 'mobile_money' && (!transaction_id || transaction_id.trim() === '')) {
-    //     return res.status(400).json({ success: false, message: "Transaction ID is required for mobile money payments" });
-    // }
-
-    // let cartTotal = 0;
-    // const cartProducts = [];
-
-    // for (const [itemId, quantity] of Object.entries(userData.cartData)) {
-    //     try {
-    //         if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    //             console.warn(`Skipping invalid product ID: ${itemId}`);
-    //             continue; // Skip invalid product ID
-    //         }
-    //         const product = await Product.findOne({ _id: mongoose.Types.ObjectId(itemId) });
-    //         if (!product) {
-    //             throw new Error(`Product not found for ID: ${itemId}`);
-    //         }
-
-    //         cartTotal += product.price * quantity;
-    //         cartProducts.push({ product, quantity });
-    //     } catch (error) {
-    //         console.error('Error processing cart item:', error.message);
-    //         return res.status(400).json({ success: false, message: error.message });
-    //     }
-    // }
-
-    // if (paymentMethod === 'mobile_money' && cartTotal !== amount) {
-    //     return res.status(400).json({ success: false, message: "The payment amount must equal the cart total for mobile money transactions" });
-    // }
-
-    // Save the order
-    const newOrder = new Order({
-      userId: req.user.id,
-      cartData: req.body.cartData.map(({ _id, quantity }) => ({
-        product: _id,
-        quantity,
-      })),
-      phone,
-      location,
-      totalAmount: amount,
-      paymentMethod,
-      transaction_id:
-        paymentMethod === "cash_on_delivery" ? null : transaction_id,
-      status: "Pending",
-      date: new Date(),
-    });
-
-    await newOrder.save();
-
-    // userData.phone = phone;
-    // userData.location = location;
-    // await userData.save();
-
-    res.json({
-      success: true,
-      message: "Checkout successful",
-      deliveryContact: "+256 789 123 456",
-    });
-  } catch (error) {
-    console.error("Error in checkout:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Checkout failed",
-        error: error.message,
-        stack: error.stack,
+      // Save the order to the database
+      const newOrder = new Order({
+          userId: req.user.id,
+          cartData: cartData.map(({ _id, quantity }) => ({
+              product: _id,
+              quantity,
+          })),
+          phone,
+          location,
+          totalAmount: amount,
+          paymentMethod,
+          transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
+          deliveryTime: deliveryTime || "now", // Default to "now" if not provided
+          status: 'pending',
+          date: new Date(),
       });
+
+      await newOrder.save();
+      res.json({
+          success: true,
+          message: 'Checkout successful',
+          deliveryContact: '+256 789 123 456',
+      });
+  } catch (error) {
+      console.error('Error during checkout:', error);
+      res.status(500).json({ success: false, message: 'Checkout failed', error: error.message });
   }
 });
 
-app.get("/admin/orders", async (req, res) => {
+app.get('/admin/orders', async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("userId")
-      .populate("cartData.product");
+      .populate('userId')
+      .populate('cartData.product');
     res.json({ success: true, orders });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch orders", error });
+    res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
   }
 });
 
@@ -472,6 +445,93 @@ app.get('/search', async (req, res) => {
             message: 'Failed to perform search',
         });
     }
+});
+
+// for statuses on delivery 
+app.put('/admin/orders/:id/status', async (req, res) => { 
+  const { id } = req.params; // Extract the order ID
+  const { status } = req.body; // Extract the new status from the request body
+
+  // Validate the new status
+  const validStatuses = ["pending", "delivered", "cancelled"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ success: false, message: "Invalid status" });
+  }
+
+  try {
+    // Update the order status in the database
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true } // Return the updated document
+    );
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, message: "Order status updated successfully", order });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.get('/my-orders', fetchUser, async (req, res) => {
+  try {
+    const userId = req.user?.id; // Ensure `fetchUser` middleware adds `req.user`
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const orders = await Order.find({ userId }).populate('cartData.product');
+    res.json({ success: true, orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
+  }
+});
+
+// Delete an order by ID
+app.delete('/admin/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedOrder = await Order.findByIdAndDelete(id);
+
+    if (!deletedOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    res.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete order', error });
+  }
+});
+
+// API to get products by category
+app.get('/api/products/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+    if (!category) {
+      return res.status(400).json({ error: 'Category parameter is required' });
+    }
+
+    console.log(`Category received: "${category}"`);
+
+    // Case-insensitive search for matching products
+    const products = await Product.find({
+      category: { $regex: new RegExp(`^${category.trim()}`, 'i') },
+    });
+
+    if (products.length === 0) {
+      console.log('No products found for this category.');
+    }
+
+    console.log(`Products fetched: ${JSON.stringify(products)}`);
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).send('Failed to fetch products');
+  }
 });
 
 app.listen(port, () => {
