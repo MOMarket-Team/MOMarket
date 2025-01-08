@@ -1,3 +1,4 @@
+const dotenv = require("dotenv");
 const express = require("express");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
@@ -5,8 +6,10 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const nodemailer = require('nodemailer');
-const twilio = require('twilio');
+const nodemailer = require("nodemailer");
+const twilio = require("twilio");
+
+dotenv.config();
 
 const app = express();
 const port = 4000;
@@ -14,9 +17,7 @@ const port = 4000;
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(
-  "mongodb+srv://khabertkcca:Khabert%2311@cluster0.mzb08dh.mongodb.net/kcca_online_marketing"
-);
+mongoose.connect(process.env.MONGODB_URI);
 
 // Model definitions
 const Product = mongoose.model("Product", {
@@ -64,8 +65,19 @@ const Order = mongoose.model("Order", {
   },
   deliveryTime: {
     type: String, // Could be an enum if needed
-    enum: ["now", "morning(Today)", "afternoon(Today)", "evening(Today)", 
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    enum: [
+      "now",
+      "morning(Today)",
+      "afternoon(Today)",
+      "evening(Today)",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ],
     default: "now", // Default to "now"
   },
   status: {
@@ -110,7 +122,7 @@ const fetchUser = async (req, res, next) => {
       .send({ errors: "Please authenticate using a valid token" });
 
   try {
-    const data = jwt.verify(token, "secret_ecom");
+    const data = jwt.verify(token, process.env.JWT_SECRET);
     req.user = data.user;
     next();
   } catch (error) {
@@ -169,12 +181,16 @@ app.post("/updateproduct", async (req, res) => {
     );
 
     if (!updatedProduct) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
     res.json({ success: true, product: updatedProduct });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to update product", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update product", error });
   }
 });
 
@@ -248,20 +264,22 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get('/getuser', (req, res) => {
-    const token = req.header('Authorization')?.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ success: false, message: 'Access Denied' });
-    }
+app.get("/getuser", (req, res) => {
+  const token = req.header("Authorization")?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Access Denied" });
+  }
 
-    try {
-        const data = jwt.verify(token, 'secret_ecom');
-        Users.findById(data.user.id, { name: 1, email: 1 })
-            .then(user => res.json({ success: true, user }))
-            .catch(() => res.status(500).json({ success: false, message: 'Internal Error' }));
-    } catch {
-        res.status(401).json({ success: false, message: 'Invalid Token' });
-    }
+  try {
+    const data = jwt.verify(token, process.env.JWT_SECRET);
+    Users.findById(data.user.id, { name: 1, email: 1 })
+      .then((user) => res.json({ success: true, user }))
+      .catch(() =>
+        res.status(500).json({ success: false, message: "Internal Error" })
+      );
+  } catch {
+    res.status(401).json({ success: false, message: "Invalid Token" });
+  }
 });
 
 // Fetch customer details
@@ -322,47 +340,55 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   }
 });
 
-app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
-  const { phone, location, paymentMethod, amount, transaction_id, cartData } = req.body;
+app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
+  const { phone, location, paymentMethod, amount, transaction_id, cartData } =
+    req.body;
 
   try {
-      // Save the order to the database
-      const newOrder = new Order({
-          userId: req.user.id,
-          cartData: cartData.map(({ _id, quantity }) => ({
-              product: _id,
-              quantity,
-          })),
-          phone,
-          location,
-          totalAmount: amount,
-          paymentMethod,
-          transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
-          deliveryTime: deliveryTime || "now", // Default to "now" if not provided
-          status: 'pending',
-          date: new Date(),
-      });
+    // Save the order to the database
+    const newOrder = new Order({
+      userId: req.user.id,
+      cartData: cartData.map(({ _id, quantity }) => ({
+        product: _id,
+        quantity,
+      })),
+      phone,
+      location,
+      totalAmount: amount,
+      paymentMethod,
+      transaction_id:
+        paymentMethod === "cash_on_delivery" ? null : transaction_id,
+      deliveryTime: deliveryTime || "now", // Default to "now" if not provided
+      status: "pending",
+      date: new Date(),
+    });
 
-      await newOrder.save();
-      res.json({
-          success: true,
-          message: 'Checkout successful',
-          deliveryContact: '+256 789 123 456',
-      });
+    await newOrder.save();
+    res.json({
+      success: true,
+      message: "Checkout successful",
+      deliveryContact: "+256 789 123 456",
+    });
   } catch (error) {
-      console.error('Error during checkout:', error);
-      res.status(500).json({ success: false, message: 'Checkout failed', error: error.message });
+    console.error("Error during checkout:", error);
+    res.status(500).json({
+      success: false,
+      message: "Checkout failed",
+      error: error.message,
+    });
   }
 });
 
-app.get('/admin/orders', async (req, res) => {
+app.get("/admin/orders", async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate('userId')
-      .populate('cartData.product');
+      .populate("userId")
+      .populate("cartData.product");
     res.json({ success: true, orders });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch orders", error });
   }
 });
 
@@ -420,35 +446,35 @@ app.post("/clearcart", fetchUser, async (req, res) => {
   }
 });
 
-app.get('/search', async (req, res) => {
-    try {
-        const query = req.query.q ? req.query.q.toLowerCase() : '';
+app.get("/search", async (req, res) => {
+  try {
+    const query = req.query.q ? req.query.q.toLowerCase() : "";
 
-        // Handle empty query
-        if (!query.trim()) {
-            return res.json({ success: true, products: [] });
-        }
-
-        // Search products using MongoDB query
-        const filteredProducts = await Product.find({
-            name: { $regex: query, $options: 'i' }, // Case-insensitive search
-        });
-
-        res.json({
-            success: true,
-            products: filteredProducts,
-        });
-    } catch (error) {
-        console.error('Error during search:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to perform search',
-        });
+    // Handle empty query
+    if (!query.trim()) {
+      return res.json({ success: true, products: [] });
     }
+
+    // Search products using MongoDB query
+    const filteredProducts = await Product.find({
+      name: { $regex: query, $options: "i" }, // Case-insensitive search
+    });
+
+    res.json({
+      success: true,
+      products: filteredProducts,
+    });
+  } catch (error) {
+    console.error("Error during search:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to perform search",
+    });
+  }
 });
 
-// for statuses on delivery 
-app.put('/admin/orders/:id/status', async (req, res) => { 
+// for statuses on delivery
+app.put("/admin/orders/:id/status", async (req, res) => {
   const { id } = req.params; // Extract the order ID
   const { status } = req.body; // Extract the new status from the request body
 
@@ -467,70 +493,82 @@ app.put('/admin/orders/:id/status', async (req, res) => {
     );
 
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
-    res.json({ success: true, message: "Order status updated successfully", order });
+    res.json({
+      success: true,
+      message: "Order status updated successfully",
+      order,
+    });
   } catch (error) {
     console.error("Error updating order status:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-app.get('/my-orders', fetchUser, async (req, res) => {
+app.get("/my-orders", fetchUser, async (req, res) => {
   try {
     const userId = req.user?.id; // Ensure `fetchUser` middleware adds `req.user`
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const orders = await Order.find({ userId }).populate('cartData.product');
+    const orders = await Order.find({ userId }).populate("cartData.product");
     res.json({ success: true, orders });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch orders', error });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch orders", error });
   }
 });
 
 // Delete an order by ID
-app.delete('/admin/orders/:id', async (req, res) => {
+app.delete("/admin/orders/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const deletedOrder = await Order.findByIdAndDelete(id);
 
     if (!deletedOrder) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
-    res.json({ success: true, message: 'Order deleted successfully' });
+    res.json({ success: true, message: "Order deleted successfully" });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to delete order', error });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to delete order", error });
   }
 });
 
 // API to get products by category
-app.get('/api/products/:category', async (req, res) => {
+app.get("/api/products/:category", async (req, res) => {
   try {
     const { category } = req.params;
     if (!category) {
-      return res.status(400).json({ error: 'Category parameter is required' });
+      return res.status(400).json({ error: "Category parameter is required" });
     }
 
     console.log(`Category received: "${category}"`);
 
     // Case-insensitive search for matching products
     const products = await Product.find({
-      category: { $regex: new RegExp(`^${category.trim()}`, 'i') },
+      category: { $regex: new RegExp(`^${category.trim()}`, "i") },
     });
 
     if (products.length === 0) {
-      console.log('No products found for this category.');
+      console.log("No products found for this category.");
     }
 
     console.log(`Products fetched: ${JSON.stringify(products)}`);
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).send('Failed to fetch products');
+    console.error("Error fetching products:", error);
+    res.status(500).send("Failed to fetch products");
   }
 });
 
