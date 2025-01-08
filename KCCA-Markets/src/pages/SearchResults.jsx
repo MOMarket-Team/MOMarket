@@ -8,7 +8,7 @@ const SearchResults = () => {
 
     useEffect(() => {
         if (query) {
-            fetch(`http://localhost:4000/search?q=${query}`)
+            fetch(`https://momarket.onrender.com/search?q=${query}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) setResults(data.products);

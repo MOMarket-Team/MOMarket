@@ -6,7 +6,7 @@ const AdminOrders = () => {
 
     // Fetch orders
     useEffect(() => {
-        fetch('http://localhost:4000/admin/orders')
+        fetch('https://momarket.onrender.com/admin/orders')
             .then((response) => response.json())
             .then((data) => {
                 if (data.success) {
@@ -18,7 +18,7 @@ const AdminOrders = () => {
 
     // Function to update order status
     const updateOrderStatus = (orderId, newStatus) => {
-        fetch(`http://localhost:4000/admin/orders/${orderId}/status`, {
+        fetch(`https://momarket.onrender.com/admin/orders/${orderId}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const AdminOrders = () => {
     // Function to delete an order
     const deleteOrder = (orderId) => {
         if (window.confirm('Are you sure you want to delete this order?')) {
-            fetch(`http://localhost:4000/admin/orders/${orderId}`, {
+            fetch(`https://momarket.onrender.com/admin/orders/${orderId}`, {
                 method: 'DELETE',
             })
                 .then((response) => response.json())

@@ -16,7 +16,7 @@ const RelatedProducts = ({ selectedCategory }) => {
 
       try {
         console.log(`Fetching related products for category: ${selectedCategory}`);
-        const response = await fetch(`http://localhost:4000/api/products/${selectedCategory}`);
+        const response = await fetch(`https://momarket.onrender.com/api/products/${selectedCategory}`);
 
         if (!response.ok) {
           console.error(`Server returned status: ${response.status}`);

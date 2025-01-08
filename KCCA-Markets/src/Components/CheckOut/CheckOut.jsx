@@ -75,7 +75,7 @@ const CheckOut = () => {
         cartData: cartItems,
       };
 
-      const response = await axios.post('http://localhost:4000/checkout', checkoutData, {
+      const response = await axios.post('https://momarket.onrender.com/checkout', checkoutData, {
         headers: {
           'auth-token': token,
         },
@@ -86,7 +86,7 @@ const CheckOut = () => {
         setIsOrderStatusVisible(true);
         alert('Order placed successfully.');
 
-        const clearCartResponse = await axios.post('http://localhost:4000/clearcart', {}, {
+        const clearCartResponse = await axios.post('https://momarket.onrender.com/clearcart', {}, {
           headers: {
             'auth-token': token,
           },

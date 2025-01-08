@@ -8,7 +8,7 @@ const ClientOrders = () => {
     // Fetch orders function
     const fetchOrders = async () => {
         try {
-            const response = await fetch('http://localhost:4000/my-orders', {
+            const response = await fetch('https://momarket.onrender.com/my-orders', {
                 headers: { 'auth-token': token },
             });
             const data = await response.json();
@@ -28,7 +28,7 @@ const ClientOrders = () => {
     }, [token]);
 
     const updateOrderStatus = (orderId, newStatus) => {
-        fetch(`http://localhost:4000/admin/orders/${orderId}/status`, {
+        fetch(`https://momarket.onrender.com/admin/orders/${orderId}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

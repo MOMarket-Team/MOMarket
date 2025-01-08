@@ -29,7 +29,7 @@ const AddProduct = () => {
         formData.append('product', image);
 
         try {
-            const response = await fetch('http://localhost:4000/uploads', {
+            const response = await fetch('https://momarket.onrender.com/uploads', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -43,7 +43,7 @@ const AddProduct = () => {
                 product.image = responseData.image_url;
                 console.log('Image URL:', responseData.image_url); // Log the image URL for debugging
 
-                const addProductResponse = await fetch('http://localhost:4000/addproduct', {
+                const addProductResponse = await fetch('https://momarket.onrender.com/addproduct', {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
