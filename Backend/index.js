@@ -15,11 +15,29 @@ const app = express();
 const port = 4000;
 
 app.use(express.json());
-app.use(cors());
+// CORS configuration
+const BASE_URL = "https://momarket.onrender.com";
 
-mongoose.connect(process.env.MONGODB_URI);
+app.use(
+  cors({
+    origin: [
+      "https://manguonlinemarket.netlify.app", // Frontend domain
+      "https://manguadmin.netlify.app",       // Admin domain
+    ],
+    credentials: true,
+  })
+);
 
-// Model definitions
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("Connected to MongoDB");
+
+    // Run the function to update image URLs
+    updateImageURLs();
+  })
+  .catch((err) => console.error("Failed to connect to MongoDB", err));
+
+// Define Product model
 const Product = mongoose.model("Product", {
   id: { type: Number, required: true },
   name: { type: String, required: true },
@@ -29,6 +47,20 @@ const Product = mongoose.model("Product", {
   date: { type: Date, default: Date.now },
   available: { type: Boolean, default: true },
 });
+
+// Update image URLs function
+async function updateImageURLs() {
+  try {
+    const products = await Product.find({ image: { $regex: "localhost:4000" } });
+    for (const product of products) {
+      product.image = product.image.replace("localhost:4000", "momarket.onrender.com");
+      await product.save();
+    }
+    console.log("Image URLs updated successfully");
+  } catch (err) {
+    console.error("Error updating image URLs:", err);
+  }
+}
 
 const Users = mongoose.model("Users", {
   name: { type: String },
@@ -107,10 +139,18 @@ app.get("/", (req, res) => {
 });
 
 app.post("/uploads", upload.single("product"), (req, res) => {
-  res.json({
-    success: 1,
-    image_url: `http://localhost:${port}/images/${req.file.filename}`,
-  });
+  if (!req.file) {
+    return res.status(400).json({ success: 0, message: "No file uploaded" });
+  }
+  try {
+    res.json({
+      success: 1,
+      image_url: `${BASE_URL}/images/${req.file.filename}`,
+    });
+  } catch (err) {
+    console.error("Error uploading file:", err);
+    res.status(500).json({ success: 0, message: "Internal Server Error", error: err.message });
+  }
 });
 
 // Authentication middleware
@@ -341,6 +381,7 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
 });
 
 app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
+  console.log("Request body:", req.body);
   const { phone, location, paymentMethod, amount, transaction_id, cartData } =
     req.body;
 
@@ -358,11 +399,15 @@ app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
       paymentMethod,
       transaction_id:
         paymentMethod === "cash_on_delivery" ? null : transaction_id,
-      deliveryTime: deliveryTime || "now", // Default to "now" if not provided
+      deliveryTime: req.body.deliveryTime || "now", // Default to "now" if not provided
       status: "pending",
       date: new Date(),
     });
-
+    await Order.updateMany(
+      { deliveryTime: { $exists: false } }, // Find orders missing the field
+      { $set: { deliveryTime: "now" } } // Set a default value
+    );
+    
     await newOrder.save();
     res.json({
       success: true,

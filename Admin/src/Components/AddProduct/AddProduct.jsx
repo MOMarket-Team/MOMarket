@@ -20,46 +20,50 @@ const AddProduct = () => {
     }
 
     const Add_product = async () => {
-        console.log(productDetails);
-
-        let responseData;
-        let product = productDetails;
-
+        console.log("Product details before upload:", productDetails);
+    
         let formData = new FormData();
         formData.append('product', image);
-
+    
         try {
-            const response = await fetch('https://momarket.onrender.com/uploads', {
+            // Upload image
+            const uploadResponse = await fetch('https://momarket.onrender.com/uploads', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
                 },
                 body: formData,
             });
-            responseData = await response.json();
-            console.log('Server Response:', responseData);
-
-            if (responseData.success) {
-                product.image = responseData.image_url;
-                console.log('Image URL:', responseData.image_url); // Log the image URL for debugging
-
+    
+            const uploadData = await uploadResponse.json();
+            console.log("Upload Response:", uploadData);
+    
+            if (uploadData.success) {
+                productDetails.image = uploadData.image_url;
+                console.log("Image URL set in productDetails:", productDetails.image);
+    
+                // Add product with image URL
                 const addProductResponse = await fetch('https://momarket.onrender.com/addproduct', {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(product),
+                    body: JSON.stringify(productDetails),
                 });
+    
                 const addProductData = await addProductResponse.json();
-                addProductData.success ? alert("Product Added") : alert("Failed");
+                addProductData.success
+                    ? alert("Product Added Successfully")
+                    : alert("Failed to Add Product");
             } else {
-                console.error('Upload failed:', responseData ? responseData.message : 'No response data');
+                console.error("Image upload failed:", uploadData.message || "Unknown error");
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error("Error during product addition:", error);
         }
-    }
+    };
+    
 
     return (
         <div className='addproduct'>
