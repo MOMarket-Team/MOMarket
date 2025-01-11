@@ -22,13 +22,19 @@ app.use(
   cors({
     origin: [
       "https://manguonlinemarket.netlify.app", // Frontend domain
-      "https://manguadmin.netlify.app",       // Admin domain
+      "https://manguadmin.netlify.app", // Admin domain
     ],
     credentials: true,
   })
 );
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+app.options("*", cors());
+
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Connected to MongoDB");
 
@@ -51,9 +57,14 @@ const Product = mongoose.model("Product", {
 // Update image URLs function
 async function updateImageURLs() {
   try {
-    const products = await Product.find({ image: { $regex: "localhost:4000" } });
+    const products = await Product.find({
+      image: { $regex: "localhost:4000" },
+    });
     for (const product of products) {
-      product.image = product.image.replace("localhost:4000", "momarket.onrender.com");
+      product.image = product.image.replace(
+        "localhost:4000",
+        "momarket.onrender.com"
+      );
       await product.save();
     }
     console.log("Image URLs updated successfully");
@@ -149,7 +160,11 @@ app.post("/uploads", upload.single("product"), (req, res) => {
     });
   } catch (err) {
     console.error("Error uploading file:", err);
-    res.status(500).json({ success: 0, message: "Internal Server Error", error: err.message });
+    res.status(500).json({
+      success: 0,
+      message: "Internal Server Error",
+      error: err.message,
+    });
   }
 });
 
@@ -407,7 +422,7 @@ app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
       { deliveryTime: { $exists: false } }, // Find orders missing the field
       { $set: { deliveryTime: "now" } } // Set a default value
     );
-    
+
     await newOrder.save();
     res.json({
       success: true,
