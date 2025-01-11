@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import "./CartItems.css";
 import { ProductContext } from "../../Context/ProductContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
@@ -6,77 +6,30 @@ import { useNavigate } from "react-router-dom";
 import prodprice from "../../../utils/priceformat";
 
 const CartItems = () => {
-  const { all_product, cartItems, removeFromcart } = useContext(ProductContext);
-  const [cartItem, setCartItem] = useState([]);
-  const [cartTotal, setCartTotal] = useState(0);
-  const [laborFee, setLaborFee] = useState(0);
+  const {
+    cartItems,
+    removeFromcart,
+    updateItemQuantity,
+    cartTotal,
+    laborFee,
+    getTotalCartAmount,
+  } = useContext(ProductContext);
   const navigate = useNavigate();
 
-  const calculateLaborFee = (total) => {
-    if (total <= 25000) {
-      return 7000;
-    } else if (total <= 50000) {
-      return 10000;
-    } else if (total <= 70000) {
-      return 13000;
-    } else if (total <= 100000) {
-      return 16000;
-    } else if (total <= 150000) {
-      return 20000;
-    } else if (total <= 200000) {
-      return 25000;
-    } else {
-      return 35000; // For total > 200000
-    }
-  };  
-
-  useEffect(() => {
-    const updatedCart = localStorage.getItem("cartItems")
-      ? JSON.parse(localStorage.getItem("cartItems"))
-      : cartItems;
-    setCartItem(updatedCart);
-
-    const total = updatedCart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    setCartTotal(total);
-    setLaborFee(calculateLaborFee(total));
-  }, [cartItems]);
-
-  const updateCartAndTotal = (updatedCart) => {
-    const subtotal = updatedCart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    setCartItem(updatedCart);
-    setCartTotal(subtotal);
-    setLaborFee(calculateLaborFee(subtotal));
-    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-  };
-
   const handleRemoveFromCart = (id) => {
-    const updatedCart = cartItem.filter((item) => item.id !== id);
-    updateCartAndTotal(updatedCart);
     removeFromcart(id);
   };
 
   const handleQuantityChange = (id, newQuantity) => {
     if (newQuantity < 0.5) return; // Prevent quantity less than 0.5 kg
-
-    const updatedCart = cartItem.map((item) =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    );
-    updateCartAndTotal(updatedCart);
+    updateItemQuantity(id, newQuantity);
   };
 
   const handleCheckout = () => {
     navigate("/checkout");
-    console.log(cartItems, "cartItems");
-    console.log(all_product, "all_product");
   };
 
-  const finalTotal = cartTotal + laborFee;
+  const finalTotal = getTotalCartAmount();
 
   return (
     <div className="cartitems">
@@ -89,10 +42,10 @@ const CartItems = () => {
         <p>Remove</p>
       </div>
       <hr />
-      {cartItem.length === 0 ? (
+      {cartItems.length === 0 ? (
         <h1>Cart is empty</h1>
       ) : (
-        cartItem.map((e) => (
+        cartItems.map((e) => (
           <div key={e.id}>
             <div className="format format-main">
               <img src={e.image} alt="" className="product-icon" />
@@ -143,10 +96,13 @@ const CartItems = () => {
             <div className="total-item">
               <p>Delivery Fee</p>
               <p>
-                Calculated based on distance 
+                Calculated based on distance
                 <span className="tooltip">
                   <i className="info-icon">ℹ️</i>
-                  <span className="tooltip-text">Delivery fee is calculated based on your distance and is payable by you at checkout.</span>
+                  <span className="tooltip-text">
+                    Delivery fee is calculated based on your distance and is
+                    payable by you at checkout.
+                  </span>
                 </span>
               </p>
             </div>

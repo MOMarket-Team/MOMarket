@@ -5,6 +5,26 @@ export const ProductContext = createContext(null);
 const ProductContextProvider = (props) => {
   const [all_product, setAll_Product] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [cartTotal, setCartTotal] = useState(0);
+  const [laborFee, setLaborFee] = useState(0);
+
+  const calculateLaborFee = (total) => {
+    if (total <= 25000) {
+      return 7000;
+    } else if (total <= 50000) {
+      return 10000;
+    } else if (total <= 70000) {
+      return 13000;
+    } else if (total <= 100000) {
+      return 16000;
+    } else if (total <= 150000) {
+      return 20000;
+    } else if (total <= 200000) {
+      return 25000;
+    } else {
+      return 35000; // For total > 200000
+    }
+  };
 
   useEffect(() => {
     // Fetch all products
@@ -13,69 +33,81 @@ const ProductContextProvider = (props) => {
       .then((data) => setAll_Product(data));
   }, []);
 
-  // Get cartItems from localstorage
+  // Get cartItems from localstorage and calculate totals
   useEffect(() => {
-    if (localStorage.getItem("cartItems")) {
-      setCartItems(JSON.parse(localStorage.getItem("cartItems")));
-    }
+    const storedCartItems = localStorage.getItem("cartItems")
+      ? JSON.parse(localStorage.getItem("cartItems"))
+      : [];
+
+    setCartItems(storedCartItems);
+
+    const subtotal = storedCartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    setCartTotal(subtotal);
+    setLaborFee(calculateLaborFee(subtotal));
   }, []);
 
+  const updateCartTotals = (items) => {
+    const subtotal = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    setCartTotal(subtotal);
+    setLaborFee(calculateLaborFee(subtotal));
+  };
 
   const addTocart = (product) => {
-
     const existingItem = cartItems.find((item) => item.id === product.id);
-
-    // Check if product exists in local storage
 
     if (existingItem) {
       alert("product already exists");
       return;
     }
 
-    setCartItems([...cartItems, product]);
-
-    console.log(cartItems, "cartItems");
-    
-
-    // Add to local storage
-    localStorage.setItem("cartItems", JSON.stringify([...cartItems, product]));
+    const updatedCart = [...cartItems, product];
+    setCartItems(updatedCart);
+    updateCartTotals(updatedCart);
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
   };
 
   const removeFromcart = async (itemId) => {
-    setCartItems(cartItems.filter((item) => item.id !== itemId));
-
-    await localStorage.setItem(
-      "cartItems",
-      JSON.stringify(cartItems.filter((item) => item.id !== itemId))
-    );
+    const updatedCart = cartItems.filter((item) => item.id !== itemId);
+    setCartItems(updatedCart);
+    updateCartTotals(updatedCart);
+    await localStorage.setItem("cartItems", JSON.stringify(updatedCart));
   };
 
+  const updateItemQuantity = (itemId, newQuantity) => {
+    if (newQuantity < 0.5) return; // Prevent quantity less than 0.5 kg
+
+    const updatedCart = cartItems.map((item) =>
+      item.id === itemId ? { ...item, quantity: newQuantity } : item
+    );
+    setCartItems(updatedCart);
+    updateCartTotals(updatedCart);
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+  };
+
+  console.log(cartItems, cartTotal, laborFee, "context");
+
   const getTotalCartAmount = () => {
-    let totalAmount = 0;
-
-    for (const item in cartItems) {
-      totalAmount += cartItems[item].price * cartItems[item].quantity;
-    }
-
-    return totalAmount;
+    return cartTotal + laborFee;
   };
 
   const getTotalItems = () => {
-    let totalItem = 0;
-    for (const item in cartItems) {
-      totalItem += cartItems[item];
-    }
-    return totalItem;
+    return cartItems.length;
   };
 
   const clearCart = () => {
-  //  Remove everything from cart and local storage
     setCartItems([]);
+    setCartTotal(0);
+    setLaborFee(0);
     localStorage.removeItem("cartItems");
   };
 
   const logout = () => {
-    // Clear the cart and remove the auth-token
     clearCart();
     localStorage.removeItem("auth-token");
   };
@@ -85,8 +117,11 @@ const ProductContextProvider = (props) => {
     getTotalCartAmount,
     all_product,
     cartItems,
+    cartTotal,
+    laborFee,
     addTocart,
     removeFromcart,
+    updateItemQuantity,
     clearCart,
     logout,
   };
