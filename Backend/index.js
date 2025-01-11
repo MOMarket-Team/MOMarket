@@ -25,6 +25,7 @@ app.use(
       "https://manguadmin.netlify.app", // Admin domain
       "https://manguonlinemarket.com", // Main domain
       "https://manguonlineadmin.netlify.app", // Admin domain
+      "http://localhost:5173",
     ],
     credentials: true,
   })
