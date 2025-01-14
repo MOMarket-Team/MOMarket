@@ -2,7 +2,7 @@ const https = require("https");
 
 require("dotenv").config();
 
-const serverUrl = process.env.SERVER_URL;
+const serverUrl = process.env.SERVER_URL || "http://localhost:4000";
 const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes in milliseconds
 
 function pingServer() {
