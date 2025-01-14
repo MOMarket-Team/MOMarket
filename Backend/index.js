@@ -9,7 +9,9 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const twilio = require("twilio");
 const bcrypt = require("bcrypt");
-const { pingServer, PING_INTERVAL } = require("./keepAlive");
+const { pingServer, PING_INTERVAL } = require("./utils/keepAlive");
+const cloudinary = require("./utils/cloudinary");
+const fs = require("fs");
 
 dotenv.config();
 
@@ -140,17 +142,7 @@ const Order = mongoose.model("Order", {
   date: { type: Date, default: Date.now },
 });
 
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: "./uploads/images",
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
-const upload = multer({ storage: storage });
+const upload = multer({ dest: "uploads/" });
 
 app.use("/images", express.static("uploads/images"));
 
@@ -158,21 +150,31 @@ app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
 
-app.post("/uploads", upload.single("product"), (req, res) => {
+app.post("/uploads", upload.single("product"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: 0, message: "No file uploaded" });
   }
+
   try {
-    res.json({
-      success: 1,
-      image_url: `${BASE_URL}/images/${req.file.filename}`,
+    const filePath = req.file.path;
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: "momarket",
+      resource_type: "image",
     });
-  } catch (err) {
-    console.error("Error uploading file:", err);
+
+    fs.unlinkSync(filePath);
+
+    res.status(200).json({
+      success: 1,
+      message: "File uploaded successfully",
+      image_url: result.secure_url,
+    });
+  } catch (error) {
+    console.error("Error uploading file:", error);
     res.status(500).json({
       success: 0,
       message: "Internal Server Error",
-      error: err.message,
+      error: error.message,
     });
   }
 });
