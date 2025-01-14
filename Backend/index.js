@@ -8,6 +8,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const twilio = require("twilio");
+const bcrypt = require("bcrypt");
+const { pingServer, PING_INTERVAL } = require("./keepAlive");
 
 dotenv.config();
 
@@ -32,6 +34,10 @@ app.use(
 );
 
 app.options("*", cors());
+
+pingServer();
+
+setInterval(pingServer, PING_INTERVAL);
 
 mongoose
   .connect(process.env.MONGODB_URI, {
@@ -293,10 +299,11 @@ app.post("/signup", async (req, res) => {
       .status(400)
       .json({ success: false, errors: "existing email address" });
   }
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const user = new Users({
     name: req.body.username,
     email: req.body.email,
-    password: req.body.password,
+    password: hashedPassword,
   });
 
   await user.save();
@@ -309,7 +316,7 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   let user = await Users.findOne({ email: req.body.email });
   if (user) {
-    const passCompare = req.body.password === user.password;
+    const passCompare = await bcrypt.compare(req.body.password, user.password);
     if (passCompare) {
       const data = { user: { id: user.id } };
       const token = jwt.sign(data, "secret_ecom");
