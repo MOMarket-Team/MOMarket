@@ -30,6 +30,7 @@ app.use(
       "https://manguonlinemarket.com", // Main domain
       "https://manguonlineadmin.netlify.app", // Admin domain
       "http://localhost:5173",
+      "http://localhost:5174",
     ],
     credentials: true,
   })

@@ -16,6 +16,8 @@ import spice_banner from './Components/Assets/Spices_banner.jpg'
 import Checkout from "./pages/Checkout.jsx";
 import SearchResults from "./pages/SearchResults.jsx";
 import ClientOrders from "./Components/ClientOrders/ClientOrders.jsx";
+import About from "./Components/About/About.jsx";
+import AllProducts from "./Components/AllProducts/AllProducts.jsx";
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
           <Route path='/checkout' element={<Checkout/>} />
           <Route path='/search' element={<SearchResults/>} />
           <Route path="/client-orders" element={<ClientOrders />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/AllProducts" element={<AllProducts />} />
         </Routes>
         <Footer />
       </BrowserRouter>

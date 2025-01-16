@@ -1,81 +1,154 @@
-.footer{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-logo p {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+}
+
+.footer-links li {
+  font-size: 18px;
+}
+
+.footer-social-icon {
+  display: flex;
+  gap: 10px;
+}
+
+.contact-popup {
+  position: fixed;
+  bottom: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1000;
+}
+
+.contact-popup textarea {
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.contact-popup button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.contact-popup .close-btn {
+  margin-top: 10px;
+  background: #ff4d4d;
+}
+
+/* Media queries */
+
+/* For screens 1280px and below */
+@media (max-width: 1280px) {
+  .footer-links {
+    font-size: 16px; /* Slightly reduce link font size */
+    gap: 25px; /* Adjust gap between links */
+  }
+
+  .footer-logo p {
+    font-size: 22px; /* Slightly reduce logo font size */
+  }
+
+  .footer-social-icon img {
+    max-width: 90%; /* Slightly reduce image size */
+  }
+
+  .contact-popup textarea {
+    font-size: 16px; /* Slightly reduce text area font size */
+  }
+
+  .contact-popup button {
+    font-size: 16px; /* Adjust button font size */
+  }
+}
+
+/* For screens 800px and below */
+@media (max-width: 800px) {
+  .footer-links {
+    font-size: 14px; /* Reduce link font size */
+    gap: 20px; /* Adjust gap between links */
+  }
+
+  .footer-logo p {
+    font-size: 20px; /* Adjust logo font size */
+  }
+
+  .footer-social-icon img {
+    max-width: 85%; /* Further reduce image size */
+  }
+
+  .contact-popup textarea {
+    font-size: 14px; /* Further reduce text area font size */
+  }
+
+  .contact-popup button {
+    font-size: 14px; /* Adjust button font size */
+  }
+}
+
+/* For screens 500px and below */
+@media (max-width: 500px) {
+  .footer-links {
+    flex-direction: column; /* Stack links vertically */
     align-items: center;
-    gap: 50px;
-}
-.footer-logo{
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-.footer-logo p{
-    color: #383838;
-    font-size: 30px;
-    font-family: 700;
-}
-.footer-links{
-    display: flex;
-    list-style: none;
-    gap: 50px;
-    color: #252525;
-    font-size: 20px;
-}
-.footer-links li{
-    cursor: pointer;
-}
-.footer-social-icon{
-    display: flex;
-    gap: 20px;
-}
-.footer-icons-container{
-    padding: 10px;
-    padding-bottom: 6px;
-    color: #fbfbfb;
-    cursor: pointer;
-    border: 1px solid #ebebeb;
-}
-.copyright{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    width: 100%;
-    margin-bottom: 30px;
-    color: #1a1a1a;
-    font-size: 20px;
-}
-.copyright hr{
-    width: 80%;
-    border: none;
-    border-radius: 10px;
-    height: 3px;
-    background: #c7c7c7;
-}
-@media(max-width:1280px){
-    .footer{
-        gap: 20px;
-    }
-    .footer-logo{
-        gap: 10px;
-        align-items: end;
-    }
-    .footer-logo img{
-        width: 50px;
-        height: 80px;
-    }
-    .footer-logo p{
-        font-size: 25px;
-    }
-    .footer-links{
-        font-size: 14px;
-        gap: 10px;
-    }
-    .footer-social-icon img{
-        width: 22px;
-    }
-    .footer-copyright{
-        font-size: 13px;
-    }
+    gap: 15px; /* Reduce gap */
+    font-size: 12px; /* Further reduce link font size */
+  }
+
+  .footer-logo p {
+    font-size: 18px; /* Adjust logo font size */
+  }
+
+  .footer-social-icon img {
+    max-width: 80%; /* Further reduce image size */
+    margin: 0 auto;
+  }
+
+  .contact-popup textarea {
+    font-size: 12px; /* Further reduce text area font size */
+    padding: 6px; /* Adjust padding */
+  }
+
+  .contact-popup button {
+    font-size: 12px; /* Further reduce button font size */
+    padding: 6px 12px; /* Adjust button padding */
+  }
+
+  .contact-popup .close-btn {
+    padding: 6px 12px; /* Adjust close button padding */
+  }
 }

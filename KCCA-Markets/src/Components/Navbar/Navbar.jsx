@@ -88,7 +88,7 @@ const Navbar = () => {
       <div className="nav-logo">
         <img src={logo} alt="Logo" />
         <p>
-          MANGU ONLINE <br /> MARKET
+          MANGU ONLINE MARKET
         </p>
       </div>
 
