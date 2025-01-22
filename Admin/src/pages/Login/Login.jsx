@@ -1,0 +1,45 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const { data } = await axios.post('https://momarket-7ata.onrender.com/loginA', { email, password });
+            localStorage.setItem('adminToken', data.token);
+            window.location.href = '/admin/orders';
+        } catch (err) {
+            setError('Invalid email or password');
+        }
+    };
+
+    return (
+        <div>
+            <h2>Admin Login</h2>
+            <form onSubmit={handleLogin}>
+                <input 
+                    type="email" 
+                    placeholder="Email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    required 
+                />
+                <input 
+                    type="password" 
+                    placeholder="Password" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    required 
+                />
+                <button type="submit">Login</button>
+                {error && <p>{error}</p>}
+            </form>
+        </div>
+    );
+};
+
+export default Login;

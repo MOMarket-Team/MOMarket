@@ -80,7 +80,7 @@ const CheckOut = () => {
       };
 
       const response = await axios.post(
-        "https://momarket.onrender.com/checkout",
+        "https://momarket-7ata.onrender.com/checkout",
         checkoutData,
         {
           headers: {
@@ -95,7 +95,7 @@ const CheckOut = () => {
         alert("Order placed successfully.");
 
         const clearCartResponse = await axios.post(
-          "https://momarket.onrender.com/clearcart",
+          "https://momarket-7ata.onrender.com/clearcart",
           {},
           {
             headers: {

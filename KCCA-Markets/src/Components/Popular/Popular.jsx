@@ -7,7 +7,7 @@ const Popular = () => {
   // all process of fetching from DB
   const [popularProducts, setPopularProducts] = useState([]);
   useEffect(() => {
-    fetch("https://momarket.onrender.com/popularinfruit")
+    fetch("https://momarket-7ata.onrender.com/popularinfruit")
       .then((response) => response.json())
       .then((data) => setPopularProducts(data));
   }, []);

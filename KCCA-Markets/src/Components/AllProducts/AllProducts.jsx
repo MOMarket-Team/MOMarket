@@ -6,7 +6,7 @@ const AllProducts = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('https://momarket.onrender.com/allproducts')
+    fetch('https://momarket-7ata.onrender.com/allproducts')
       .then((response) => response.json())
       .then((data) => setProducts(data))
       .catch((error) => console.error('Error fetching products:', error));

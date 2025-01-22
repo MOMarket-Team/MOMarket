@@ -20,7 +20,7 @@ const port = 4000;
 
 app.use(express.json());
 // CORS configuration
-const BASE_URL = "https://momarket.onrender.com";
+const BASE_URL = "https://momarket-7ata.onrender.com";
 
 app.use(
   cors({
@@ -141,6 +141,19 @@ const Order = mongoose.model("Order", {
     default: "pending",
   },
   date: { type: Date, default: Date.now },
+});
+
+const AdminUserSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true }
+});
+
+// Hash the password before saving
+AdminUserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
 const upload = multer({ dest: "uploads/" });
@@ -642,6 +655,39 @@ app.get("/api/products/:category", async (req, res) => {
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).send("Failed to fetch products");
+  }
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+// Add an admin user
+app.post('/adminusers', async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+      const user = new AdminUser({ name, email, password });
+      await user.save();
+      res.status(201).json({ message: 'Admin user created successfully' });
+  } catch (err) {
+      res.status(500).json({ error: 'Error creating admin user', details: err });
+  }
+});
+
+// Login admin user
+app.post('/loginA', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+      const user = await AdminUser.findOne({ email });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+
+      const token = jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: '1h' });
+      res.status(200).json({ token });
+  } catch (err) {
+      res.status(500).json({ error: 'Error logging in', details: err });
   }
 });
 

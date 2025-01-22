@@ -27,7 +27,7 @@ const AddProduct = () => {
     
         try {
             // Upload image
-            const uploadResponse = await fetch('https://momarket.onrender.com/uploads', {
+            const uploadResponse = await fetch('https://momarket-7ata.onrender.com/uploads', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -43,7 +43,7 @@ const AddProduct = () => {
                 console.log("Image URL set in productDetails:", productDetails.image);
     
                 // Add product with image URL
-                const addProductResponse = await fetch('https://momarket.onrender.com/addproduct', {
+                const addProductResponse = await fetch('https://momarket-7ata.onrender.com/addproduct', {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',

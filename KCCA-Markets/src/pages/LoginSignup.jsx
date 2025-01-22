@@ -17,7 +17,7 @@ const LoginSignup = () => {
   const login = async () =>{
   
     let responseData;
-    await fetch('https://momarket.onrender.com/login',{
+    await fetch('https://momarket-7ata.onrender.com/login',{
       method:'POST',
       headers:{
         Accept:'application/form-data',
@@ -39,7 +39,7 @@ const LoginSignup = () => {
   //below are logics func for signup to db
   const signup = async () =>{
     let responseData;
-    await fetch('https://momarket.onrender.com/signup',{
+    await fetch('https://momarket-7ata.onrender.com/signup',{
       method:'POST',
       headers:{
         Accept:'application/form-data',

@@ -9,7 +9,7 @@ const NewCollection = () => {
   // under newcollection,the lastest products only will be added.
   const [new_collection, setNew_collection] = useState([]);
   useEffect(() => {
-    fetch("https://momarket.onrender.com/newcollections")
+    fetch("https://momarket-7ata.onrender.com/newcollections")
       .then((response) => response.json())
       .then((data) => setNew_collection(data));
   }, []);

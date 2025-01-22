@@ -24,7 +24,7 @@ const Navbar = () => {
       if (!token) return;
 
       try {
-        const response = await fetch("https://momarket.onrender.com/getuser", {
+        const response = await fetch("https://momarket-7ata.onrender.com/getuser", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
@@ -52,7 +52,7 @@ const Navbar = () => {
     }
 
     try {
-      const response = await fetch(`https://momarket.onrender.com/search?q=${e.target.value}`);
+      const response = await fetch(`https://momarket-7ata.onrender.com/search?q=${e.target.value}`);
       if (!response.ok) throw new Error("Failed to fetch search results");
 
       const data = await response.json();

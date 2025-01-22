@@ -9,7 +9,7 @@ const ListProduct = () => {
 
     const fetchInfo = async () => {
         try {
-            const res = await fetch('https://momarket.onrender.com/allproducts');
+            const res = await fetch('https://momarket-7ata.onrender.com/allproducts');
             const data = await res.json();
             setAllProducts(data);
 
@@ -27,7 +27,7 @@ const ListProduct = () => {
 
     // API call to remove product
     const remove_product = async (id) => {
-        await fetch('https://momarket.onrender.com/removeproduct', {
+        await fetch('https://momarket-7ata.onrender.com/removeproduct', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -40,7 +40,7 @@ const ListProduct = () => {
 
     // API call to update product
     const updateProduct = async () => {
-        await fetch('https://momarket.onrender.com/updateproduct', {
+        await fetch('https://momarket-7ata.onrender.com/updateproduct', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
