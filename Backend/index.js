@@ -20,18 +20,11 @@ const port = 4000;
 
 app.use(express.json());
 // CORS configuration
-const BASE_URL = "https://momarket-7ata.onrender.com";
+const BASE_URL = process.env.BASE_URL;
 
 app.use(
   cors({
-    origin: [
-      "https://manguonlinemarket.netlify.app", // Frontend domain
-      "https://manguadmin.netlify.app", // Admin domain
-      "https://manguonlinemarket.com", // Main domain
-      "https://manguonlineadmin.netlify.app", // Admin domain
-      "http://localhost:5173",
-      "http://localhost:5174",
-    ],
+    origin: process.env.CORS_ORIGINS.split(','),
     credentials: true,
   })
 );
@@ -143,18 +136,19 @@ const Order = mongoose.model("Order", {
   date: { type: Date, default: Date.now },
 });
 
-const AdminUserSchema = new mongoose.Schema({
+const AdminUser = mongoose.model("AdminUser", {
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  date: { type: Date, default: Date.now },
 });
 
 // Hash the password before saving
-AdminUserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
+// AdminUser.pre('save', async function (next) {
+//   if (!this.isModified('password')) return next();
+//   this.password = await bcrypt.hash(this.password, 10);
+//   next();
+// });
 
 const upload = multer({ dest: "uploads/" });
 
@@ -681,13 +675,33 @@ app.post('/loginA', async (req, res) => {
       const user = await AdminUser.findOne({ email });
       if (!user) return res.status(404).json({ error: 'User not found' });
 
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+      // Directly compare the password since it's no longer hashed
+      if (password !== user.password) {
+          return res.status(401).json({ error: 'Invalid credentials' });
+      }
 
-      const token = jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
       res.status(200).json({ token });
   } catch (err) {
-      res.status(500).json({ error: 'Error logging in', details: err });
+    console.error('Error logging in:', err);  // Log error to console
+    res.status(500).json({ error: 'Error logging in', details: err });
+  }
+});
+
+app.get('/admin/details', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const admin = await AdminUser.findById(decoded.id);
+      if (!admin) {
+          return res.status(404).json({ error: 'Admin not found' });
+      }
+      res.json({ name: admin.name });
+  } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch admin details', details: err });
   }
 });
 

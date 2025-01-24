@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './Login.css'; // Import the CSS file
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -11,14 +12,14 @@ const Login = () => {
         try {
             const { data } = await axios.post('https://momarket-7ata.onrender.com/loginA', { email, password });
             localStorage.setItem('adminToken', data.token);
-            window.location.href = '/admin/orders';
+            window.location.href = '/admin/orders'; // Redirect to the orders page
         } catch (err) {
             setError('Invalid email or password');
         }
     };
 
     return (
-        <div>
+        <div className="container">
             <h2>Admin Login</h2>
             <form onSubmit={handleLogin}>
                 <input 
