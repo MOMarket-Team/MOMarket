@@ -10,7 +10,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const { data } = await axios.post('http://localhost:4000/loginA', { email, password });
+            const { data } = await axios.post('https://momarket-7ata.onrender.com/loginA', { email, password });
             localStorage.setItem('adminToken', data.token);
             window.location.href = '/admin/orders'; // Redirect to the orders page
         } catch (err) {

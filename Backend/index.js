@@ -672,19 +672,22 @@ app.post('/adminusers', async (req, res) => {
 app.post('/loginA', async (req, res) => {
   const { email, password } = req.body;
   try {
+      console.log('Login request received:', email); // Log email
       const user = await AdminUser.findOne({ email });
-      if (!user) return res.status(404).json({ error: 'User not found' });
-
-      // Directly compare the password since it's no longer hashed
+      if (!user) {
+          console.error('User not found');
+          return res.status(404).json({ error: 'User not found' });
+      }
       if (password !== user.password) {
+          console.error('Invalid credentials');
           return res.status(401).json({ error: 'Invalid credentials' });
       }
-
       const token = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      console.log('Token generated successfully');
       res.status(200).json({ token });
   } catch (err) {
-    console.error('Error logging in:', err);  // Log error to console
-    res.status(500).json({ error: 'Error logging in', details: err });
+      console.error('Error logging in:', err); // Log full error
+      res.status(500).json({ error: 'Error logging in', details: err.message });
   }
 });
 
