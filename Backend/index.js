@@ -671,23 +671,34 @@ app.post('/adminusers', async (req, res) => {
 // Login admin user
 app.post('/loginA', async (req, res) => {
   const { email, password } = req.body;
+
   try {
-      console.log('Login request received:', email); // Log email
-      const user = await AdminUser.findOne({ email });
-      if (!user) {
-          console.error('User not found');
-          return res.status(404).json({ error: 'User not found' });
-      }
-      if (password !== user.password) {
-          console.error('Invalid credentials');
-          return res.status(401).json({ error: 'Invalid credentials' });
-      }
-      const token = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      console.log('Token generated successfully');
-      res.status(200).json({ token });
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+    console.log('MONGODB_URI', process.env.MONGODB_URI);
+    console.log('Login request received:', email);
+
+    const user = await AdminUser.findOne({ email });
+    if (!user) {
+      console.error('User not found:', email);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (password !== user.password) {
+      console.error('Invalid password for user:', email);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, name: user.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    console.log('Token generated successfully for user:', email);
+
+    res.status(200).json({ token });
   } catch (err) {
-      console.error('Error logging in:', err); // Log full error
-      res.status(500).json({ error: 'Error logging in', details: err.message });
+    console.error('JWT generation error:', err.message);
+    return res.status(500).json({ error: 'Failed to generate token' });
   }
 });
 

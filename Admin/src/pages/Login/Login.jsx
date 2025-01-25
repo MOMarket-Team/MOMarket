@@ -10,12 +10,13 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const { data } = await axios.post('https://momarket-7ata.onrender.com/loginA', { email, password });
+            const { data } = await axios.post('https://momarket-7ata.onrender.com/loginA', { email, password }, { withCredentials: true });
             localStorage.setItem('adminToken', data.token);
-            window.location.href = '/admin/orders'; // Redirect to the orders page
-        } catch (err) {
-            setError('Invalid email or password');
-        }
+            window.location.href = '/admin/orders';
+          } catch (err) {
+            console.error('Login error:', err.response?.data || err.message); // Log backend error response
+            setError(err.response?.data?.error || 'An unexpected error occurred');
+          }          
     };
 
     return (
