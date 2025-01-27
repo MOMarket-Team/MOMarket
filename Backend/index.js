@@ -447,7 +447,7 @@ app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
     res.json({
       success: true,
       message: "Checkout successful",
-      deliveryContact: "+256 789 123 456",
+      deliveryContact: "+256 708853662",
     });
   } catch (error) {
     console.error("Error during checkout:", error);
