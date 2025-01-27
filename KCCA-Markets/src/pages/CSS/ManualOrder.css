@@ -1,0 +1,46 @@
+.manual-order-page {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.error-msg {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.order-table th,
+.order-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.order-table th {
+  background-color: #f4f4f4;
+}
+
+button {
+  margin: 5px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+h2 {
+  margin-top: 20px;
+  font-size: 1.5rem;
+}
