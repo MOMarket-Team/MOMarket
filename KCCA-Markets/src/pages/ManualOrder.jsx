@@ -1,16 +1,16 @@
 import React, { useState, useContext, useEffect } from "react";
 import { ProductContext } from "../Context/ProductContext";
 import { useNavigate } from "react-router-dom";
-import './CSS/ManualOrder.css';
+import "./CSS/ManualOrder.css";
 
 const ManualOrder = () => {
   const { addTocart } = useContext(ProductContext);
   const [orders, setOrders] = useState([
-    { title: "", pricePerKg: 0, weight: 1, total: 0 },
-    { title: "", pricePerKg: 0, weight: 1, total: 0 },
-    { title: "", pricePerKg: 0, weight: 1, total: 0 },
-    { title: "", pricePerKg: 0, weight: 1, total: 0 },
-    { title: "", pricePerKg: 0, weight: 1, total: 0 },
+    { title: "", pricePerKg: 0, weight: 1, total: 0, image: "" },
+    { title: "", pricePerKg: 0, weight: 1, total: 0, image: "" },
+    { title: "", pricePerKg: 0, weight: 1, total: 0, image: "" },
+    { title: "", pricePerKg: 0, weight: 1, total: 0, image: "" },
+    { title: "", pricePerKg: 0, weight: 1, total: 0, image: "" },
   ]);
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
@@ -34,6 +34,7 @@ const ManualOrder = () => {
         setError("");
         updatedOrders[index].title = matchedProduct.name;
         updatedOrders[index].pricePerKg = matchedProduct.price;
+        updatedOrders[index].image = matchedProduct.image; // Automatically set image
         updatedOrders[index].total = (
           matchedProduct.price * updatedOrders[index].weight
         ).toFixed(2);
@@ -41,6 +42,7 @@ const ManualOrder = () => {
         setError("Product Not Available");
         updatedOrders[index].title = value; // Allow input while showing the error
         updatedOrders[index].pricePerKg = 0;
+        updatedOrders[index].image = "";
         updatedOrders[index].total = 0;
       }
     } else if (field === "weight") {
@@ -56,7 +58,7 @@ const ManualOrder = () => {
   const handleAddRow = () => {
     setOrders([
       ...orders,
-      { title: "", pricePerKg: 0, weight: 1, total: 0 },
+      { title: "", pricePerKg: 0, weight: 1, total: 0, image: "" },
     ]);
   };
 
@@ -72,6 +74,7 @@ const ManualOrder = () => {
           name: order.title,
           price: parseFloat(order.pricePerKg),
           quantity: parseFloat(order.weight),
+          image: order.image,
         });
       }
     });
@@ -79,7 +82,9 @@ const ManualOrder = () => {
   };
 
   const calculateGrandTotal = () => {
-    return orders.reduce((total, order) => total + parseFloat(order.total || 0), 0).toFixed(2);
+    return orders
+      .reduce((total, order) => total + parseFloat(order.total || 0), 0)
+      .toFixed(2);
   };
 
   return (
@@ -90,6 +95,7 @@ const ManualOrder = () => {
         <thead>
           <tr>
             <th>Title</th>
+            <th>Image</th>
             <th>Weight (kg)</th>
             <th>Price per kg</th>
             <th>Remove</th>
@@ -115,6 +121,17 @@ const ManualOrder = () => {
                     </option>
                   ))}
                 </datalist>
+              </td>
+              <td>
+                {order.image ? (
+                  <img
+                    src={order.image}
+                    alt={order.title}
+                    className="product-image"
+                  />
+                ) : (
+                  "N/A"
+                )}
               </td>
               <td>
                 <input

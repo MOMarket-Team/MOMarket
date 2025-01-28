@@ -297,7 +297,7 @@ app.get("/newcollections", async (req, res) => {
 
 app.get("/popularinfruit", async (req, res) => {
   let products = await Product.find({ category: "Fruits" });
-  let popular_in_fruit = products.slice(0, 4);
+  let popular_in_fruit = products.slice(0, 6);
   res.send(popular_in_fruit);
 });
 
