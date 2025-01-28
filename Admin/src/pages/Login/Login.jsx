@@ -11,7 +11,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        "https://momarket-7ata.onrender.com/login",
+        "https://momarket-7ata.onrender.com/loginA",
         { email, password },
         { withCredentials: true }
       );
