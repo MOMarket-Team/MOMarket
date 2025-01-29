@@ -291,7 +291,7 @@ app.get("/allproducts", async (req, res) => {
 });
 app.get("/newcollections", async (req, res) => {
   let products = await Product.find({});
-  let newcollection = products.slice(1).slice(-8);
+  let newcollection = products.slice(1).slice(-12);
   res.send(newcollection);
 });
 

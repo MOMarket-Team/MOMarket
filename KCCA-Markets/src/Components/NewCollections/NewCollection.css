@@ -1,71 +1,85 @@
-.newcollections{
+.newcollections {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     margin-bottom: 100px;
 }
-.newcollections h1{
+
+.newcollections h1 {
     color: #171717;
     font-size: 50px;
     font-weight: 600;
 }
-.newcollections hr{
+
+.newcollections hr {
     width: 200px;
     height: 6px;
     border-radius: 10px;
     background: #252525;
 }
-.collections{
+
+/* Default: Desktop - 4 columns x 3 rows */
+.collections {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, auto);
     margin-top: 50px;
     gap: 30px;
 }
-@media(max-width:1280px){
-    .newcollections h1{
+
+/* 1280px - 6 columns x 2 rows */
+@media (max-width: 1280px) {
+    .newcollections h1 {
         font-size: 40px;
     }
-    .newcollections hr{
+    .newcollections hr {
         width: 160px;
         height: 4px;
     }
-    .collections{
-        gap: 20px;
-        margin-top: 30px;
+    .collections {
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(2, auto);
+        gap: 15px;
     }
 }
-@media(max-width:1024px){
-    .newcollections h1{
+
+/* 1024px - 6 columns x 2 rows */
+@media (max-width: 1024px) {
+    .newcollections h1 {
         font-size: 30px;
     }
-    .newcollections hr{
+    .newcollections hr {
         width: 120px;
         height: 3px;
     }
-    .collections{
-        gap: 15px;
-        margin-top: 20px;
+    .collections {
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(2, auto);
+        gap: 10px;
     }
 }
-@media(max-width:800px){
-    .newcollections{
-        gap: 6px;
-    }
-    .newcollections h1{
+
+/* 800px - 4 columns x 3 rows */
+@media (max-width: 800px) {
+    .newcollections h1 {
         font-size: 20px;
     }
-    .newcollections hr{
+    .newcollections hr {
         width: 100px;
     }
-    .collections{
-        gap: 5px;
+    .collections {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, auto);
+        gap: 8px;
     }
 }
-@media(max-width:500px){
-    .collections{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+
+/* 500px - 3 columns x 4 rows */
+@media (max-width: 500px) {
+    .collections {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(4, auto);
+        gap: 6px;
     }
 }
