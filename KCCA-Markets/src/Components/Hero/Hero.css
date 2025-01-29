@@ -52,7 +52,7 @@
   }
   
   .hero-right img {
-    max-width: 100%;
+    max-width: 50%;
     height: auto;
     border-radius: 15px;
   }
@@ -79,6 +79,6 @@
       padding-left: 0;
     }
     .hero-right img {
-      width: 80%;
+      width: 60%;
     }
   }  

@@ -76,6 +76,7 @@
         grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(3, auto);
         gap: 8px;
+        height: 90vh;
     }
 }
 
@@ -86,5 +87,6 @@
         grid-template-rows: repeat(4, auto);
         gap: 6px;
         padding-left: 130px;
+        height: 130vh;
     }
 }
