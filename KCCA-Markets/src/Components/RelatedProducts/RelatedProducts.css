@@ -22,7 +22,7 @@
 
 .relatedproducts-item {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
     justify-content: center;
 }
@@ -35,7 +35,7 @@
         width: 90px;
     }
     .relatedproducts-item {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 18px;
     }
 }
@@ -48,14 +48,14 @@
         width: 70px;
     }
     .relatedproducts-item {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 15px;
     }
 }
 
 @media (max-width: 500px) {
     .relatedproducts {
-        gap: 10px;
+        gap: 5px;
     }
     .relatedproducts h1 {
         font-size: 22px;
@@ -65,7 +65,8 @@
     }
     .relatedproducts-item {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(3, 0.8fr); /* Reduce width of each column */
+        gap: 10px; /* Increase spacing */
     }
+    
 }

@@ -20,7 +20,7 @@
 .category-products {
     margin: 20px 170px;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr ;
     row-gap: 80px;
 }
 .loadmore {
@@ -88,6 +88,7 @@
 }
 @media (max-width: 500px) {
     .category-products {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 5px;
     }
 }

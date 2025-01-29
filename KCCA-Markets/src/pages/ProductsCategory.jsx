@@ -6,7 +6,7 @@ import Item from '../Components/Item/Item';
 
 const ProductsCategory = (props) => {
   const { all_product } = useContext(ProductContext);
-  const [visibleCount, setVisibleCount] = useState(9); // Initial number of products displayed
+  const [visibleCount, setVisibleCount] = useState(12); // Initial number of products displayed
 
   // Filter products based on category
   const categoryProducts = all_product.filter(item => item.category === props.category);
