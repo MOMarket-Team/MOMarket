@@ -76,7 +76,7 @@
         grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(3, auto);
         gap: 8px;
-        height: 90vh;
+        height: 100vh;
     }
 }
 
