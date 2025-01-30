@@ -161,6 +161,7 @@
         height: 40vh;
         margin-bottom: 50px;
         padding: 15px;
+        background-color: black;
     }
 
     .offers-left h1 {

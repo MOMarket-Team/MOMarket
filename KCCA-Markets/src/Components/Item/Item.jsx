@@ -17,7 +17,7 @@ const Item = (props) => {
       </Link>
       
       {/* Price with /KG */}
-      <div className="prices">
+      <div className="item-price">
         {prodprice.format(props.price)} <span className="unit">/KG</span>
       </div>
     </div>

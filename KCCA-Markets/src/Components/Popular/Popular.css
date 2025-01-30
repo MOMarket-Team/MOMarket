@@ -3,14 +3,15 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    height: 70vh; 
-    padding: 0 20px; /* Added padding to avoid edge clipping */
+    height: 120vh;
+    padding: 0 10px;
 }
 
 .popular h1 {
     color: #171717;
     font-size: 50px;
     font-weight: 600;
+    text-align: center;
 }
 
 .popular hr {
@@ -20,46 +21,73 @@
     background: #252525;
 }
 
+/* Grid Layout */
 .popular-item {
-    gap: 12px;
-    margin-top: 30px;
+    margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(1, auto);
-    padding: 0 10px; /* Added horizontal padding to ensure space on the sides */
-    padding-left: 300px;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto;
+    gap: 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* background-color: #171717; */
 }
 
-/* Ensure all 6 images fit in one row */
+/* Image Styling */
+.popular-item img {
+    border-radius: 5px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.popular-item img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Name & Price Styling */
+.popular-item .item-name {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.popular-item .item-price {
+    font-size: 12px;
+    font-weight: 400;
+    color: #555;
+    text-align: center;
+}
+
+/* Responsive Design */
+
+/* Adjust grid for smaller screens */
 @media (max-width: 1280px) {
     .popular {
-        height: 60vh;
+        height: 90vh;
         padding: 0 20px;
     }
-    
+
     .popular h1 {
         font-size: 40px;
     }
 
-    .popular hr {
-        width: 160px;
-        height: 4px;
-    }
-
     .popular-item {
-        gap: 12px;
-        margin-top: 30px;
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(1, auto);
-        padding: 0 10px; /* Maintain spacing on the edges */
-        padding-left: 300px;
+        gap: 8px;
     }
 }
 
 @media (max-width: 1024px) {
     .popular {
-        height: 50vh;
+        height: 70vh;
         padding: 0 20px;
     }
 
@@ -67,25 +95,23 @@
         font-size: 30px;
     }
 
-    .popular hr {
-        width: 120px;
-        height: 3px;
+    .popular-item {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
     }
 
-    .popular-item {
-        gap: 8px;
-        margin-top: 20px;
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        grid-template-rows: repeat(1, auto);
-        padding: 0 10px;
-        padding-left: 100px;
+    .popular-item .item-name {
+        font-size: 12px;
+    }
+
+    .popular-item .item-price {
+        font-size: 10px;
     }
 }
 
 @media (max-width: 800px) {
     .popular {
-        height: 40vh;
+        height: auto;
         gap: 6px;
         padding: 0 15px;
     }
@@ -94,33 +120,57 @@
         font-size: 20px;
     }
 
-    .popular hr {
-        width: 100px;
+    .popular-item {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+        /* background-color: #171717; */
     }
 
-    .popular-item {
-        gap: 6px;
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        grid-template-rows: repeat(1, auto);
-        padding: 0 10px;
-        padding-left: 35px;
+    .popular-item img {
+        max-width: 100%;
     }
 }
 
-/* Display images in a 3 x 2 grid for small screens */
 @media (max-width: 500px) {
     .popular {
-        height: 70vh;
-        
+        height: auto;
+        max-width: 100%;
+        padding: 0 5px;
+        /* background-color: #171717; */
     }
 
     .popular-item {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(2, auto);
-        gap: 5px; /* Increased gap slightly for better visibility */
-        padding: 0 10px; /* Maintain spacing on the sides */
-        padding-left: 120px;
+        display: grid; /* Use grid for structured layout */
+        grid-template-columns: repeat(3, 1fr); /* Three columns */
+        grid-template-rows: repeat(2, auto); /* Adjust rows dynamically */
+        gap: 5px; /* Reduce space between grid items */
+        justify-content: center; /* Center grid items */
+        align-items: center; /* Align items in the middle */
+    }
+
+    .popular-item .item {
+        display: flex; /* Use flex to keep items aligned */
+        flex-direction: column; /* Stack image, name, and price */
+        align-items: center; /* Center items horizontally */
+        width: 100%; /* Ensure item takes full width of grid cell */
+        text-align: center; /* Center text */
+    }
+
+    .popular-item img {
+        max-width: 100px; /* Reduce image size */
+        height: auto;
+    }
+
+    .popular-item .item-name {
+        font-size: 11px; /* Reduce text size */
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .popular-item .item-price {
+        font-size: 12px;
+        text-align: center;
+        font-weight: 400px;
+        color: #171717;
     }
 }

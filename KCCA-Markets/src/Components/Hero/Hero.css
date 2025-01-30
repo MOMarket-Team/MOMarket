@@ -74,6 +74,7 @@
     .hero {
       flex-direction: column;
       text-align: center;
+      background-color: #1a1a1a;
     }
     .hero-left {
       padding-left: 0;
