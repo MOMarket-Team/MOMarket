@@ -3,8 +3,9 @@ import './Footer.css';
 import { Link } from 'react-router-dom';
 import footer_logo from '../Assets/logo_big.png';
 import insta_icon from '../Assets/instagram_icon.png';
-import pintester_icon from '../Assets/pintester_icon.png';
 import what_icon from '../Assets/whatsapp_icon.png';
+import x_icon from '../Assets/x.png';
+import facebook_icon from '../Assets/facebook.png';
 
 const Footer = () => {
   const [showContactPopup, setShowContactPopup] = useState(false);
@@ -48,11 +49,14 @@ const Footer = () => {
         <a href="https://wa.link/4wgyk8" target="_blank" rel="noopener noreferrer">
           <img src={what_icon} alt="WhatsApp" />
         </a>
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.instagram.com/momarket25/" target="_blank" rel="noopener noreferrer">
           <img src={insta_icon} alt="Instagram" />
         </a>
-        <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer">
-          <img src={pintester_icon} alt="Pinterest" />
+        <a href="https://www.facebook.com/profile.php?id=61572943912444" target="_blank" rel="noopener noreferrer">
+          <img src={facebook_icon} alt="Facebook" />
+        </a>
+        <a href="https://x.com/MOMarket25" target="_blank" rel="noopener noreferrer">
+          <img src={x_icon} alt="X (Twitter)" />
         </a>
       </div>
 
