@@ -34,6 +34,15 @@
   gap: 10px;
 }
 
+.footer-social-icon a {
+  display: inline-block;
+}
+
+.footer-social-icon img {
+  width: 30px;
+  height: 30px;
+}
+
 .contact-popup {
   position: fixed;
   bottom: 20%;
@@ -63,6 +72,7 @@
   color: white;
   border: none;
   border-radius: 4px;
+  cursor: pointer;
 }
 
 .contact-popup .close-btn {
@@ -70,85 +80,85 @@
   background: #ff4d4d;
 }
 
-/* Media queries */
+/* Media Queries */
 
 /* For screens 1280px and below */
 @media (max-width: 1280px) {
   .footer-links {
-    font-size: 16px; /* Slightly reduce link font size */
-    gap: 25px; /* Adjust gap between links */
+    font-size: 16px;
+    gap: 25px;
   }
 
   .footer-logo p {
-    font-size: 22px; /* Slightly reduce logo font size */
+    font-size: 22px;
   }
 
   .footer-social-icon img {
-    max-width: 90%; /* Slightly reduce image size */
+    max-width: 90%;
   }
 
   .contact-popup textarea {
-    font-size: 16px; /* Slightly reduce text area font size */
+    font-size: 16px;
   }
 
   .contact-popup button {
-    font-size: 16px; /* Adjust button font size */
+    font-size: 16px;
   }
 }
 
 /* For screens 800px and below */
 @media (max-width: 800px) {
   .footer-links {
-    font-size: 14px; /* Reduce link font size */
-    gap: 20px; /* Adjust gap between links */
+    font-size: 14px;
+    gap: 20px;
   }
 
   .footer-logo p {
-    font-size: 20px; /* Adjust logo font size */
+    font-size: 20px;
   }
 
   .footer-social-icon img {
-    max-width: 85%; /* Further reduce image size */
+    max-width: 85%;
   }
 
   .contact-popup textarea {
-    font-size: 14px; /* Further reduce text area font size */
+    font-size: 14px;
   }
 
   .contact-popup button {
-    font-size: 14px; /* Adjust button font size */
+    font-size: 14px;
   }
 }
 
 /* For screens 500px and below */
 @media (max-width: 500px) {
   .footer-links {
-    flex-direction: column; /* Stack links vertically */
+    flex-direction: column;
     align-items: center;
-    gap: 15px; /* Reduce gap */
-    font-size: 12px; /* Further reduce link font size */
+    gap: 15px;
+    font-size: 12px;
   }
 
   .footer-logo p {
-    font-size: 18px; /* Adjust logo font size */
+    font-size: 18px;
   }
 
   .footer-social-icon img {
-    max-width: 80%; /* Further reduce image size */
+    max-width: 80%;
     margin: 0 auto;
   }
 
   .contact-popup textarea {
-    font-size: 12px; /* Further reduce text area font size */
-    padding: 6px; /* Adjust padding */
+    font-size: 12px;
+    padding: 6px;
   }
 
   .contact-popup button {
-    font-size: 12px; /* Further reduce button font size */
-    padding: 6px 12px; /* Adjust button padding */
+    font-size: 12px;
+    padding: 6px 12px;
   }
 
   .contact-popup .close-btn {
-    padding: 6px 12px; /* Adjust close button padding */
+    padding: 6px 12px;
   }
 }

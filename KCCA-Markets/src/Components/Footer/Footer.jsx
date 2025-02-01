@@ -28,9 +28,10 @@ const Footer = () => {
           MANGU <br /> ONLINE <br /> MARKET
         </p>
       </div>
+
       <ul className="footer-links">
         <li>
-          <Link to="/AllProducts">AllProducts</Link>
+          <Link to="/AllProducts">All Products</Link>
         </li>
         <li>
           <Link to="/client-orders">Company</Link>
@@ -41,14 +42,12 @@ const Footer = () => {
         <li>
           <Link to="/about">About</Link>
         </li>
-        {/* <li>
-          <button onClick={() => handleContactClick('contact')}>Contact</button>
-        </li> */}
       </ul>
+
       <div className="footer-social-icon">
-        <button onClick={() => handleContactClick('whatsapp')}>
+        <a href="https://wa.link/4wgyk8" target="_blank" rel="noopener noreferrer">
           <img src={what_icon} alt="WhatsApp" />
-        </button>
+        </a>
         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
           <img src={insta_icon} alt="Instagram" />
         </a>
@@ -56,6 +55,7 @@ const Footer = () => {
           <img src={pintester_icon} alt="Pinterest" />
         </a>
       </div>
+
       {showContactPopup && (
         <div className="contact-popup">
           <h4>Contact Us</h4>
@@ -77,9 +77,10 @@ const Footer = () => {
           </button>
         </div>
       )}
+
       <div className="copyright">
         <hr />
-        <p>Copyright @ 2024 - All Rights Reserved</p>
+        <p>Copyright © 2024 - All Rights Reserved</p>
       </div>
     </div>
   );
