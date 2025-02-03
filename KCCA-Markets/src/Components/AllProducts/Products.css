@@ -12,7 +12,9 @@
 .products-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 0 10px;
 }
 
 .product-card {
@@ -22,10 +24,12 @@
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
 }
 
 .product-card:hover {
   transform: scale(1.05);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
   transition: 0.6s;
 }
 
@@ -53,38 +57,66 @@
   color: #555;
 }
 
+/* Responsive Adjustments */
 @media (max-width: 1280px) {
   .products-grid {
-    grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, 1fr);
+      padding-left: 100px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .products-grid {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 0 1px;
   }
 }
 
 @media (max-width: 800px) {
   .products-grid {
-    grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+  }
+  .product-card {
+    padding: 10px;
+    font-size: 2rem;
+  }
+
+  .product-card img {
+    max-width: 100%;
+  }
+
+  .product-card h3 {
+    font-size: 0.9rem;
+  }
+
+  .product-card p {
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 500px) {
   .products-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px; /* Slightly reduced gap */
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      padding: 0 5px;
   }
-
+  
   .product-card {
-    padding: 10px; /* Reduced padding */
-    font-size: 0.9rem; /* Smaller text for the card */
+      padding: 10px;
+      font-size: 0.9rem;
   }
-
+  
   .product-card img {
-    max-width: 90%; /* Slightly smaller images */
+      max-width: 100%;
   }
-
+  
   .product-card h3 {
-    font-size: 1rem; /* Adjusted heading size */
+      font-size: 0.5rem;
   }
-
+  
   .product-card p {
-    font-size: 0.9rem; /* Smaller font for price text */
+      font-size: 0.5rem;
   }
 }
