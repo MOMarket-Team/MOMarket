@@ -11,6 +11,7 @@ const CheckOut = () => {
   const { getTotalCartAmount, clearCart, cartItems } =
     useContext(ProductContext);
   const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
   const [location, setLocation] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
   const [amount, setAmount] = useState(0);
@@ -64,6 +65,10 @@ const CheckOut = () => {
       alert(
         "Your cart is empty. Please add items to your cart before checking out."
       );
+      return;
+    }
+    if (!phone || error) {
+      alert("Please enter a valid Ugandan phone number before checking out.");
       return;
     }
 
@@ -125,19 +130,34 @@ const CheckOut = () => {
     }
   }, [navigate, locationState]);
 
+  const validatePhone = (value) => {
+    const ugandanPhoneRegex = /^(?:\+2567\d{8}|07\d{8})$/; // Valid: +2567XXXXXXXX or 07XXXXXXXX
+
+    if (!ugandanPhoneRegex.test(value)) {
+      setError("Invalid Ugandan phone number! Use +2567XXXXXXXX or 07XXXXXXXX");
+    } else {
+      setError("");
+    }
+
+    setPhone(value);
+  };
+
   return (
     <div className="checkout-container">
       <h1>Checkout</h1>
 
       <form onSubmit={(e) => e.preventDefault()}>
-        <label htmlFor="phone">Phone Number:</label>
-        <input
-          id="phone"
-          type="text"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Enter your phone number"
-        />
+      <div>
+      <label htmlFor="phone">Phone Number:</label>
+      <input
+        id="phone"
+        type="text"
+        value={phone}
+        onChange={(e) => validatePhone(e.target.value)}
+        placeholder="Enter your phone number"
+      />
+      {error && <p style={{ color: "red" }}>{error}</p>}
+    </div>
 
         <label htmlFor="location">Location:</label>
         <input
@@ -197,10 +217,11 @@ const CheckOut = () => {
             {...config}
             text="Pay with Flutterwave"
             callback={handleFlutterwavePayment}
-            className="checkout-button"
+            className="checkout-button" 
+            disabled={!phone || error}
           />
         ) : (
-          <button onClick={() => handleCheckout()} className="checkout-button">
+          <button onClick={() => handleCheckout()} className="checkout-button" disabled={!phone || error}>
             Checkout
           </button>
         )}
