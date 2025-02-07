@@ -130,7 +130,7 @@ const Navbar = () => {
 
         <ul ref={menuRef} className="nav-menu">
           {[
-            { name: "Products", path: "/" },
+            { name: "Home", path: "/" },
             { name: "Fruits", path: "/Fruits" },
             { name: "Foods", path: "/Foods" },
             { name: "Vegetables", path: "/Vegetables" },

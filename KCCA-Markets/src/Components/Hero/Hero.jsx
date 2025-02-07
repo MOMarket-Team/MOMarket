@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./Hero.css";
 import hero_image from "../Assets/hero_image.png";
-import groce from "../Assets/groce.jpeg";
+import groce from "../Assets/groce.jpg";
 import groce1 from "../Assets/groce1.jpg";
-import groce2 from "../Assets/groce2.jpeg";
+import groce2 from "../Assets/groce2.jpg";
 
 const images = [hero_image, groce, groce1, groce2];
 
