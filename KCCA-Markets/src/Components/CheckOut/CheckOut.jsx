@@ -175,7 +175,7 @@ const CheckOut = () => {
           onChange={(e) => setPaymentMethod(e.target.value)}
         >
           <option value="cash_on_delivery">Cash on Delivery</option>
-          <option value="mobile_money">Mobile Money</option>
+          <option value="mobile_money">Mobile Money(Currently Down)</option>
         </select>
 
         {paymentMethod === "mobile_money" && (
