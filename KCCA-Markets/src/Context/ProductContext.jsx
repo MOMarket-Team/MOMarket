@@ -11,20 +11,32 @@ const ProductContextProvider = (props) => {
   const calculateLaborFee = (total) => {
     if (total <= 25000) {
       return 7000;
-    } else if (total <= 50000) {
-      return 10000;
-    } else if (total <= 70000) {
-      return 13000;
-    } else if (total <= 100000) {
-      return 16000;
-    } else if (total <= 150000) {
-      return 20000;
-    } else if (total <= 200000) {
-      return 25000;
-    } else {
-      return 35000; // For total > 200000
     }
-  };
+  
+    let previousLimit = 25000;
+    let previousFee = 7000;
+    let increment = 3000; // Start with 3,000 UGX increment
+  
+    // Extend the pattern up to 200,000 UGX
+    while (previousLimit < 200000) {
+      let nextLimit = previousLimit + (previousLimit <= 100000 ? 25000 : 50000); // Adjust interval
+      let nextFee = previousFee + increment;
+  
+      if (total <= nextLimit) {
+        return nextFee;
+      }
+  
+      previousLimit = nextLimit;
+      previousFee = nextFee;
+      
+      // Adjust the increment for the next range
+      increment += 1000;
+    }
+  
+    // Beyond 200,000 UGX, apply a 5% increase per 200,000 UGX interval
+    let extraFee = Math.floor((total - 200000) / 200000) * (0.05 * total);
+    return previousFee + extraFee;
+  };   
 
   useEffect(() => {
     // Fetch all products
