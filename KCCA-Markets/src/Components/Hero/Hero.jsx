@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./Hero.css";
 import hero_image from "../Assets/hero_image.png";
 import groce from "../Assets/groce.jpg";
-import groce1 from "../Assets/groce1.jpg";
-import groce2 from "../Assets/groce2.jpg";
+import groce1 from "../Assets/grocei.jpg";
+import groce2 from "../Assets/groceii.jpg";
 
 const images = [hero_image, groce, groce1, groce2];
 
@@ -33,7 +33,7 @@ const Hero = ({ handleManualOrder }) => {
       <div className="hero-left">
         <h2>Shop Your Way</h2>
         <p>Order Exactly What You Need</p>
-        <p>Hassle-Free Shopping</p>
+        <p>Freshness guaranteed</p>
         <button className="manual-order-btn" onClick={handleManualOrder}>
           Enter Your Order/s Manually
         </button>
