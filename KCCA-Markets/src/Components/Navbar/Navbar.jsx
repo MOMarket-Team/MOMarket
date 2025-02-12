@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import logo from "../Assets/logo.png";
 import cart_icon from "../Assets/cart_icon.png";
-import dropdown_icon from "../Assets/dropdown_icon.png";
 import { ProductContext } from "../../Context/ProductContext";
 
 const Navbar = () => {
@@ -11,14 +10,12 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userName, setUserName] = useState("User"); // Initialize with "User"
+  const [userName, setUserName] = useState("User");
 
   const { cartItems } = useContext(ProductContext);
-  const menuRef = useRef();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch the user's name after login
     const fetchUserName = async () => {
       const token = localStorage.getItem("auth-token");
       if (!token) return;
@@ -38,11 +35,6 @@ const Navbar = () => {
 
     fetchUserName();
   }, []);
-
-  const dropdown_toggle = (e) => {
-    menuRef.current.classList.toggle("nav-menu-visible");
-    e.target.classList.toggle("open");
-  };
 
   const handleSearch = async (e) => {
     setSearchTerm(e.target.value);
@@ -87,17 +79,8 @@ const Navbar = () => {
     <div className="navbar">
       <div className="nav-logo">
         <img src={logo} alt="Logo" />
-        <p>
-          MANGU ONLINE MARKET
-        </p>
+        <p>MANGU ONLINE MARKET</p>
       </div>
-
-      <img
-        className="nav-dropdown"
-        onClick={dropdown_toggle}
-        src={dropdown_icon}
-        alt="Dropdown Icon"
-      />
 
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div className="nav-search">
@@ -128,7 +111,7 @@ const Navbar = () => {
           )}
         </div>
 
-        <ul ref={menuRef} className="nav-menu">
+        <ul className="nav-menu">
           {[
             { name: "Home", path: "/" },
             { name: "Fruits", path: "/Fruits" },
@@ -150,18 +133,18 @@ const Navbar = () => {
       <div className="nav-logo-cart">
         {localStorage.getItem("auth-token") ? (
           <div className="user-dropdown">
-              <button onClick={toggleDropdown}>{userName}</button>
-              {dropdownOpen && (
-                  <div className="dropdown-menu">
-                      <p>
-                          <Link to="/client-orders" style={{ textDecoration: "none", color: "inherit" }}>
-                              Orders
-                          </Link>
-                      </p>
-                      <p onClick={handleLogout}>Logout</p>
-                      <p>Profile</p>
-                  </div>
-              )}
+            <button onClick={toggleDropdown}>{userName}</button>
+            {dropdownOpen && (
+              <div className="dropdown-menu">
+                <p>
+                  <Link to="/client-orders" style={{ textDecoration: "none", color: "inherit" }}>
+                    Orders
+                  </Link>
+                </p>
+                <p onClick={handleLogout}>Logout</p>
+                <p>Profile</p>
+              </div>
+            )}
           </div>
         ) : (
           <Link to="/login">
