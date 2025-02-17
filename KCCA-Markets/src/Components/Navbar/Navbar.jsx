@@ -15,6 +15,9 @@ const Navbar = () => {
   const { cartItems } = useContext(ProductContext);
   const navigate = useNavigate();
 
+  const dropdownRef = useRef(null);
+  const searchRef = useRef(null);
+
   useEffect(() => {
     const fetchUserName = async () => {
       const token = localStorage.getItem("auth-token");
@@ -75,6 +78,24 @@ const Navbar = () => {
     window.location.replace("/");
   };
 
+  // Close dropdown or search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        (dropdownRef.current && !dropdownRef.current.contains(event.target)) &&
+        (searchRef.current && !searchRef.current.contains(event.target))
+      ) {
+        setDropdownOpen(false);
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="navbar">
       <div className="nav-logo">
@@ -83,7 +104,7 @@ const Navbar = () => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <div className="nav-search">
+        <div className="nav-search" ref={searchRef}>
           <form onSubmit={handleSearchSubmit}>
             <input
               type="text"
@@ -132,7 +153,7 @@ const Navbar = () => {
 
       <div className="nav-logo-cart">
         {localStorage.getItem("auth-token") ? (
-          <div className="user-dropdown">
+          <div className="user-dropdown" ref={dropdownRef}>
             <button onClick={toggleDropdown}>{userName}</button>
             {dropdownOpen && (
               <div className="dropdown-menu">
@@ -153,9 +174,9 @@ const Navbar = () => {
         )}
 
         <Link to="/cart">
-          <img src={cart_icon} alt="Cart" />
+            <img src={cart_icon} alt="Cart" />
         </Link>
-        <div className="nav-cart-count">{cartItems.length}</div>
+        {cartItems.length > 0 && <div className="nav-cart-count">{cartItems.length}</div>}
       </div>
     </div>
   );

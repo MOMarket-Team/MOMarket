@@ -108,6 +108,7 @@
     z-index: 10;
     border-radius: 4px;
     text-align: left;
+    background-color: #1717177b;
 }
 
 .dropdown-menu p {
