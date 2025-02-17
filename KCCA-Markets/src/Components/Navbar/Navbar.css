@@ -316,7 +316,6 @@
         margin-left: -100px;
     }
     .nav-menu li {
-        /* margin-top: 15px; */
         font-size: 10px; /* Reduce font size */
         font-weight: 600;
         padding: 2px 3px; /* Adjust padding */
@@ -340,8 +339,6 @@
         gap: 10px; /* Reduce space between elements */
         margin-left: -140px;
         margin-top: 15px;
-        /* margin-bottom: 40px; */
-        /* background-color: #171717; */
     }
     .nav-logo-cart button {
         width: 100px;
@@ -353,7 +350,7 @@
         margin-left: -8px;
     }
     .nav-search {
-        width: 65%;
+        width: 60%;
         max-width: 250px; /* Ensure enough space for search bar */
     }
     .nav-search input::placeholder {
@@ -366,8 +363,8 @@
 
     .nav-search input {
         width: 100%;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 550;
         padding: 5px 8px;
         height: 5vh;
         display: flex;
@@ -387,5 +384,17 @@
         font-size: 12px;
         background: red;
         color: white;
+    }
+    .user-dropdown button {
+        width: 90%;
+        height: 90%;
+        padding: 10px 15px;
+        background-color: #f8f8f8;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        color: #333;
+        font-weight: bold;
+        margin: 10px;
     }
 }
