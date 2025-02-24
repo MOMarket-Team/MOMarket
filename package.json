@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.8",
     "@react-google-maps/api": "^2.20.6",
     "flutterwave-react-v3": "^1.0.7",
     "multer": "^1.4.5-lts.1",

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import "./CartItems.css";
 import { ProductContext } from "../../Context/ProductContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
@@ -17,65 +17,78 @@ const CartItems = () => {
   const navigate = useNavigate();
 
   const [deliveryOption, setDeliveryOption] = useState("pickup");
-  const [deliveryLocation, setDeliveryLocation] = useState("");
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const inputRef = useRef(null);
+
   const GOOGLE_MAPS_API_KEY = "AIzaSyCwf2lc3JC4jjSBztY4MB78cRzZAKZPGOQ"; // Replace with your API key
 
   // Nakasero Market coordinates
   const companyLocation = { lat: 0.3175, lng: 32.5825 };
 
-  const calculateDeliveryFee = async (location) => {
-    if (!location.trim()) return;
+  const [googleMaps, setGoogleMaps] = useState(null);
 
-    const loader = new Loader({ apiKey: GOOGLE_MAPS_API_KEY, version: "weekly" });
+useEffect(() => {
+  const loader = new Loader({
+    apiKey: GOOGLE_MAPS_API_KEY,
+    version: "weekly",
+    libraries: ["places"],
+  });
 
-    try {
-      const google = await loader.load();
-      const geocoder = new google.maps.Geocoder();
+  loader.load().then((google) => {
+    setGoogleMaps(google);
+    console.log("Google Maps API loaded successfully");
 
-      // Convert user location to coordinates
-      geocoder.geocode({ address: location }, (results, status) => {
-        if (status === "OK" && results[0]) {
-          const userCoords = results[0].geometry.location;
+    if (inputRef.current) {
+      const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
+        componentRestrictions: { country: "UG" },
+        fields: ["formatted_address", "geometry"],
+      });
 
-          // Use Distance Matrix API to calculate distance
-          const service = new google.maps.DistanceMatrixService();
-          service.getDistanceMatrix(
-            {
-              origins: [companyLocation],
-              destinations: [userCoords],
-              travelMode: "DRIVING",
-            },
-            (response, status) => {
-              if (status === "OK") {
-                const distanceInKm =
-                  response.rows[0].elements[0].distance.value / 1000; // Convert meters to KM
-                const fee = distanceInKm * 1000; // UGX per KM
-                setDeliveryFee(fee);
-              } else {
-                console.error("Error fetching distance:", status);
-              }
-            }
-          );
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place.geometry) {
+          setDeliveryLocation(place.formatted_address);
+          calculateDeliveryFee(place.geometry.location);
         } else {
-          alert("Invalid location. Please enter a correct address.");
+          console.error("No geometry found for the selected place");
         }
       });
-    } catch (error) {
-      console.error("Google Maps API error:", error);
     }
-  };
+  }).catch((error) => {
+    console.error("Error loading Google Maps API:", error);
+  });
+}, []);  // Runs once on component mount
 
-  const handleLocationChange = (e) => {
-    const location = e.target.value;
-    setDeliveryLocation(location);
-    calculateDeliveryFee(location);
-  };
+const calculateDeliveryFee = (userCoords) => {
+  if (!googleMaps) return; // Ensure Google Maps is loaded
+
+  const service = new googleMaps.maps.DistanceMatrixService();
+
+  service.getDistanceMatrix(
+    {
+      origins: [companyLocation],
+      destinations: [{ lat: userCoords.lat(), lng: userCoords.lng() }],
+      travelMode: "DRIVING",
+    },
+    (response, status) => {
+      if (status === "OK") {
+        console.log("Distance Matrix Response:", response);
+
+        const distanceInKm = response.rows[0].elements[0].distance.value / 1000;
+        const fee = distanceInKm * 1000;
+        setDeliveryFee(fee);
+      } else {
+        console.error("Error fetching distance:", status);
+      }
+    }
+  );
+};
 
   const finalTotal = getTotalCartAmount() + (deliveryOption === "deliver" ? deliveryFee : 0);
 
   return (
     <div className="cartitems">
+      {/* Cart Header */}
       <div className="format-main">
         <p>Products</p>
         <p>Title</p>
@@ -85,6 +98,8 @@ const CartItems = () => {
         <p>Remove</p>
       </div>
       <hr />
+
+      {/* Cart Items */}
       {cartItems.length === 0 ? (
         <h1>Cart is empty</h1>
       ) : (
@@ -121,6 +136,8 @@ const CartItems = () => {
           </div>
         ))
       )}
+
+      {/* Cart Totals */}
       <div className="down">
         <div className="total">
           <h1>Cart Totals</h1>
@@ -140,6 +157,7 @@ const CartItems = () => {
                 <option value="deliver">Deliver</option>
               </select>
             </div>
+
             {deliveryOption === "deliver" && (
               <>
                 <hr />
@@ -149,14 +167,14 @@ const CartItems = () => {
                     <input
                       type="text"
                       placeholder="Enter your delivery location"
-                      value={deliveryLocation}
-                      onChange={handleLocationChange}
+                      ref={inputRef}
                     />
                     <span>{prodprice.format(deliveryFee)}</span>
                   </div>
                 </div>
               </>
             )}
+
             <hr />
             <div className="total-item">
               <h3>Total</h3>
@@ -164,13 +182,6 @@ const CartItems = () => {
             </div>
           </div>
           <button onClick={() => navigate("/checkout")}>PROCEED TO CHECKOUT</button>
-        </div>
-        <div className="promocode">
-          <p>If you have a promo code, Enter it here</p>
-          <div className="promobox">
-            <input type="text" placeholder="promo code" />
-            <button>Submit</button>
-          </div>
         </div>
       </div>
     </div>
