@@ -17,8 +17,28 @@ dotenv.config();
 
 const app = express();
 const port = 4000;
+const TWILIO_ACCOUNT_SID = 'ACbaa698170880348e9b05781abc462cf2';
+const TWILIO_AUTH_TOKEN = '06f32d305680a3f3c8543f3446978d6a';
+const TWILIO_WHATSAPP_NUMBER = 'whatsapp:+17073923274';
+const TWILIO_SMS_NUMBER = '+17073923274'; // Twilio SMS number
+const YOUR_PHONE_NUMBER_1 = '+256708853662';
+const YOUR_PHONE_NUMBER_2 = '+256762100982';
 
-app.use(express.json());
+// Initialize Twilio Client
+const client = new twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+
+// Nodemailer Transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'manguonlinemarket@gmail.com',
+    pass: 'manguonlinemarketwth1345#',
+  },
+});
+
+app.use(express.json({ limit: '50mb' })); // Increase limit to 10MB
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Apply to form-encoded data
+
 // CORS configuration
 const BASE_URL = process.env.BASE_URL;
 
@@ -415,10 +435,9 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   }
 });
 
-app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
-  console.log("Request body:", req.body);
-  const { phone, location, paymentMethod, amount, transaction_id, cartData } =
-    req.body;
+app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
+  console.log('Request body:', req.body);
+  const { phone, location, paymentMethod, amount, transaction_id, cartData } = req.body;
 
   try {
     // Save the order to the database
@@ -432,28 +451,61 @@ app.post("/checkout", fetchUser, ensureCartNotEmpty, async (req, res) => {
       location,
       totalAmount: amount,
       paymentMethod,
-      transaction_id:
-        paymentMethod === "cash_on_delivery" ? null : transaction_id,
-      deliveryTime: req.body.deliveryTime || "now", // Default to "now" if not provided
-      status: "pending",
+      transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
+      deliveryTime: req.body.deliveryTime || 'now', // Default to "now" if not provided
+      status: 'pending',
       date: new Date(),
     });
+
+    // Ensure all orders have a default deliveryTime if missing
     await Order.updateMany(
       { deliveryTime: { $exists: false } }, // Find orders missing the field
-      { $set: { deliveryTime: "now" } } // Set a default value
+      { $set: { deliveryTime: 'now' } } // Set a default value
     );
 
     await newOrder.save();
+
+    // ✅ Send WhatsApp Notification
+    await client.messages.create({
+      from: TWILIO_WHATSAPP_NUMBER,
+      to: 'whatsapp:+256708853662', // Your WhatsApp number
+      body: `📢 New Order Received!\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment: ${paymentMethod}`,
+    });
+
+    // ✅ Send SMS Notification
+    await client.messages.create({
+      from: '+17073923274',
+      to: YOUR_PHONE_NUMBER_1,
+      body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
+    });
+
+    await client.messages.create({
+      from: '+17073923274',
+      to: YOUR_PHONE_NUMBER_2,
+      body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
+    });
+
+    // ✅ Send Email Notification
+    const mailOptions = {
+      from: 'manguonlinemarket@gmail.com',
+      to: 'khabertzion11@gmail.com',
+      subject: '📦 New Order Received!',
+      text: `A new order has been placed.\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment Method: ${paymentMethod}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     res.json({
       success: true,
-      message: "Checkout successful",
-      deliveryContact: "+256 708853662",
+      message: 'Checkout successful',
+      deliveryContact: '+256 708853662',
     });
+
   } catch (error) {
-    console.error("Error during checkout:", error);
+    console.error('Error during checkout:', error);
     res.status(500).json({
       success: false,
-      message: "Checkout failed",
+      message: 'Checkout failed',
       error: error.message,
     });
   }
