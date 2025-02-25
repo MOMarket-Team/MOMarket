@@ -52,6 +52,8 @@
     display: flex;
     margin: 100px 0;
     gap: 40px;
+    justify-content: center;
+    align-items: center;
 }
 
 .total {
@@ -59,17 +61,77 @@
     display: flex;
     flex-direction: column;
     gap: 40px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+}
+
+.total h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
 }
 
 .total-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 15px 0;
+    font-size: 16px;
+    color: #555;
+    border-bottom: 1px solid #eee;
 }
 
+.total-item h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+}
+
+.total-item select {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Improved Delivery Fee Section */
+.delivery-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.delivery-input input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.delivery-input input:focus {
+    border-color: #ff5a5a;
+    box-shadow: 0px 0px 5px rgba(255, 90, 90, 0.5);
+}
+
+.delivery-input span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff5a5a;
+}
+
+/* Checkout Button */
 .total button {
-    width: 262px;
-    height: 58px;
+    width: 100%;
+    height: 50px;
     outline: none;
     border: none;
     background: #ff5a5a;
@@ -77,6 +139,12 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.total button:hover {
+    background: #e04848;
 }
 
 /* Promocode Section */

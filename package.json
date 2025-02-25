@@ -3,6 +3,7 @@
     "@googlemaps/js-api-loader": "^1.16.8",
     "@react-google-maps/api": "^2.20.6",
     "flutterwave-react-v3": "^1.0.7",
+    "lodash": "^4.17.21",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
     "react-swipeable": "^7.0.2",
