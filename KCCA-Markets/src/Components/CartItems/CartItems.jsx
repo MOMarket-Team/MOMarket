@@ -20,8 +20,6 @@ const CartItems = () => {
   const [deliveryOption, setDeliveryOption] = useState("deliver");
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [deliveryLocation, setDeliveryLocation] = useState(""); // Track delivery location input
-  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false); // Track API loading status
-  const [isLoading, setIsLoading] = useState(false); // Track loading state for delivery fee calculation
   const inputRef = useRef(null);
 
   const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -31,7 +29,6 @@ const CartItems = () => {
 
   const [googleMaps, setGoogleMaps] = useState(null);
   const distanceCache = useRef(new Map()); // Cache for storing distances
-  const pendingUserCoords = useRef(null); // Store user coordinates if API is not yet loaded
 
   useEffect(() => {
     const loader = new Loader({
@@ -40,14 +37,10 @@ const CartItems = () => {
       libraries: ["places"],
     });
 
-    setIsLoading(true); // Show loading state while API is loading
-
     loader
       .load()
       .then((google) => {
         setGoogleMaps(google.maps);
-        setIsGoogleMapsLoaded(true); // Mark API as loaded
-        setIsLoading(false); // Hide loading state
         console.log("Google Maps API loaded successfully");
 
         if (inputRef.current) {
@@ -57,12 +50,7 @@ const CartItems = () => {
           });
 
           const debouncedCalculateDeliveryFee = debounce((userCoords) => {
-            if (isGoogleMapsLoaded) {
-              calculateDeliveryFee(userCoords);
-            } else {
-              console.error("Google Maps API not yet loaded");
-              pendingUserCoords.current = userCoords; // Store coordinates for later
-            }
+            calculateDeliveryFee(userCoords);
           }, 500); // Debounce for 500ms
 
           autocomplete.addListener("place_changed", () => {
@@ -75,16 +63,9 @@ const CartItems = () => {
             }
           });
         }
-
-        // Retry calculation if there are pending coordinates
-        if (pendingUserCoords.current) {
-          calculateDeliveryFee(pendingUserCoords.current);
-          pendingUserCoords.current = null; // Clear pending coordinates
-        }
       })
       .catch((error) => {
         console.error("Error loading Google Maps API:", error);
-        setIsLoading(false); // Hide loading state on error
       });
   }, []);
 
@@ -100,8 +81,6 @@ const CartItems = () => {
       return;
     }
 
-    setIsLoading(true); // Show loading state while calculating fee
-
     const service = new googleMaps.DistanceMatrixService();
 
     service.getDistanceMatrix(
@@ -111,7 +90,6 @@ const CartItems = () => {
         travelMode: "DRIVING",
       },
       (response, status) => {
-        setIsLoading(false); // Hide loading state after calculation
         if (status === "OK") {
           const distanceInKm = response.rows[0].elements[0].distance.value / 1000;
           const roundedDistance = Math.ceil(distanceInKm);
@@ -229,11 +207,7 @@ const CartItems = () => {
                       value={deliveryLocation}
                       onChange={(e) => setDeliveryLocation(e.target.value)}
                     />
-                    {isLoading ? (
-                      <span>Calculating delivery fee...</span>
-                    ) : (
-                      <span>{prodprice.format(deliveryFee)}</span>
-                    )}
+                    <span>{prodprice.format(deliveryFee)}</span>
                   </div>
                 </div>
               </>

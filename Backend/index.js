@@ -31,8 +31,8 @@ const client = new twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'manguonlinemarket@gmail.com',
-    pass: 'manguonlinemarketwth1345#',
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
   },
 });
 
