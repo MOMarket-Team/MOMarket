@@ -1,4 +1,3 @@
-import React from "react";
 import Navbar from "./Components/Navbar/Navbar.jsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Products from "./pages/Products.jsx";
@@ -31,10 +30,20 @@ function App() {
       <BrowserRouter>
         <Navbar />
         <Routes>
-        <Route path="/" element={<><Hero handleManualOrder={handleManualOrder} /><Products /></>} />
+          <Route
+            path="/"
+            element={
+              <>
+                <Hero handleManualOrder={handleManualOrder} />
+                <Products />
+              </>
+            }
+          />
           <Route
             path="/Fruits"
-            element={<ProductsCategory banner={fruit_banner} category="Fruits" />}
+            element={
+              <ProductsCategory banner={fruit_banner} category="Fruits" />
+            }
           />
           <Route
             path="/Foods"
@@ -42,15 +51,21 @@ function App() {
           />
           <Route
             path="/Vegetables"
-            element={<ProductsCategory banner={veg_banner} category="Vegetables" />}
+            element={
+              <ProductsCategory banner={veg_banner} category="Vegetables" />
+            }
           />
           <Route
             path="/Sauce"
-            element={<ProductsCategory banner={sauce_banner} category="Sauce" />}
+            element={
+              <ProductsCategory banner={sauce_banner} category="Sauce" />
+            }
           />
           <Route
             path="/Spices"
-            element={<ProductsCategory banner={spice_banner} category="Spices" />}
+            element={
+              <ProductsCategory banner={spice_banner} category="Spices" />
+            }
           />
           <Route path="/Product" element={<Product />}>
             <Route path=":productId" element={<Product />} />
