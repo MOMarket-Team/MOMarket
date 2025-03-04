@@ -57,26 +57,49 @@
   color: #555;
 }
 
+/* View Details Section */
+.view-details {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+  text-decoration: none;
+  color: #1e90ff; /* Blue color for the "View" text */
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.view-details:hover {
+  text-decoration: underline; /* Optional hover effect */
+}
+
+.eye-icon {
+  width: 20px; /* Adjust size as needed */
+  height: 20px; /* Adjust size as needed */
+}
+
 /* Responsive Adjustments */
 @media (max-width: 1280px) {
   .products-grid {
-      grid-template-columns: repeat(5, 1fr);
-      padding-left: 100px;
+    grid-template-columns: repeat(5, 1fr);
+    padding-left: 100px;
   }
 }
 
 @media (max-width: 1024px) {
   .products-grid {
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      padding: 0 1px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 0 1px;
   }
 }
 
 @media (max-width: 800px) {
   .products-grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
   .product-card {
     padding: 10px;
@@ -94,29 +117,47 @@
   .product-card p {
     font-size: 0.9rem;
   }
+
+  .view-details {
+    font-size: 12px;
+  }
+
+  .eye-icon {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 @media (max-width: 500px) {
   .products-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
-      padding: 0 5px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    padding: 0 5px;
   }
-  
+
   .product-card {
-      padding: 10px;
-      font-size: 0.9rem;
+    padding: 10px;
+    font-size: 0.9rem;
   }
-  
+
   .product-card img {
-      max-width: 100%;
+    max-width: 100%;
   }
-  
+
   .product-card h3 {
-      font-size: 0.5rem;
+    font-size: 0.5rem;
   }
-  
+
   .product-card p {
-      font-size: 0.5rem;
+    font-size: 0.5rem;
+  }
+
+  .view-details {
+    font-size: 10px;
+  }
+
+  .eye-icon {
+    width: 50px;
+    height: 50px;
   }
 }

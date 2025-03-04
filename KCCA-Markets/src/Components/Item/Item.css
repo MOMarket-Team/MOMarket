@@ -1,5 +1,6 @@
 .item {
     width: 280px;
+    position: relative; /* Ensure the view-details section is positioned correctly */
 }
 
 .item img {
@@ -36,6 +37,29 @@
     transition: 0.6s;
 }
 
+/* View Details Section */
+.view-details {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    text-decoration: none;
+    color: #1e90ff; /* Blue color for the "View" text */
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+.view-details:hover {
+    text-decoration: underline; /* Optional hover effect */
+}
+
+.eye-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+}
+
+/* Responsive Styles */
 @media (max-width: 1280px) {
     .item {
         width: 220px;

@@ -219,6 +219,14 @@
     cursor: pointer;
     margin-left: 5px;
     color: #555;
+  } 
+  
+  .loading-message {
+    background-color: #ffeb3b;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    color: #333;
   }  
 
 /* Responsive Design - Medium Screens */

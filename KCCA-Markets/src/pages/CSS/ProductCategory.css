@@ -1,3 +1,4 @@
+/* Keep these styles as they are */
 .banner {
     display: block;
     margin: 30px auto;
@@ -21,46 +22,6 @@
     font-weight: 600;
 }
 
-.category-products {
-    margin: 20px 170px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: auto;
-    gap: 10px;
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
-.category-products img {
-    border-radius: 5px;
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.category-products img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-.category-products .item-name {
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.category-products .item-price {
-    font-size: 12px;
-    font-weight: 400;
-    color: #555;
-    text-align: center;
-}
-
 .loadmore {
     cursor: pointer;
     display: flex;
@@ -82,6 +43,57 @@
     background-color: #0056b3;
 }
 
+/* Adjust the .category-products and related styles to match .products-grid and .product-card */
+.category-products {
+    margin: 20px 170px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+    padding: 0 10px;
+}
+
+.category-products .item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+}
+
+.category-products .item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    transition: 0.6s;
+}
+
+.category-products img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.category-products .item-name {
+    margin: 10px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.category-products .item-name:hover {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.category-products .item-price {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 1280px) {
     .banner {
         margin: 20px auto;
@@ -101,8 +113,9 @@
     .category-products {
         width: 90%;
         margin: 10px auto;
-        gap: 8px;
-        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        grid-template-columns: repeat(5, 1fr);
+        padding-left: 100px;
     }
     .loadmore {
         margin: 100px auto;
@@ -113,22 +126,40 @@
 
 @media (max-width: 1024px) {
     .category-products {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        padding: 0 1px;
     }
     .category-products .item-name {
-        font-size: 12px;
+        font-size: 1.2rem;
     }
     .category-products .item-price {
-        font-size: 12px;
+        font-size: 1rem;
     }
 }
 
 @media (max-width: 800px) {
     .category-products {
         grid-template-columns: repeat(4, 1fr);
-        gap: 5px;
+        gap: 8px;
     }
+    .category-products .item {
+        padding: 10px;
+        font-size: 2rem;
+    }
+
+    .category-products img {
+        max-width: 100%;
+    }
+
+    .category-products .item-name {
+        font-size: 0.9rem;
+    }
+
+    .category-products .item-price {
+        font-size: 0.9rem;
+    }
+
     .loadmore {
         margin: 60px auto;
         width: 150px;
@@ -139,32 +170,25 @@
 
 @media (max-width: 500px) {
     .category-products {
-        display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 5px;
-        justify-content: center;
-        align-items: center;
+        padding: 0 5px;
     }
+
     .category-products .item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        text-align: center;
+        padding: 10px;
+        font-size: 0.9rem;
     }
+
     .category-products img {
-        max-width: 100px;
-        height: auto;
+        max-width: 100%;
     }
+
     .category-products .item-name {
-        font-size: 8px;
-        font-weight: 700;
-        text-align: center;
+        font-size: 0.5rem;
     }
+
     .category-products .item-price {
-        font-size: 8px;
-        font-weight: 600;
-        color: #171717;
-        text-align: center;
+        font-size: 0.5rem;
     }
 }

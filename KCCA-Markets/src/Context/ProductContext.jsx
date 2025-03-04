@@ -41,7 +41,7 @@ const ProductContextProvider = (props) => {
     const existingItem = cartItems.find((item) => item.id === product.id);
 
     if (existingItem) {
-      alert("product already exists");
+      alert("Product already exists in the cart");
       return;
     }
 
@@ -59,17 +59,20 @@ const ProductContextProvider = (props) => {
   };
 
   const updateItemQuantity = (itemId, newQuantity) => {
-    if (newQuantity < 0.5) return; // Prevent quantity less than 0.5 kg
+    const updatedCart = cartItems.map((item) => {
+      if (item.id === itemId) {
+        if (item.measurement === "Kgs" && newQuantity < 0.5) return item; // Prevent quantity less than 0.5 kg
+        if (item.measurement === "Whole" && newQuantity < 1) return item; // Prevent quantity less than 1 for Whole
+        if (item.measurement === "Set" && newQuantity < 1000) return item; // Prevent quantity less than 1000 for Set
+        return { ...item, quantity: newQuantity };
+      }
+      return item;
+    });
 
-    const updatedCart = cartItems.map((item) =>
-      item.id === itemId ? { ...item, quantity: newQuantity } : item
-    );
     setCartItems(updatedCart);
     updateCartTotals(updatedCart);
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
   };
-
-  console.log(cartItems, cartTotal, "context");
 
   const getTotalCartAmount = () => {
     return cartTotal;

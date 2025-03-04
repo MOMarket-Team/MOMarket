@@ -21,6 +21,8 @@ const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER;
 const TWILIO_SMS_NUMBER = process.env.TWILIO_SMS_NUMBER;
+// const TWILIO_ACCOUNT_SID = import.meta.env.TWILIO_ACCOUNT_SID;
+// const TWILIO_AUTH_TOKEN = import.meta.env.TWILIO_AUTH_TOKEN;
 const YOUR_PHONE_NUMBER_1 = process.env.YOUR_PHONE_NUMBER_1;
 const YOUR_PHONE_NUMBER_2 = process.env.YOUR_PHONE_NUMBER_2;
 
@@ -65,6 +67,8 @@ mongoose
 
     // Run the function to update image URLs
     updateImageURLs();
+    // Update the measurement field for all products
+    //updateMeasurementField();
   })
   .catch((err) => console.error("Failed to connect to MongoDB", err));
 
@@ -73,8 +77,11 @@ const Product = mongoose.model("Product", {
   id: { type: Number, required: true },
   name: { type: String, required: true },
   image: { type: String, required: true },
+  measurement: { type: String, enum: ["Kgs", "Whole", "Set"], default: "Kgs" }, // New field
   category: { type: String, required: true },
   price: { type: Number, required: true },
+  sizeOptions: { type: Map, of: Number, default: {} }, // For "Whole" products (small, medium, big)
+  basePrice: { type: Number, default: 0 }, // For "Set" products
   date: { type: Date, default: Date.now },
   available: { type: Boolean, default: true },
 });
@@ -97,6 +104,18 @@ async function updateImageURLs() {
     console.error("Error updating image URLs:", err);
   }
 }
+// Function to update the measurement field for all products
+// async function updateMeasurementField() {
+//   try {
+//     const result = await Product.updateMany(
+//       {}, // Filter: update all documents
+//       { $set: { measurement: "Kgs" } } // Update: set measurement to "Kgs"
+//     );
+//     console.log(`Updated ${result.modifiedCount} products with measurement: Kgs`);
+//   } catch (err) {
+//     console.error("Error updating measurement field:", err);
+//   }
+// }
 
 const Users = mongoose.model("Users", {
   name: { type: String },
@@ -162,13 +181,6 @@ const AdminUser = mongoose.model("AdminUser", {
   password: { type: String, required: true },
   date: { type: Date, default: Date.now },
 });
-
-// Hash the password before saving
-// AdminUser.pre('save', async function (next) {
-//   if (!this.isModified('password')) return next();
-//   this.password = await bcrypt.hash(this.password, 10);
-//   next();
-// });
 
 const upload = multer({ dest: "uploads/" });
 
@@ -244,47 +256,48 @@ const ensureCartNotEmpty = (req, res, next) => {
 // Routes for product operations
 app.post("/addproduct", async (req, res) => {
   try {
-    let products = await Product.find({});
-    let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
+    const { name, image, category, price, measurement, sizeOptions, basePrice } = req.body;
 
-    const product = new Product({
-      id: id,
-      name: req.body.name,
-      image: req.body.image,
-      category: req.body.category,
-      price: req.body.price,
+    const newProduct = new Product({
+      id: await generateProductId(), // Function to generate unique ID
+      name,
+      image,
+      category,
+      price,
+      measurement,
+      sizeOptions: measurement === "Whole" ? sizeOptions : {},
+      basePrice: measurement === "Set" ? basePrice : 0,
     });
 
-    await product.save();
-    res.json({ success: true, name: req.body.name });
+    await newProduct.save();
+    res.json({ success: true, product: newProduct });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to save product", error });
+    res.status(500).json({ success: false, message: "Failed to add product", error });
   }
 });
 
 app.post("/updateproduct", async (req, res) => {
   try {
-    const { id, name, image, category, price } = req.body;
+    const { _id, name, image, category, price, measurement, sizeOptions, basePrice } = req.body;
+
+    console.log("Received update request for product ID:", _id); // Debugging
+    console.log("Measurement to update:", measurement); // Debugging
 
     const updatedProduct = await Product.findOneAndUpdate(
-      { id: id },
-      { name, image, category, price },
-      { new: true } // Return the updated product
+      { _id: _id }, // Use _id instead of id
+      { name, image, category, price, measurement, sizeOptions, basePrice },
+      { new: true }
     );
 
     if (!updatedProduct) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
+    console.log("Updated product:", updatedProduct); // Debugging
     res.json({ success: true, product: updatedProduct });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to update product", error });
+    console.error("Error updating product:", error); // Debugging
+    res.status(500).json({ success: false, message: "Failed to update product", error });
   }
 });
 
@@ -769,6 +782,14 @@ app.get('/admin/details', async (req, res) => {
   } catch (err) {
       res.status(500).json({ error: 'Failed to fetch admin details', details: err });
   }
+});
+
+app.get("/api/maps-key", (req, res) => {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "API key not found in environment variables" });
+  }
+  res.json({ key: apiKey });
 });
 
 app.listen(port, () => {

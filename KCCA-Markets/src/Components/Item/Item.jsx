@@ -2,6 +2,7 @@ import React from 'react';
 import './Item.css';
 import { Link } from 'react-router-dom';
 import prodprice from '../../../utils/priceformat';
+import eye_icon from '../Assets/eye.png';
 
 const Item = (props) => {
   return (
@@ -18,8 +19,14 @@ const Item = (props) => {
       
       {/* Price with /KG */}
       <div className="item-price">
-        {prodprice.format(props.price)} <span className="unit">/KG</span>
+        {prodprice.format(props.price)} <span className="unit"></span>
       </div>
+
+      {/* View Details Section */}
+      <Link to={`/product/${props.id}`} state={{ category: props.category }} className="view-details">
+        <img src={eye_icon} alt="View Details" className="eye-icon" />
+        <span>View</span>
+      </Link>
     </div>
   );
 };
