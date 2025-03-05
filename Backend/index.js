@@ -6,7 +6,7 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+//const nodemailer = require("nodemailer");
 const twilio = require("twilio");
 const bcrypt = require("bcrypt");
 const { pingServer, PING_INTERVAL } = require("./utils/keepAlive");
@@ -17,26 +17,26 @@ dotenv.config();
 
 const app = express();
 const port = 4000;
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-const TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER;
-const TWILIO_SMS_NUMBER = process.env.TWILIO_SMS_NUMBER;
+//const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+//const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+//const TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER;
+//const TWILIO_SMS_NUMBER = process.env.TWILIO_SMS_NUMBER;
 // const TWILIO_ACCOUNT_SID = import.meta.env.TWILIO_ACCOUNT_SID;
 // const TWILIO_AUTH_TOKEN = import.meta.env.TWILIO_AUTH_TOKEN;
-const YOUR_PHONE_NUMBER_1 = process.env.YOUR_PHONE_NUMBER_1;
-const YOUR_PHONE_NUMBER_2 = process.env.YOUR_PHONE_NUMBER_2;
+//const YOUR_PHONE_NUMBER_1 = process.env.YOUR_PHONE_NUMBER_1;
+//const YOUR_PHONE_NUMBER_2 = process.env.YOUR_PHONE_NUMBER_2;
 
 // Initialize Twilio Client
-const client = new twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+//const client = new twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 // Nodemailer Transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS,
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.GMAIL_USER,
+//     pass: process.env.GMAIL_PASS,
+//   },
+// });
 
 app.use(express.json({ limit: '50mb' })); // Increase limit to 10MB
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Apply to form-encoded data
@@ -478,35 +478,35 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
 
     await newOrder.save();
 
-    // ✅ Send WhatsApp Notification
-    await client.messages.create({
-      from: TWILIO_WHATSAPP_NUMBER,
-      to: 'whatsapp:+256708853662', // Your WhatsApp number
-      body: `📢 New Order Received!\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment: ${paymentMethod}`,
-    });
+    // ✅ Comment out Twilio WhatsApp Notification
+    // await client.messages.create({
+    //   from: TWILIO_WHATSAPP_NUMBER,
+    //   to: 'whatsapp:+256708853662', // Your WhatsApp number
+    //   body: `📢 New Order Received!\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment: ${paymentMethod}`,
+    // });
 
-    // ✅ Send SMS Notification
-    await client.messages.create({
-      from: '+17073923274',
-      to: YOUR_PHONE_NUMBER_1,
-      body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
-    });
+    // ✅ Comment out Twilio SMS Notification
+    // await client.messages.create({
+    //   from: '+17073923274',
+    //   to: YOUR_PHONE_NUMBER_1,
+    //   body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
+    // });
 
-    await client.messages.create({
-      from: '+17073923274',
-      to: YOUR_PHONE_NUMBER_2,
-      body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
-    });
+    // await client.messages.create({
+    //   from: '+17073923274',
+    //   to: YOUR_PHONE_NUMBER_2,
+    //   body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
+    // });
 
-    // ✅ Send Email Notification
-    const mailOptions = {
-      from: 'manguonlinemarket@gmail.com',
-      to: 'khabertzion11@gmail.com',
-      subject: '📦 New Order Received!',
-      text: `A new order has been placed.\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment Method: ${paymentMethod}`,
-    };
+    // ✅ Send Email Notification (Keep this if you want email notifications)
+    // const mailOptions = {
+    //   from: 'manguonlinemarket@gmail.com',
+    //   to: 'khabertzion11@gmail.com',
+    //   subject: '📦 New Order Received!',
+    //   text: `A new order has been placed.\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment Method: ${paymentMethod}`,
+    // };
 
-    await transporter.sendMail(mailOptions);
+    // await transporter.sendMail(mailOptions);
 
     res.json({
       success: true,
