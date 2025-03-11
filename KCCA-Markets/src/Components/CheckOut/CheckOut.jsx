@@ -8,8 +8,7 @@ import "./CheckOut.css";
 import logo1 from "../Assets/logo.png";
 
 const CheckOut = () => {
-  const { getTotalCartAmount, clearCart, cartItems } =
-    useContext(ProductContext);
+  const { getTotalCartAmount, clearCart, cartItems } = useContext(ProductContext);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [location, setLocation] = useState("");
@@ -21,8 +20,11 @@ const CheckOut = () => {
   const [deliveryTime, setDeliveryTime] = useState("");
 
   const navigate = useNavigate();
-  const locationState = useLocation(); // To track previous route
+  const locationState = useLocation();
   const cartTotal = getTotalCartAmount();
+
+  // Extract state from navigation
+  const { deliveryOption, deliveryFee, deliveryLocation: initialDeliveryLocation, totalAmount } = locationState.state || {};
 
   useEffect(() => {
     const token = localStorage.getItem("auth-token");
@@ -36,7 +38,7 @@ const CheckOut = () => {
   const config = {
     public_key: "FLWPUBK_TEST-37204d00156d46b5e6c40d9a27f4c5bc-X",
     tx_ref: Date.now(),
-    amount: cartTotal,
+    amount: totalAmount || cartTotal,
     currency: "UGX",
     payment_options: "mobilemoneyuganda",
     customer: {
@@ -62,9 +64,7 @@ const CheckOut = () => {
 
   const handleCheckout = async (transaction_id = null) => {
     if (cartItems.length === 0) {
-      alert(
-        "Your cart is empty. Please add items to your cart before checking out."
-      );
+      alert("Your cart is empty. Please add items to your cart before checking out.");
       return;
     }
     if (!phone || error) {
@@ -76,12 +76,14 @@ const CheckOut = () => {
       const token = localStorage.getItem("auth-token");
       const checkoutData = {
         phone,
-        location,
+        location: location || initialDeliveryLocation,
         paymentMethod,
-        amount: cartTotal,
+        amount: totalAmount || cartTotal,
         transaction_id,
         cartData: cartItems,
         deliveryTime,
+        deliveryOption,
+        deliveryFee: deliveryOption === "deliver" ? deliveryFee : 0,
       };
 
       const response = await axios.post(
@@ -147,23 +149,23 @@ const CheckOut = () => {
       <h1>Checkout</h1>
 
       <form onSubmit={(e) => e.preventDefault()}>
-      <div>
-      <label htmlFor="phone">Phone Number:</label>
-      <input
-        id="phone"
-        type="text"
-        value={phone}
-        onChange={(e) => validatePhone(e.target.value)}
-        placeholder="Enter your phone number"
-      />
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+        <div>
+          <label htmlFor="phone">Phone Number:</label>
+          <input
+            id="phone"
+            type="text"
+            value={phone}
+            onChange={(e) => validatePhone(e.target.value)}
+            placeholder="Enter your phone number"
+          />
+          {error && <p style={{ color: "red" }}>{error}</p>}
+        </div>
 
         <label htmlFor="location">Location:</label>
         <input
           id="location"
           type="text"
-          value={location}
+          value={location || initialDeliveryLocation || ""}
           onChange={(e) => setLocation(e.target.value)}
           placeholder="Enter your delivery location"
         />
@@ -217,7 +219,7 @@ const CheckOut = () => {
             {...config}
             text="Pay with Flutterwave"
             callback={handleFlutterwavePayment}
-            className="checkout-button" 
+            className="checkout-button"
             disabled={!phone || error}
           />
         ) : (

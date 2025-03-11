@@ -87,7 +87,7 @@ const AdminOrders = () => {
                   <td>{order.phone}</td>
                   <td>{order.location}</td>
                   <td>{order.deliveryTime || 'N/A'}</td>
-                  <td>${order.totalAmount}</td>
+                  <td>UGX{order.totalAmount}</td>
                   <td>{order.paymentMethod}</td>
                   <td>
                     <select

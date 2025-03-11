@@ -9,14 +9,14 @@
     color: #333;
   }
   
-  .relatedproducts hr {
+  /* .relatedproducts hr {
     width: 100px;
     height: 4px;
     background: #252525;
     border: none;
     border-radius: 10px;
     margin-bottom: 20px;
-  }
+  } */
   
   .relatedproducts-item {
     display: grid;

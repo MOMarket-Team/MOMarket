@@ -1,5 +1,5 @@
 import React from 'react';
-import './Item.css';
+//import './Item.css';
 import { Link } from 'react-router-dom';
 import prodprice from '../../../utils/priceformat';
 import eye_icon from '../Assets/eye.png';

@@ -143,7 +143,17 @@ const CartItems = () => {
       inputRef.current.focus();
       return;
     }
-    navigate("/checkout");
+  
+    const totalAmount = getTotalCartAmount() + (deliveryOption === "deliver" ? deliveryFee : 0);
+  
+    navigate("/checkout", {
+      state: {
+        deliveryOption,
+        deliveryFee: deliveryOption === "deliver" ? deliveryFee : 0,
+        deliveryLocation,
+        totalAmount,
+      },
+    });
   };
 
   const finalTotal = useMemo(() => {

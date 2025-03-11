@@ -144,14 +144,16 @@ const Order = mongoose.model("Order", {
   ],
   phone: { type: String, required: true },
   location: { type: String, required: true },
-  totalAmount: { type: Number, required: true },
+  totalAmount: { type: Number, required: true }, // Subtotal + delivery fee
+  deliveryOption: { type: String, enum: ["deliver", "pickup"], required: true }, // Track delivery option
+  deliveryFee: { type: Number, default: 0 }, // Track delivery fee
   paymentMethod: {
     type: String,
     enum: ["cash_on_delivery", "mobile_money"],
     required: true,
   },
   deliveryTime: {
-    type: String, // Could be an enum if needed
+    type: String,
     enum: [
       "now",
       "morning(Today)",
@@ -165,7 +167,7 @@ const Order = mongoose.model("Order", {
       "Saturday",
       "Sunday",
     ],
-    default: "now", // Default to "now"
+    default: "now",
   },
   status: {
     type: String,
@@ -450,9 +452,13 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
 
 app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
   console.log('Request body:', req.body);
-  const { phone, location, paymentMethod, amount, transaction_id, cartData } = req.body;
+  const { phone, location, paymentMethod, amount, transaction_id, cartData, deliveryOption, deliveryFee } = req.body;
 
   try {
+    // Calculate total amount
+    const subtotal = amount; // Subtotal from the frontend
+    const totalAmount = deliveryOption === 'deliver' ? subtotal + deliveryFee : subtotal;
+
     // Save the order to the database
     const newOrder = new Order({
       userId: req.user.id,
@@ -462,7 +468,7 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
       })),
       phone,
       location,
-      totalAmount: amount,
+      totalAmount, // Include delivery fee in the total amount
       paymentMethod,
       transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
       deliveryTime: req.body.deliveryTime || 'now', // Default to "now" if not provided
@@ -477,36 +483,6 @@ app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
     );
 
     await newOrder.save();
-
-    // ✅ Comment out Twilio WhatsApp Notification
-    // await client.messages.create({
-    //   from: TWILIO_WHATSAPP_NUMBER,
-    //   to: 'whatsapp:+256708853662', // Your WhatsApp number
-    //   body: `📢 New Order Received!\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment: ${paymentMethod}`,
-    // });
-
-    // ✅ Comment out Twilio SMS Notification
-    // await client.messages.create({
-    //   from: '+17073923274',
-    //   to: YOUR_PHONE_NUMBER_1,
-    //   body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
-    // });
-
-    // await client.messages.create({
-    //   from: '+17073923274',
-    //   to: YOUR_PHONE_NUMBER_2,
-    //   body: `📢 New Order Alert! Amount: ${amount} UGX, Location: ${location}`,
-    // });
-
-    // ✅ Send Email Notification (Keep this if you want email notifications)
-    // const mailOptions = {
-    //   from: 'manguonlinemarket@gmail.com',
-    //   to: 'khabertzion11@gmail.com',
-    //   subject: '📦 New Order Received!',
-    //   text: `A new order has been placed.\n\nTotal: ${amount} UGX\nLocation: ${location}\nPayment Method: ${paymentMethod}`,
-    // };
-
-    // await transporter.sendMail(mailOptions);
 
     res.json({
       success: true,
