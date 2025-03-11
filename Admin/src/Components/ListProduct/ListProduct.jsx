@@ -24,40 +24,59 @@ const ListProduct = () => {
   }, []);
 
   const remove_product = async (_id) => {
-    await fetch('https://momarket-7ata.onrender.com/removeproduct', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _id }), // Use _id instead of id
-    });
-    await fetchInfo();
+    if (window.confirm("Are you sure you want to remove this product?")) {
+      try {
+        console.log("Attempting to remove product with ID:", _id); // Debugging
+  
+        const response = await fetch('https://momarket-7ata.onrender.com/removeproduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ _id }),
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Failed to remove product:", errorData);
+          return;
+        }
+  
+        const result = await response.json();
+        console.log("Product removed successfully:", result);
+  
+        // Refresh the product list
+        await fetchInfo();
+      } catch (error) {
+        console.error("Error removing product:", error);
+      }
+    }
   };
 
   const updateProduct = async () => {
-    if (!editProduct || !editProduct._id) { // Use _id instead of id
+    if (!editProduct || !editProduct._id) {
       console.error("Edit product is missing ID or is undefined");
       return;
     }
-
-    console.log("Updating product with payload:", editProduct);
-
+  
+    console.log("Updating product with payload:", editProduct); // Debugging
+  
     try {
       const response = await fetch('https://momarket-7ata.onrender.com/updateproduct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editProduct),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Failed to update product:", errorData);
         return;
       }
-
+  
       const result = await response.json();
       console.log("Product updated successfully:", result);
-
+  
       setEditProduct(null);
-      await fetchInfo();
+      await fetchInfo(); // Refresh the product list
     } catch (error) {
       console.error("Error updating product:", error);
     }

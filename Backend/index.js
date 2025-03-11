@@ -74,7 +74,7 @@ mongoose
 
 // Define Product model
 const Product = mongoose.model("Product", {
-  id: { type: Number, required: true },
+  // id: { type: Number, required: true },
   name: { type: String, required: true },
   image: { type: String, required: true },
   measurement: { type: String, enum: ["Kgs", "Whole", "Set"], default: "Kgs" }, // New field
@@ -283,10 +283,16 @@ app.post("/updateproduct", async (req, res) => {
     const { _id, name, image, category, price, measurement, sizeOptions, basePrice } = req.body;
 
     console.log("Received update request for product ID:", _id); // Debugging
-    console.log("Measurement to update:", measurement); // Debugging
+    console.log("Payload received:", req.body); // Debugging
+
+    // Validate measurement
+    const validMeasurements = ["Kgs", "Whole", "Set"];
+    if (measurement && !validMeasurements.includes(measurement)) {
+      return res.status(400).json({ success: false, message: "Invalid measurement value" });
+    }
 
     const updatedProduct = await Product.findOneAndUpdate(
-      { _id: _id }, // Use _id instead of id
+      { _id },
       { name, image, category, price, measurement, sizeOptions, basePrice },
       { new: true }
     );
@@ -305,12 +311,16 @@ app.post("/updateproduct", async (req, res) => {
 
 app.post("/removeproduct", async (req, res) => {
   try {
-    await Product.findOneAndDelete({ id: req.body.id });
-    res.json({ success: true, name: req.body.name });
+    const objectId = new mongoose.Types.ObjectId(req.body._id);
+    const deletedProduct = await Product.findByIdAndDelete(objectId);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.json({ success: true, name: deletedProduct.name });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to remove product", error });
+    res.status(500).json({ success: false, message: "Failed to remove product", error });
   }
 });
 
