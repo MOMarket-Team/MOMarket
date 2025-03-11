@@ -25,6 +25,13 @@ const ProductDisplay = (props) => {
     }
   }, [product]);
 
+  // Initialize quantity to basePrice for "Set" products
+  useEffect(() => {
+    if (product?.measurement === "Set") {
+      setQuantity(product.basePrice || 0); // Start with basePrice for "Set"
+    }
+  }, [product]);
+
   const updateLocalStorageQuantity = (newQuantity) => {
     const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
     const updatedCartItems = cartItems.map((item) =>
@@ -40,7 +47,7 @@ const ProductDisplay = (props) => {
     } else if (product.measurement === "Whole") {
       newQuantity += 1;
     } else if (product.measurement === "Set") {
-      newQuantity += 1000;
+      newQuantity += 1000; // Increment by 1000 for "Set"
     }
     setQuantity(newQuantity);
     updateLocalStorageQuantity(newQuantity);
@@ -52,8 +59,8 @@ const ProductDisplay = (props) => {
       newQuantity -= 0.5;
     } else if (product.measurement === "Whole" && quantity > 1) {
       newQuantity -= 1;
-    } else if (product.measurement === "Set" && quantity > 1000) {
-      newQuantity -= 1000;
+    } else if (product.measurement === "Set" && quantity > product.basePrice) {
+      newQuantity -= 1000; // Decrement by 1000 for "Set", but not below basePrice
     }
     setQuantity(newQuantity);
     updateLocalStorageQuantity(newQuantity);
@@ -69,11 +76,12 @@ const ProductDisplay = (props) => {
     return <p>Loading product details...</p>;
   }
 
+  // Calculate total price based on measurement type
   const totalPrice =
     product.measurement === "Whole"
       ? product.sizeOptions[selectedSize] * quantity
       : product.measurement === "Set"
-      ? product.basePrice + quantity
+      ? quantity // For "Set", total price is the current quantity (basePrice + increments)
       : product.price * quantity;
 
   return (
@@ -102,7 +110,7 @@ const ProductDisplay = (props) => {
             {product.measurement === "Whole"
               ? `${prodprice.format(product.sizeOptions[selectedSize])}`
               : product.measurement === "Set"
-              ? `${prodprice.format(product.basePrice)}+`
+              ? `${prodprice.format(product.basePrice)}+` // Display basePrice for "Set"
               : `${prodprice.format(product.price)} ${product.measurement === "Kgs" ? "/ kg" : ""}`}
           </div>
         </div>
@@ -125,7 +133,7 @@ const ProductDisplay = (props) => {
               ? `Selected Weight: ${quantity} kg`
               : product.measurement === "Whole"
               ? `Selected Quantity: ${quantity}`
-              : `Products From: ${prodprice.format(totalPrice)} +..`}
+              : `Products From: ${prodprice.format(product.basePrice)} +..`} {/* Display basePrice for "Set" */}
           </p>
           <p className="weight_total">Total: {prodprice.format(totalPrice)}</p>
         </div>
@@ -138,7 +146,7 @@ const ProductDisplay = (props) => {
             type="number"
             className="quantity-input"
             value={quantity}
-            min={product.measurement === "Kgs" ? 0.5 : 1}
+            min={product.measurement === "Kgs" ? 0.5 : product.measurement === "Set" ? product.basePrice : 1}
             step={product.measurement === "Kgs" ? 0.5 : 1}
             readOnly
           />

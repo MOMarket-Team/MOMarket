@@ -97,8 +97,9 @@ const ListProduct = () => {
         <hr />
         {allProducts.map((product, index) => (
           <div className="listproduct-format-main listproduct-format" key={index}>
-            {editProduct && editProduct._id === product._id ? ( // Use _id instead of id
+            {editProduct && editProduct._id === product._id ? (
               <>
+                {/* Product Image */}
                 <input
                   type="file"
                   onChange={(e) => {
@@ -112,16 +113,19 @@ const ListProduct = () => {
                     }
                   }}
                 />
+                {/* Product Name */}
                 <input
                   type="text"
                   value={editProduct.name}
                   onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })}
                 />
+                {/* Product Price */}
                 <input
                   type="number"
                   value={editProduct.price}
                   onChange={(e) => setEditProduct({ ...editProduct, price: e.target.value })}
                 />
+                {/* Product Category */}
                 <select
                   value={editProduct.category}
                   onChange={(e) => setEditProduct({ ...editProduct, category: e.target.value })}
@@ -130,6 +134,7 @@ const ListProduct = () => {
                     <option key={idx} value={cat}>{cat}</option>
                   ))}
                 </select>
+                {/* Product Measurement */}
                 <select
                   value={editProduct.measurement || "Kgs"}
                   onChange={(e) => {
@@ -139,10 +144,12 @@ const ListProduct = () => {
                     const updatedProduct = { ...editProduct, measurement: newMeasurement };
                     if (newMeasurement === "Whole") {
                       updatedProduct.sizeOptions = { small: 0, medium: 0, big: 0 };
+                      updatedProduct.sizeImages = { small: "", medium: "", big: "" }; // Initialize size images
                     } else if (newMeasurement === "Set") {
                       updatedProduct.basePrice = 0;
                     } else {
                       delete updatedProduct.sizeOptions;
+                      delete updatedProduct.sizeImages;
                       delete updatedProduct.basePrice;
                     }
 
@@ -153,6 +160,62 @@ const ListProduct = () => {
                   <option value="Whole">Whole</option>
                   <option value="Set">Set</option>
                 </select>
+
+                {/* Size Options for "Whole" Measurement */}
+                {editProduct.measurement === "Whole" && (
+                  <div className="size-options">
+                    {["small", "medium", "big"].map((size) => (
+                      <div key={size} className="size-option">
+                        <h4>{size.toUpperCase()}</h4>
+                        {/* Price Input */}
+                        <input
+                          type="number"
+                          placeholder={`${size} price`}
+                          value={editProduct.sizeOptions[size] || 0}
+                          onChange={(e) =>
+                            setEditProduct({
+                              ...editProduct,
+                              sizeOptions: {
+                                ...editProduct.sizeOptions,
+                                [size]: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                        {/* Image Upload */}
+                        <input
+                          type="file"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setEditProduct({
+                                  ...editProduct,
+                                  sizeImages: {
+                                    ...editProduct.sizeImages,
+                                    [size]: reader.result,
+                                  },
+                                });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        {/* Display Uploaded Image */}
+                        {editProduct.sizeImages[size] && (
+                          <img
+                            src={editProduct.sizeImages[size]}
+                            alt={`${size} image`}
+                            className="size-image"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Save and Cancel Buttons */}
                 <button onClick={updateProduct}>Save</button>
                 <button onClick={() => setEditProduct(null)}>Cancel</button>
               </>
@@ -165,7 +228,12 @@ const ListProduct = () => {
                 <p>{product.measurement || "N/A"}</p>
                 <div>
                   <button onClick={() => setEditProduct({ ...product })}>Edit</button>
-                  <img onClick={() => remove_product(product._id)} src={cross_icon} alt="Remove" className="remove-icon" /> {/* Use _id instead of id */}
+                  <img
+                    onClick={() => remove_product(product._id)}
+                    src={cross_icon}
+                    alt="Remove"
+                    className="remove-icon"
+                  />
                 </div>
               </>
             )}

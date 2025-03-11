@@ -73,7 +73,36 @@
     font-size: 14px;
     width: 100%;
   }
+  .size-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
   
+  .size-option {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+  }
+  
+  .size-option h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .size-image {
+    height: 50px;
+    width: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-top: 5px;
+  } 
   @media (max-width: 800px) {
     .listproduct {
       box-sizing: border-box;

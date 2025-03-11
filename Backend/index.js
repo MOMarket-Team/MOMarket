@@ -77,10 +77,11 @@ const Product = mongoose.model("Product", {
   // id: { type: Number, required: true },
   name: { type: String, required: true },
   image: { type: String, required: true },
-  measurement: { type: String, enum: ["Kgs", "Whole", "Set"], default: "Kgs" }, // New field
+  measurement: { type: String, enum: ["Kgs", "Whole", "Set"], default: "Kgs" },
   category: { type: String, required: true },
   price: { type: Number, required: true },
-  sizeOptions: { type: Map, of: Number, default: {} }, // For "Whole" products (small, medium, big)
+  sizeOptions: { type: Map, of: Number, default: {} }, // For "Whole" products
+  sizeImages: { type: Map, of: String, default: {} }, // For "Whole" products
   basePrice: { type: Number, default: 0 }, // For "Set" products
   date: { type: Date, default: Date.now },
   available: { type: Boolean, default: true },
@@ -280,7 +281,7 @@ app.post("/addproduct", async (req, res) => {
 
 app.post("/updateproduct", async (req, res) => {
   try {
-    const { _id, name, image, category, price, measurement, sizeOptions, basePrice } = req.body;
+    const { _id, name, image, category, price, measurement, sizeOptions, sizeImages, basePrice } = req.body;
 
     console.log("Received update request for product ID:", _id); // Debugging
     console.log("Payload received:", req.body); // Debugging
@@ -291,9 +292,30 @@ app.post("/updateproduct", async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid measurement value" });
     }
 
+    // Prepare the update object
+    const updateFields = {
+      name,
+      image,
+      category,
+      price,
+      measurement,
+      basePrice,
+    };
+
+    // Add sizeOptions and sizeImages only if measurement is "Whole"
+    if (measurement === "Whole") {
+      updateFields.sizeOptions = sizeOptions || { small: 0, medium: 0, big: 0 };
+      updateFields.sizeImages = sizeImages || { small: "", medium: "", big: "" };
+    } else {
+      // Remove sizeOptions and sizeImages if measurement is not "Whole"
+      updateFields.sizeOptions = undefined;
+      updateFields.sizeImages = undefined;
+    }
+
+    // Update the product in the database
     const updatedProduct = await Product.findOneAndUpdate(
       { _id },
-      { name, image, category, price, measurement, sizeOptions, basePrice },
+      updateFields,
       { new: true }
     );
 
