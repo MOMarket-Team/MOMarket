@@ -27,22 +27,22 @@ const ListProduct = () => {
     if (window.confirm("Are you sure you want to remove this product?")) {
       try {
         console.log("Attempting to remove product with ID:", _id); // Debugging
-  
+
         const response = await fetch('https://momarket-7ata.onrender.com/removeproduct', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ _id }),
         });
-  
+
         if (!response.ok) {
           const errorData = await response.json();
           console.error("Failed to remove product:", errorData);
           return;
         }
-  
+
         const result = await response.json();
         console.log("Product removed successfully:", result);
-  
+
         // Refresh the product list
         await fetchInfo();
       } catch (error) {
@@ -56,25 +56,25 @@ const ListProduct = () => {
       console.error("Edit product is missing ID or is undefined");
       return;
     }
-  
+
     console.log("Updating product with payload:", editProduct); // Debugging
-  
+
     try {
       const response = await fetch('https://momarket-7ata.onrender.com/updateproduct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editProduct),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Failed to update product:", errorData);
         return;
       }
-  
+
       const result = await response.json();
       console.log("Product updated successfully:", result);
-  
+
       setEditProduct(null);
       await fetchInfo(); // Refresh the product list
     } catch (error) {
@@ -146,7 +146,8 @@ const ListProduct = () => {
                       updatedProduct.sizeOptions = { small: 0, medium: 0, big: 0 };
                       updatedProduct.sizeImages = { small: "", medium: "", big: "" }; // Initialize size images
                     } else if (newMeasurement === "Set") {
-                      updatedProduct.basePrice = 0;
+                      // Set basePrice to the current price when switching to "Set"
+                      updatedProduct.basePrice = updatedProduct.price || 0;
                     } else {
                       delete updatedProduct.sizeOptions;
                       delete updatedProduct.sizeImages;

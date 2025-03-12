@@ -10,7 +10,7 @@ const AddProduct = () => {
     price: "",
     measurement: "Kgs", // Default to "Kgs"
     sizeOptions: {}, // For "Whole" products
-    basePrice: 0, // For "Set" products
+    basePrice: price || 0, // For "Set" products this is me trying it out
   });
 
   const [image, setImage] = useState(null);

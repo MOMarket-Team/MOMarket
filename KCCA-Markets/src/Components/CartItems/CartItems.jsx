@@ -143,9 +143,9 @@ const CartItems = () => {
       inputRef.current.focus();
       return;
     }
-  
+
     const totalAmount = getTotalCartAmount() + (deliveryOption === "deliver" ? deliveryFee : 0);
-  
+
     navigate("/checkout", {
       state: {
         deliveryOption,
@@ -166,8 +166,8 @@ const CartItems = () => {
       <div className="format-main">
         <p>Products</p>
         <p>Title</p>
-        <p>Price per kg</p>
-        <p>Weight (kg)</p>
+        <p>Price</p>
+        <p>Quantity/Weight(kg)</p>
         <p>Total</p>
         <p>Remove</p>
       </div>
@@ -182,23 +182,35 @@ const CartItems = () => {
             <div className="format format-main">
               <img src={e.image} alt="" className="product-icon" />
               <p>{e.name}</p>
-              <p>{prodprice.format(e.price)}</p>
+              <p>
+                {e.measurement === "Set"
+                  ? `${prodprice.format(e.basePrice)}`
+                  : e.measurement === "Whole"
+                  ? `${prodprice.format(e.sizeOptions[e.selectedSize])}`
+                  : `${prodprice.format(e.price)}`}
+              </p>
               <div className="quantity-control">
                 <input
                   type="number"
                   className="quantity"
                   value={e.quantity}
-                  min="0.5"
-                  step="0.5"
+                  min={e.measurement === "Kgs" ? 0.5 : e.measurement === "Set" ? e.basePrice : 1}
+                  step={e.measurement === "Kgs" ? 0.5 : e.measurement === "Set" ? 1000 : 1}
                   onChange={(event) => {
                     const newQuantity = parseFloat(event.target.value) || 0.5;
                     updateItemQuantity(e.id, Math.max(0.5, newQuantity));
                   }}
                   style={{ width: "70px" }}
                 />
-                <span>kg</span>
+                <span>{e.measurement === "Set" ? "" : "kg"}</span>
               </div>
-              <p>{prodprice.format(e.price * e.quantity)}</p>
+              <p>
+                {e.measurement === "Set"
+                  ? `${prodprice.format(e.quantity)}`
+                  : e.measurement === "Whole"
+                  ? `${prodprice.format(e.sizeOptions[e.selectedSize] * e.quantity)}`
+                  : `${prodprice.format(e.price * e.quantity)}`}
+              </p>
               <img
                 className="remove-icon"
                 src={remove_icon}
@@ -215,7 +227,7 @@ const CartItems = () => {
           <p>Google Maps API is still loading. Please wait...</p>
         </div>
       )}
-      
+
       {/* Cart Totals */}
       <div className="down">
         <div className="total">

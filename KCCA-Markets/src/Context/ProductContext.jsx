@@ -30,21 +30,31 @@ const ProductContextProvider = (props) => {
   }, []);
 
   const updateCartTotals = (items) => {
-    const subtotal = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const subtotal = items.reduce((sum, item) => {
+      if (item.measurement === "Set") {
+        return sum + item.quantity; // For "Set", total is the quantity itself
+      } else if (item.measurement === "Whole") {
+        return sum + item.sizeOptions[item.selectedSize] * item.quantity; // For "Whole", use selected size price
+      } else {
+        return sum + item.price * item.quantity; // For "Kgs", multiply price by quantity
+      }
+    }, 0);
     setCartTotal(subtotal);
   };
 
   const addTocart = (product) => {
     const existingItem = cartItems.find((item) => item.id === product.id);
-
+  
     if (existingItem) {
       alert("Product already exists in the cart");
       return;
     }
-
+  
+    // Add selectedSize for Whole products
+    if (product.measurement === "Whole") {
+      product.selectedSize = "small"; // Default to small
+    }
+  
     const updatedCart = [...cartItems, product];
     setCartItems(updatedCart);
     updateCartTotals(updatedCart);
