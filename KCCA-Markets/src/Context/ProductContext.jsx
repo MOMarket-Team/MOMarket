@@ -23,7 +23,15 @@ const ProductContextProvider = (props) => {
     setCartItems(storedCartItems);
 
     const subtotal = storedCartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum, item) => {
+        if (item.measurement === "Set") {
+          return sum + item.quantity; // For "Set", total is the quantity itself
+        } else if (item.measurement === "Whole") {
+          return sum + item.sizeOptions[item.selectedSize] * item.quantity; // For "Whole", use selected size price
+        } else {
+          return sum + item.price * item.quantity; // For "Kgs", multiply price by quantity
+        }
+      },
       0
     );
     setCartTotal(subtotal);
@@ -52,7 +60,7 @@ const ProductContextProvider = (props) => {
   
     // Add selectedSize for Whole products
     if (product.measurement === "Whole") {
-      product.selectedSize = "small"; // Default to small
+      product.selectedSize = product.selectedSize || "small"; // Default to small if not provided
     }
   
     const updatedCart = [...cartItems, product];

@@ -67,7 +67,9 @@ const ProductDisplay = (props) => {
   };
 
   const handleAddToCart = () => {
-    addTocart({ ...product, quantity });
+    const productToAdd = { ...product, quantity, selectedSize };
+    console.log("Adding to cart:", productToAdd); // Log the product being added
+    addTocart(productToAdd);
     setShowAlert(true);
     setTimeout(() => setShowAlert(false), 3000);
   };
