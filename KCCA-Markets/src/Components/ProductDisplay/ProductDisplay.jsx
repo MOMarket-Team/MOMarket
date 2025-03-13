@@ -74,6 +74,10 @@ const ProductDisplay = (props) => {
     setTimeout(() => setShowAlert(false), 3000);
   };
 
+  const handleSizeClick = (size) => {
+    setSelectedSize(size);
+  };
+
   if (!product) {
     return <p>Loading product details...</p>;
   }
@@ -89,13 +93,45 @@ const ProductDisplay = (props) => {
   return (
     <div className="productdisplay">
       <div className="left">
-        <div className="img-list">
-          <img src={product.image} alt="Product Thumbnail 1" />
-          <img src={product.image} alt="Product Thumbnail 2" />
-        </div>
-        <div className="display-img">
-          <img className="main-img" src={product.image} alt="Product" />
-        </div>
+        {product.measurement === "Whole" ? (
+          <div className="whole-product-images">
+            <div className="size-images">
+              <p>Pick size:</p>
+              <div className="size-image-list">
+                {["small", "medium", "big"].map((size) => (
+                  <div
+                    key={size}
+                    className={`size-image ${selectedSize === size ? "selected" : ""}`}
+                    onClick={() => handleSizeClick(size)}
+                  >
+                    <img
+                      src={product.sizeImages?.[size] || product.image}
+                      alt={`${size} size`}
+                    />
+                    <p>{size.charAt(0).toUpperCase() + size.slice(1)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="main-img-container">
+              <img
+                className="main-img"
+                src={product.sizeImages?.[selectedSize] || product.image}
+                alt="Product"
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="img-list">
+              <img src={product.image} alt="Product Thumbnail 1" />
+              <img src={product.image} alt="Product Thumbnail 2" />
+            </div>
+            <div className="display-img">
+              <img className="main-img" src={product.image} alt="Product" />
+            </div>
+          </>
+        )}
       </div>
       <div className="right">
         <h1>{product.name}</h1>
@@ -117,17 +153,6 @@ const ProductDisplay = (props) => {
           </div>
         </div>
         <div className="description">Best foods for life and strength</div>
-
-        {product.measurement === "Whole" && (
-          <div className="size-options">
-            <p>Pick size:</p>
-            <select value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}>
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="big">Big</option>
-            </select>
-          </div>
-        )}
 
         <div className="weight-display">
           <p className="weight_price">
