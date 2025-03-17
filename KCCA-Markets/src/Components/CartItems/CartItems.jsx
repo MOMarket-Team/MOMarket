@@ -172,7 +172,7 @@ const CartItems = () => {
         <p>Remove</p>
       </div>
       <hr />
-
+  
       {/* Cart Items */}
       {cartItems.length === 0 ? (
         <h1>Cart is empty</h1>
@@ -227,7 +227,7 @@ const CartItems = () => {
           <p>Google Maps API is still loading. Please wait...</p>
         </div>
       )}
-
+  
       {/* Cart Totals */}
       <div className="down">
         <div className="total">
@@ -248,26 +248,28 @@ const CartItems = () => {
                 <option value="pickup">Pickup (No Delivery Fee)</option>
               </select>
             </div>
-
+  
             {deliveryOption === "deliver" && (
               <>
                 <hr />
                 <div className="total-item">
+                  <p>Delivery Location</p>
+                  <input
+                    type="text"
+                    placeholder="Enter your delivery location"
+                    ref={inputRef}
+                    value={deliveryLocation}
+                    onChange={(e) => setDeliveryLocation(e.target.value)}
+                    className="delivery-location-input"
+                  />
+                </div>
+                <div className="total-item">
                   <p>Delivery Fee</p>
-                  <div className="delivery-input">
-                    <input
-                      type="text"
-                      placeholder="Enter your delivery location"
-                      ref={inputRef}
-                      value={deliveryLocation}
-                      onChange={(e) => setDeliveryLocation(e.target.value)}
-                    />
-                    <span>{prodprice.format(deliveryFee)}</span>
-                  </div>
+                  <span>{prodprice.format(deliveryFee)}</span>
                 </div>
               </>
             )}
-
+  
             <hr />
             <div className="total-item">
               <h3>Total</h3>
