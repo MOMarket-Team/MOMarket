@@ -38,6 +38,12 @@ const port = 4000;
 //   },
 // });
 
+app.use((req, res, next) => {
+  console.log('Incoming request body:', req.body);
+  console.log('Headers:', req.headers);
+  next();
+});
+
 app.use(express.json({ limit: '50mb' })); // Increase limit to 10MB
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Apply to form-encoded data
 
@@ -66,7 +72,7 @@ mongoose
     console.log("Connected to MongoDB");
 
     // Run the function to update image URLs
-    updateImageURLs();
+    //updateImageURLs();
     // Update the measurement field for all products
     //updateMeasurementField();
   })
@@ -88,23 +94,23 @@ const Product = mongoose.model("Product", {
 });
 
 // Update image URLs function
-async function updateImageURLs() {
-  try {
-    const products = await Product.find({
-      image: { $regex: "localhost:4000" },
-    });
-    for (const product of products) {
-      product.image = product.image.replace(
-        "localhost:4000",
-        "momarket.onrender.com"
-      );
-      await product.save();
-    }
-    console.log("Image URLs updated successfully");
-  } catch (err) {
-    console.error("Error updating image URLs:", err);
-  }
-}
+// async function updateImageURLs() {
+//   try {
+//     const products = await Product.find({
+//       image: { $regex: "localhost:4000" },
+//     });
+//     for (const product of products) {
+//       product.image = product.image.replace(
+//         "localhost:4000",
+//         "momarket.onrender.com"
+//       );
+//       await product.save();
+//     }
+//     console.log("Image URLs updated successfully");
+//   } catch (err) {
+//     console.error("Error updating image URLs:", err);
+//   }
+// }
 // Function to update the measurement field for all products
 // async function updateMeasurementField() {
 //   try {
@@ -146,7 +152,7 @@ const Order = mongoose.model("Order", {
   phone: { type: String, required: true },
   location: { type: String, required: true },
   totalAmount: { type: Number, required: true }, // Subtotal + delivery fee
-  deliveryOption: { type: String, enum: ["deliver", "pickup"], required: true }, // Track delivery option
+  deliveryOption: { type: String, enum: ["deliver", "pickup"], default: "deliver" }, // Track delivery option
   deliveryFee: { type: Number, default: 0 }, // Track delivery fee
   paymentMethod: {
     type: String,
@@ -157,9 +163,9 @@ const Order = mongoose.model("Order", {
     type: String,
     enum: [
       "now",
-      "morning(Today)",
-      "afternoon(Today)",
-      "evening(Today)",
+      "morning",
+      "afternoon",
+      "evening",
       "Monday",
       "Tuesday",
       "Wednesday",
@@ -482,55 +488,73 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   }
 });
 
-app.post('/checkout', fetchUser, ensureCartNotEmpty, async (req, res) => {
-  console.log('Request body:', req.body);
-  const { phone, location, paymentMethod, amount, transaction_id, cartData, deliveryOption, deliveryFee } = req.body;
+app.post('/checkout', 
+  (req, res, next) => {
+    console.log("Before Middleware - Request Body:", req.body);
+    next();
+  },
+  fetchUser,
+  ensureCartNotEmpty,
+  (req, res, next) => {
+    console.log("After Middleware - Request Body:", req.body);
+    next();
+  },
+  async (req, res) => {
+    console.log('Final Request Body:', req.body);
+    const { phone, location, paymentMethod, amount, transaction_id, cartData, deliveryOption, deliveryFee } = req.body;
+    if (!deliveryOption) {
+      console.error("Delivery option is missing in the request body");
+      return res.status(400).json({
+        success: false,
+        message: 'Delivery option is required',
+      });
+    }
+    try {
+      // Calculate total amount
+      const subtotal = amount; // Subtotal from the frontend
+      const totalAmount = deliveryOption === 'deliver' ? subtotal + deliveryFee : subtotal;
 
-  try {
-    // Calculate total amount
-    const subtotal = amount; // Subtotal from the frontend
-    const totalAmount = deliveryOption === 'deliver' ? subtotal + deliveryFee : subtotal;
+      // Save the order to the database
+      const newOrder = new Order({
+        userId: req.user.id,
+        cartData: cartData.map(({ _id, quantity }) => ({
+          product: _id,
+          quantity,
+        })),
+        phone,
+        location,
+        totalAmount, // Include delivery fee in the total amount
+        paymentMethod,
+        transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
+        deliveryTime: req.body.deliveryTime || 'now', // Default to "now" if not provided
+        deliveryOption: req.body.deliveryOption, // Direct assignment
+        deliveryFee: deliveryFee || 0, // Ensure this is set
+        status: 'pending',
+        date: new Date(),
+      });
+      // await Order.updateMany(
+      //   { deliveryOption: { $exists: false } }, 
+      //   { $set: { deliveryOption: "deliver", deliveryFee: 0 } } // Set default values
+      // );
+    
+      await newOrder.save();
 
-    // Save the order to the database
-    const newOrder = new Order({
-      userId: req.user.id,
-      cartData: cartData.map(({ _id, quantity }) => ({
-        product: _id,
-        quantity,
-      })),
-      phone,
-      location,
-      totalAmount, // Include delivery fee in the total amount
-      paymentMethod,
-      transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
-      deliveryTime: req.body.deliveryTime || 'now', // Default to "now" if not provided
-      status: 'pending',
-      date: new Date(),
-    });
+      res.json({
+        success: true,
+        message: 'Checkout successful',
+        deliveryContact: '+256 708853662',
+      });
 
-    // Ensure all orders have a default deliveryTime if missing
-    await Order.updateMany(
-      { deliveryTime: { $exists: false } }, // Find orders missing the field
-      { $set: { deliveryTime: 'now' } } // Set a default value
-    );
-
-    await newOrder.save();
-
-    res.json({
-      success: true,
-      message: 'Checkout successful',
-      deliveryContact: '+256 708853662',
-    });
-
-  } catch (error) {
-    console.error('Error during checkout:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Checkout failed',
-      error: error.message,
-    });
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Checkout failed',
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 app.get("/admin/orders", async (req, res) => {
   try {

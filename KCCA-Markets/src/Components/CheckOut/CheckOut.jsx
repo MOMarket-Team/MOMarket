@@ -21,6 +21,7 @@ const CheckOut = () => {
 
   const navigate = useNavigate();
   const locationState = useLocation();
+  console.log("Location State:", locationState.state);
   const cartTotal = getTotalCartAmount();
 
   // Extract state from navigation
@@ -47,7 +48,7 @@ const CheckOut = () => {
       name: customer.name,
     },
     customizations: {
-      title: "KCCA Market",
+      title: "MOMarket",
       description: "Payment for items in cart",
       logo: logo1,
     },
@@ -71,7 +72,7 @@ const CheckOut = () => {
       alert("Please enter a valid Ugandan phone number before checking out.");
       return;
     }
-
+  
     try {
       const token = localStorage.getItem("auth-token");
       const checkoutData = {
@@ -81,26 +82,27 @@ const CheckOut = () => {
         amount: totalAmount || cartTotal,
         transaction_id,
         cartData: cartItems,
-        deliveryTime,
-        deliveryOption,
+        deliveryTime: deliveryTime || "now", // Ensure this is set
+        deliveryOption: deliveryOption || "deliver", // Ensure this is set
         deliveryFee: deliveryOption === "deliver" ? deliveryFee : 0,
       };
-
+  
       const response = await axios.post(
         "https://momarket-7ata.onrender.com/checkout",
         checkoutData,
         {
           headers: {
+            "Content-Type": "application/json",
             "auth-token": token,
           },
         }
       );
-
+  
       if (response.data.success) {
         setDelivererNumber(response.data.deliveryContact);
         setIsOrderStatusVisible(true);
         alert("Order placed successfully.");
-
+  
         const clearCartResponse = await axios.post(
           "https://momarket-7ata.onrender.com/clearcart",
           {},
@@ -110,7 +112,7 @@ const CheckOut = () => {
             },
           }
         );
-
+  
         if (clearCartResponse.data.success) {
           clearCart();
         } else {
