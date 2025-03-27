@@ -151,7 +151,7 @@ const CartItems = () => {
         deliveryOption,
         deliveryFee: deliveryOption === "deliver" ? deliveryFee : 0,
         deliveryLocation,
-        totalAmount,
+        subtotal: getTotalCartAmount(),
       },
     });
   };

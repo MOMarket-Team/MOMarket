@@ -38,11 +38,11 @@ const port = 4000;
 //   },
 // });
 
-app.use((req, res, next) => {
-  console.log('Incoming request body:', req.body);
-  console.log('Headers:', req.headers);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('Incoming request body:', req.body);
+//   console.log('Headers:', req.headers);
+//   next();
+// });
 
 app.use(express.json({ limit: '50mb' })); // Increase limit to 10MB
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Apply to form-encoded data
@@ -512,7 +512,7 @@ app.post('/checkout',
     try {
       // Calculate total amount
       const subtotal = amount; // Subtotal from the frontend
-      const totalAmount = deliveryOption === 'deliver' ? subtotal + deliveryFee : subtotal;
+      const totalAmount = deliveryOption === 'deliver' ? subtotal : subtotal;
 
       // Save the order to the database
       const newOrder = new Order({
