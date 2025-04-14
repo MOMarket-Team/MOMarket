@@ -75,17 +75,24 @@ const CheckOut = () => {
   
     try {
       const token = localStorage.getItem("auth-token");
+
+      // Ensure finalTotal is computed before sending to the backend
+      const subtotal = getTotalCartAmount();
+      const deliveryFeeToUse = deliveryOption === "deliver" ? deliveryFee : 0;
+      const totalAmount = subtotal + deliveryFeeToUse;
+
       const checkoutData = {
         phone,
         location: location || initialDeliveryLocation,
         paymentMethod,
-        amount: totalAmount || cartTotal,
+        subtotal, // Send subtotal separately
+        totalAmount, // Send totalAmount explicitly
         transaction_id,
         cartData: cartItems,
-        deliveryTime: deliveryTime || "now", // Ensure this is set
-        deliveryOption: deliveryOption || "deliver", // Ensure this is set
-        deliveryFee: deliveryOption === "deliver" ? deliveryFee : 0,
-      };
+        deliveryTime: deliveryTime || "now",
+        deliveryOption: deliveryOption || "deliver",
+        deliveryFee: deliveryFeeToUse, // Send delivery fee separately
+      };      
   
       const response = await axios.post(
         "https://momarket-7ata.onrender.com/checkout",
@@ -125,7 +132,7 @@ const CheckOut = () => {
       console.error("Checkout error:", error);
       alert("An error occurred during checkout. Please try again.");
     }
-  };
+};
 
   useEffect(() => {
     const token = localStorage.getItem("auth-token");

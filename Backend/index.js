@@ -151,9 +151,10 @@ const Order = mongoose.model("Order", {
   ],
   phone: { type: String, required: true },
   location: { type: String, required: true },
+  subtotal: { type: Number, required: true }, // Subtotal from products
+  deliveryFee: { type: Number, required: true }, // Delivery fee, default to 0
   totalAmount: { type: Number, required: true }, // Subtotal + delivery fee
-  deliveryOption: { type: String, enum: ["deliver", "pickup"], default: "deliver" }, // Track delivery option
-  deliveryFee: { type: Number, default: 0 }, // Track delivery fee
+  deliveryOption: { type: String, enum: ["deliver", "pickup"], required: true },
   paymentMethod: {
     type: String,
     enum: ["cash_on_delivery", "mobile_money"],
@@ -161,19 +162,7 @@ const Order = mongoose.model("Order", {
   },
   deliveryTime: {
     type: String,
-    enum: [
-      "now",
-      "morning",
-      "afternoon",
-      "evening",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ],
+    enum: ["now", "morning", "afternoon", "evening"],
     default: "now",
   },
   status: {
@@ -488,7 +477,8 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   }
 });
 
-app.post('/checkout', 
+app.post(
+  "/checkout",
   (req, res, next) => {
     console.log("Before Middleware - Request Body:", req.body);
     next();
@@ -500,21 +490,51 @@ app.post('/checkout',
     next();
   },
   async (req, res) => {
-    console.log('Final Request Body:', req.body);
-    const { phone, location, paymentMethod, amount, transaction_id, cartData, deliveryOption, deliveryFee } = req.body;
+    console.log("Final Request Body:", req.body);
+
+    const {
+      phone,
+      location,
+      paymentMethod,
+      subtotal,
+      totalAmount,
+      transaction_id,
+      cartData,
+      deliveryOption,
+      deliveryFee,
+    } = req.body;
+
     if (!deliveryOption) {
       console.error("Delivery option is missing in the request body");
       return res.status(400).json({
         success: false,
-        message: 'Delivery option is required',
+        message: "Delivery option is required",
       });
     }
-    try {
-      // Calculate total amount
-      const subtotal = amount; // Subtotal from the frontend
-      const totalAmount = deliveryOption === 'deliver' ? subtotal : subtotal;
 
-      // Save the order to the database
+    try {
+      // Compute delivery fee
+      const parsedDeliveryFee =
+        deliveryOption === "deliver" ? deliveryFee || 0 : 0;
+
+      // Compute total amount based on backend logic
+      const computedTotalAmount = subtotal + parsedDeliveryFee;
+
+      if (totalAmount !== computedTotalAmount) {
+        console.warn(
+          `Mismatch in totalAmount! Received: ${totalAmount}, Expected: ${computedTotalAmount}`
+        );
+        // Proceeding with computed totalAmount
+      }
+
+      // Log the order values
+      console.log("Creating order with values:", {
+        subtotal,
+        deliveryFee: parsedDeliveryFee,
+        totalAmount: computedTotalAmount,
+      });
+
+      // Create and save the new order
       const newOrder = new Order({
         userId: req.user.id,
         cartData: cartData.map(({ _id, quantity }) => ({
@@ -523,33 +543,30 @@ app.post('/checkout',
         })),
         phone,
         location,
-        totalAmount, // Include delivery fee in the total amount
+        subtotal,
+        deliveryFee: parsedDeliveryFee,
+        totalAmount: computedTotalAmount, // Always assign backend-computed total
         paymentMethod,
-        transaction_id: paymentMethod === 'cash_on_delivery' ? null : transaction_id,
-        deliveryTime: req.body.deliveryTime || 'now', // Default to "now" if not provided
-        deliveryOption: req.body.deliveryOption, // Direct assignment
-        deliveryFee: deliveryFee || 0, // Ensure this is set
-        status: 'pending',
+        transaction_id:
+          paymentMethod === "cash_on_delivery" ? null : transaction_id,
+        deliveryTime: req.body.deliveryTime || "now",
+        deliveryOption,
+        status: "pending",
         date: new Date(),
       });
-      // await Order.updateMany(
-      //   { deliveryOption: { $exists: false } }, 
-      //   { $set: { deliveryOption: "deliver", deliveryFee: 0 } } // Set default values
-      // );
-    
+
       await newOrder.save();
 
       res.json({
         success: true,
-        message: 'Checkout successful',
-        deliveryContact: '+256 708853662',
+        message: "Checkout successful",
+        deliveryContact: "+256 708853662",
       });
-
     } catch (error) {
-      console.error('Error during checkout:', error);
+      console.error("Error during checkout:", error);
       res.status(500).json({
         success: false,
-        message: 'Checkout failed',
+        message: "Checkout failed",
         error: error.message,
       });
     }

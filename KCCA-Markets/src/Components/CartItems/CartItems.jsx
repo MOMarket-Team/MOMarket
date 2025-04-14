@@ -144,22 +144,25 @@ const CartItems = () => {
       return;
     }
 
-    const totalAmount = getTotalCartAmount() + (deliveryOption === "deliver" ? deliveryFee : 0);
+    const subtotal = getTotalCartAmount();
+    const deliveryFeeToUse = deliveryOption === "deliver" ? deliveryFee : 0;
+    const finalTotal = subtotal + deliveryFeeToUse; // Ensure deliveryFee is added
 
     navigate("/checkout", {
       state: {
         deliveryOption,
-        deliveryFee: deliveryOption === "deliver" ? deliveryFee : 0,
+        deliveryFee: deliveryFeeToUse,
         deliveryLocation,
-        subtotal: getTotalCartAmount(),
+        subtotal,
+        totalAmount: finalTotal, // Ensure totalAmount includes delivery fee
       },
     });
-  };
+};
 
-  const finalTotal = useMemo(() => {
+const finalTotal = useMemo(() => {
     return getTotalCartAmount() + (deliveryOption === "deliver" ? deliveryFee : 0);
-  }, [getTotalCartAmount, deliveryOption, deliveryFee]);
-
+}, [getTotalCartAmount, deliveryOption, deliveryFee]);
+  
   return (
     <div className="cartitems">
       {/* Cart Header */}
