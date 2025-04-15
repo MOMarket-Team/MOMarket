@@ -8,55 +8,132 @@ const AddProduct = () => {
     image: "",
     category: "Fruits",
     price: "",
-    measurement: "Kgs", // Default to "Kgs"
-    sizeOptions: {}, // For "Whole" products
-    basePrice: price || 0, // For "Set" products this is me trying it out
+    measurement: "Kgs",
+    sizeOptions: {},
+    basePrice: "",
   });
 
   const [image, setImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const detailHandler = (e) => {
     const { name, value } = e.target;
-    setProductDetails({ ...productDetails, [name]: value });
+    setProductDetails(prev => ({ 
+      ...prev, 
+      [name]: value 
+    }));
   };
 
   const sizeOptionHandler = (size, price) => {
-    setProductDetails({
-      ...productDetails,
-      sizeOptions: { ...productDetails.sizeOptions, [size]: price },
-    });
+    setProductDetails(prev => ({
+      ...prev,
+      sizeOptions: { 
+        ...prev.sizeOptions, 
+        [size]: price 
+      },
+    }));
   };
 
   const Add_product = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    if (!image) {
+      alert("Please select an image first");
+      setIsSubmitting(false);
+      return;
+    }
+
     let formData = new FormData();
     formData.append('product', image);
 
     try {
-      // Upload image
+      // 1. Upload image
       const uploadResponse = await fetch('https://momarket-7ata.onrender.com/uploads', {
         method: 'POST',
-        headers: { Accept: 'application/json' },
         body: formData,
       });
+      
+      if (!uploadResponse.ok) {
+        throw new Error("Image upload failed");
+      }
+
       const uploadData = await uploadResponse.json();
 
-      if (uploadData.success) {
-        productDetails.image = uploadData.image_url;
+      if (!uploadData.success) {
+        throw new Error(uploadData.message || "Image upload failed");
+      }
 
-        // Add product
-        const addProductResponse = await fetch('https://momarket-7ata.onrender.com/addproduct', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(productDetails),
+      // 2. Prepare product data with proper types
+      const productData = {
+        name: productDetails.name,
+        image: uploadData.image_url,
+        category: productDetails.category,
+        measurement: productDetails.measurement,
+        available: true,
+        date: new Date(),
+        sizeImages: {},
+        sizeOptions: {},
+        basePrice: 0,
+        price: 0
+      };
+
+      // Handle different measurement types
+      if (productDetails.measurement === "Whole") {
+        // Convert size options to numbers
+        const sizeOpts = {};
+        for (const [size, price] of Object.entries(productDetails.sizeOptions)) {
+          sizeOpts[size] = Number(price);
+        }
+        productData.sizeOptions = sizeOpts;
+        productData.price = 0; // Whole products use sizeOptions
+      } 
+      else if (productDetails.measurement === "Set") {
+        productData.basePrice = Number(productDetails.basePrice) || 0;
+        productData.price = productData.basePrice;
+      } 
+      else { // "Kgs"
+        productData.price = Number(productDetails.price) || 0;
+      }
+
+      // 3. Add product
+      const addProductResponse = await fetch('https://momarket-7ata.onrender.com/addproduct', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(productData),
+      });
+
+      if (!addProductResponse.ok) {
+        const errorData = await addProductResponse.json();
+        throw new Error(errorData.message || "Failed to add product");
+      }
+
+      const addProductData = await addProductResponse.json();
+      
+      if (addProductData.success) {
+        alert("Product Added Successfully");
+        // Reset form
+        setProductDetails({
+          name: "",
+          image: "",
+          category: "Fruits",
+          price: "",
+          measurement: "Kgs",
+          sizeOptions: {},
+          basePrice: "",
         });
-
-        const addProductData = await addProductResponse.json();
-        addProductData.success
-          ? alert("Product Added Successfully")
-          : alert("Failed to Add Product");
+        setImage(null);
+      } else {
+        throw new Error(addProductData.message || "Failed to Add Product");
       }
     } catch (error) {
       console.error("Error during product addition:", error);
+      alert(error.message || "An error occurred while adding the product");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -64,15 +141,40 @@ const AddProduct = () => {
     <div className='addproduct'>
       <div className="itemfield">
         <p>Product title</p>
-        <input value={productDetails.name} onChange={detailHandler} type="text" name='name' placeholder='Type here' />
+        <input 
+          value={productDetails.name} 
+          onChange={detailHandler} 
+          type="text" 
+          name='name' 
+          placeholder='Type here' 
+          required
+        />
       </div>
-      <div className="itemfield">
-        <p>Price</p>
-        <input value={productDetails.price} onChange={detailHandler} type="text" name='price' placeholder='Type here' />
-      </div>
+      
+      {productDetails.measurement !== "Whole" && (
+        <div className="itemfield">
+          <p>{productDetails.measurement === "Set" ? "Set Price" : "Price"}</p>
+          <input 
+            value={productDetails.measurement === "Set" ? productDetails.basePrice : productDetails.price} 
+            onChange={detailHandler} 
+            type="number" 
+            name={productDetails.measurement === "Set" ? "basePrice" : "price"} 
+            placeholder='Type here' 
+            min="0"
+            step="0.01"
+            required
+          />
+        </div>
+      )}
+      
       <div className="itemfield">
         <p>Product category</p>
-        <select value={productDetails.category} onChange={detailHandler} name="category">
+        <select 
+          value={productDetails.category} 
+          onChange={detailHandler} 
+          name="category"
+          required
+        >
           <option value="Fruits">Fruits</option>
           <option value="Foods">Foods</option>
           <option value="Vegetables">Vegetables</option>
@@ -80,41 +182,74 @@ const AddProduct = () => {
           <option value="Spices">Spices</option>
         </select>
       </div>
+      
       <div className="itemfield">
         <p>Measurement</p>
-        <select value={productDetails.measurement} onChange={detailHandler} name="measurement">
+        <select 
+          value={productDetails.measurement} 
+          onChange={detailHandler} 
+          name="measurement"
+          required
+        >
           <option value="Kgs">Kgs</option>
           <option value="Whole">Whole</option>
           <option value="Set">Set</option>
         </select>
       </div>
+
       {productDetails.measurement === "Whole" && (
         <div className="itemfield">
           <p>Size Options</p>
           <input
             type="number"
             placeholder="Small Price"
+            min="0"
+            step="0.01"
             onChange={(e) => sizeOptionHandler("small", e.target.value)}
           />
           <input
             type="number"
             placeholder="Medium Price"
+            min="0"
+            step="0.01"
             onChange={(e) => sizeOptionHandler("medium", e.target.value)}
           />
           <input
             type="number"
             placeholder="Big Price"
+            min="0"
+            step="0.01"
             onChange={(e) => sizeOptionHandler("big", e.target.value)}
           />
         </div>
       )}
+
       <div className="itemfield">
         <label htmlFor="file-input">
-          <img src={image ? URL.createObjectURL(image) : upload} alt="" className='upload-img' />
+          <img 
+            src={image ? URL.createObjectURL(image) : upload} 
+            alt="" 
+            className='upload-img' 
+          />
+          <p>{image ? image.name : "Click to upload image"}</p>
         </label>
-        <input onChange={(e) => setImage(e.target.files[0])} type="file" id='file-input' hidden />
+        <input 
+          onChange={(e) => setImage(e.target.files[0])} 
+          type="file" 
+          id='file-input' 
+          hidden 
+          accept="image/*"
+          required
+        />
       </div>
-      <button onClick={Add_product} className='add-btn'>ADD</button>
+      
+      <button 
+        onClick={Add_product} 
+        className='add-btn'
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Adding..." : "ADD"}
+      </button>
     </div>
   );
 };

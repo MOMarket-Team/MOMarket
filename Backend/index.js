@@ -254,23 +254,70 @@ const ensureCartNotEmpty = (req, res, next) => {
 // Routes for product operations
 app.post("/addproduct", async (req, res) => {
   try {
-    const { name, image, category, price, measurement, sizeOptions, basePrice } = req.body;
+    const { name, image, category, price, measurement, sizeOptions = {}, basePrice = 0 } = req.body;
 
-    const newProduct = new Product({
-      id: await generateProductId(), // Function to generate unique ID
-      name,
-      image,
-      category,
-      price,
-      measurement,
-      sizeOptions: measurement === "Whole" ? sizeOptions : {},
-      basePrice: measurement === "Set" ? basePrice : 0,
-    });
+    // Validate required fields
+    if (!name || !image || !category || price === undefined) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing required fields: name, image, category, and price are required" 
+      });
+    }
 
+    // Create product data with proper types
+    const productData = {
+      name: String(name),
+      image: String(image),
+      category: String(category),
+      measurement: ["Kgs", "Whole", "Set"].includes(measurement) ? measurement : "Kgs",
+      available: true,
+      date: new Date(),
+      sizeImages: new Map(),
+      sizeOptions: new Map(),
+      basePrice: 0,
+      price: 0
+    };
+
+    // Handle measurement-specific data
+    if (productData.measurement === "Whole") {
+      // Convert size options to Map
+      const sizeOpts = new Map();
+      for (const [size, price] of Object.entries(sizeOptions)) {
+        sizeOpts.set(size, Number(price));
+      }
+      productData.sizeOptions = sizeOpts;
+    } 
+    else if (productData.measurement === "Set") {
+      productData.basePrice = Number(basePrice) || 0;
+      productData.price = productData.basePrice;
+    } 
+    else { // "Kgs"
+      productData.price = Number(price) || 0;
+    }
+
+    // Create and save product
+    const newProduct = new Product(productData);
     await newProduct.save();
-    res.json({ success: true, product: newProduct });
+
+    res.json({ 
+      success: true, 
+      message: "Product added successfully",
+      product: {
+        id: newProduct._id,
+        name: newProduct.name,
+        image: newProduct.image,
+        category: newProduct.category,
+        price: newProduct.price,
+        measurement: newProduct.measurement
+      }
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to add product", error });
+    console.error("Add product error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to add product",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 });
 
