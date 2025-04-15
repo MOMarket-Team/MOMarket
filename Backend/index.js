@@ -257,10 +257,10 @@ app.post("/addproduct", async (req, res) => {
     const { name, image, category, price, measurement, sizeOptions = {}, basePrice = 0 } = req.body;
 
     // Validate required fields
-    if (!name || !image || !category || price === undefined) {
+    if (!name || !image || !category) {
       return res.status(400).json({ 
         success: false, 
-        message: "Missing required fields: name, image, category, and price are required" 
+        message: "Missing required fields: name, image, and category are required" 
       });
     }
 
@@ -272,26 +272,33 @@ app.post("/addproduct", async (req, res) => {
       measurement: ["Kgs", "Whole", "Set"].includes(measurement) ? measurement : "Kgs",
       available: true,
       date: new Date(),
-      sizeImages: new Map(),
-      sizeOptions: new Map(),
+      sizeImages: {},
+      sizeOptions: {},
       basePrice: 0,
       price: 0
     };
 
     // Handle measurement-specific data
     if (productData.measurement === "Whole") {
-      // Convert size options to Map
-      const sizeOpts = new Map();
+      // Convert size options to plain object (Mongoose will convert to Map)
+      const sizeOpts = {};
       for (const [size, price] of Object.entries(sizeOptions)) {
-        sizeOpts.set(size, Number(price));
+        sizeOpts[size] = Number(price);
       }
       productData.sizeOptions = sizeOpts;
+      productData.price = 0; // Whole products use sizeOptions
     } 
     else if (productData.measurement === "Set") {
       productData.basePrice = Number(basePrice) || 0;
       productData.price = productData.basePrice;
     } 
     else { // "Kgs"
+      if (price === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: "Price is required for Kgs measurement"
+        });
+      }
       productData.price = Number(price) || 0;
     }
 
