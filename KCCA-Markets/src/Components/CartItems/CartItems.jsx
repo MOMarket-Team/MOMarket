@@ -27,7 +27,7 @@ const CartItems = () => {
   const distanceCache = useRef(new Map());
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://momarket-7ata.onrender.com";
-  const companyLocation = { lat: 0.3175, lng: 32.5825 };
+  const companyLocation = { lat: 0.3113, lng: 32.5799 };
 
   // Fetch the Google Maps API key from the backend
   const fetchGoogleMapsApiKey = async () => {

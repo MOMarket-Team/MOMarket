@@ -23,43 +23,81 @@ const Footer = () => {
 
   return (
     <div className="footer">
-      <div className="footer-logo">
-        <img src={footer_logo} alt="Mangu Logo" />
-        <p>
-          MANGU <br /> ONLINE <br /> MARKET
-        </p>
+      {/* Footer Content */}
+      <div className="footer-content">
+        {/* Logo Section */}
+        <div className="footer-logo">
+          <img src={footer_logo} alt="Mangu Logo" />
+          <p>
+            MANGU <br /> ONLINE <br /> MARKET
+          </p>
+        </div>
+
+        {/* Quick Links Section */}
+        <div className="footer-section">
+          <h4>Quick Links</h4>
+          <ul className="footer-links">
+            <li>
+              <Link to="/AllProducts">All Products</Link>
+            </li>
+            <li>
+              <Link to="/client-orders">Company</Link>
+            </li>
+            <li>
+              <Link to="/offices">Offices</Link>
+            </li>
+            <li>
+              <Link to="/about">About</Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Contact Information Section */}
+        <div className="footer-section">
+          <h4>Contact Us</h4>
+          <p>Email: manguonlinemarket.com</p>
+          <p>Phone: +256708853662</p>
+          <p>Address: Nakaseero Market, Market Square Street, Kampala, Uganda</p>
+          <div className="footer-social-icon">
+            <a href="https://wa.link/4wgyk8" target="_blank" rel="noopener noreferrer">
+              <img src={what_icon} alt="WhatsApp" />
+            </a>
+            <a href="https://www.instagram.com/momarket25/" target="_blank" rel="noopener noreferrer">
+              <img src={insta_icon} alt="Instagram" />
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61572943912444" target="_blank" rel="noopener noreferrer">
+              <img src={facebook_icon} alt="Facebook" />
+            </a>
+            <a href="https://x.com/MOMarket25" target="_blank" rel="noopener noreferrer">
+              <img src={x_icon} alt="X (Twitter)" />
+            </a>
+          </div>
+        </div>
+
+        {/* Legal Links Section */}
+        <div className="footer-section">
+          <h4>Legal</h4>
+          <ul className="footer-links">
+            <li>
+              <Link to="/privacy-policy">Privacy Policy</Link>
+            </li>
+            <li>
+              <Link to="/terms-of-service">Terms of Service</Link>
+            </li>
+            <li>
+              <Link to="/refund-policy">Refund Policy</Link>
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <ul className="footer-links">
-        <li>
-          <Link to="/AllProducts">All Products</Link>
-        </li>
-        <li>
-          <Link to="/client-orders">Company</Link>
-        </li>
-        <li>
-          <Link to="/offices">Offices</Link>
-        </li>
-        <li>
-          <Link to="/about">About</Link>
-        </li>
-      </ul>
-
-      <div className="footer-social-icon">
-        <a href="https://wa.link/4wgyk8" target="_blank" rel="noopener noreferrer">
-          <img src={what_icon} alt="WhatsApp" />
-        </a>
-        <a href="https://www.instagram.com/momarket25/" target="_blank" rel="noopener noreferrer">
-          <img src={insta_icon} alt="Instagram" />
-        </a>
-        <a href="https://www.facebook.com/profile.php?id=61572943912444" target="_blank" rel="noopener noreferrer">
-          <img src={facebook_icon} alt="Facebook" />
-        </a>
-        <a href="https://x.com/MOMarket25" target="_blank" rel="noopener noreferrer">
-          <img src={x_icon} alt="X (Twitter)" />
-        </a>
+      {/* Copyright Section */}
+      <div className="copyright">
+        <hr />
+        <p>Copyright © 2025 - All Rights Reserved</p>
       </div>
 
+      {/* Contact Popup */}
       {showContactPopup && (
         <div className="contact-popup">
           <h4>Contact Us</h4>
@@ -81,11 +119,6 @@ const Footer = () => {
           </button>
         </div>
       )}
-
-      <div className="copyright">
-        <hr />
-        <p>Copyright © 2025 - All Rights Reserved</p>
-      </div>
     </div>
   );
 };
