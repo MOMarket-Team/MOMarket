@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import './CSS/ProductCategory.css';
 import { ProductContext } from '../Context/ProductContext';
 import dropdown_icon from '../Components/Assets/dropdown_icon.png';
@@ -6,14 +6,24 @@ import Item from '../Components/Item/Item';
 
 const ProductsCategory = (props) => {
   const { all_product } = useContext(ProductContext);
-  const [visibleCount, setVisibleCount] = useState(12); // Initial number of products displayed
+  const [visibleCount, setVisibleCount] = useState(12);
+  const [loading, setLoading] = useState(true);
 
   // Filter products based on category
   const categoryProducts = all_product.filter(item => item.category === props.category);
 
+  useEffect(() => {
+    // Simulate loading delay
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   // Handle "Explore More" click
   const handleExploreMore = () => {
-    setVisibleCount(categoryProducts.length); // Show all products in the category
+    setVisibleCount(categoryProducts.length);
   };
 
   return (
@@ -27,21 +37,28 @@ const ProductsCategory = (props) => {
           Sort by <img src={dropdown_icon} alt="" />
         </div>
       </div>
-      <div className="category-products">
-        {categoryProducts.slice(0, visibleCount).map((item, i) => (
-          <Item
-            key={i}
-            id={item.id}
-            name={item.name}
-            image={item.image}
-            price={item.price}
-          />
-        ))}
-      </div>
-      {visibleCount < categoryProducts.length && ( // Show "Explore More" only if there are more products
-        <div className="loadmore" onClick={handleExploreMore}>
-          Explore More
-        </div>
+      
+      {loading ? (
+        <div className="loading-message">Loading {props.category} products...</div>
+      ) : (
+        <>
+          <div className="category-products">
+            {categoryProducts.slice(0, visibleCount).map((item, i) => (
+              <Item
+                key={i}
+                id={item.id}
+                name={item.name}
+                image={item.image}
+                price={item.price}
+              />
+            ))}
+          </div>
+          {visibleCount < categoryProducts.length && (
+            <div className="loadmore" onClick={handleExploreMore}>
+              Explore More
+            </div>
+          )}
+        </>
       )}
     </div>
   );

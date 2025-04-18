@@ -3,12 +3,13 @@
     text-align: center;
     max-width: 100%; /* Ensure it doesn't exceed the parent container's width */
     box-sizing: border-box; /* Include padding in width calculation */
+    background-color: #EADCBB; /* Light beige background */
 }
 
 .popular h1 {
     margin-bottom: 30px;
     font-size: 2rem;
-    color: #333;
+    color: #0D330E; /* Dark green for heading */
 }
 
 /* Grid Layout */
@@ -24,11 +25,11 @@
 
 /* Product Card Styling */
 .popular-item .item {
-    border: 1px solid #ddd;
+    border: 1px solid #477023; /* Muted green border */
     border-radius: 8px;
     padding: 15px;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(7, 30, 7, 0.1); /* Green-tinted shadow */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     background: #fff;
     max-width: 100%; /* Ensure items don't exceed their container */
@@ -36,7 +37,7 @@
 
 .popular-item .item:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 10px rgba(7, 30, 7, 0.15); /* Darker green-tinted shadow */
     transition: 0.6s;
 }
 
@@ -52,16 +53,18 @@
     font-size: 1.2rem;
     font-weight: 600;
     text-decoration: none;
+    color: #071E07; /* Darkest green for product names */
 }
 
 .popular-item .item-name:hover {
     text-decoration: none;
-    color: #007bff;
+    color: #3E8400; /* Bright green on hover */
 }
 
 .popular-item .item-price {
     font-size: 1rem;
-    color: #555;
+    color: #477023; /* Muted green for price */
+    font-weight: 600;
 }
 
 /* View Details Section */
@@ -71,7 +74,7 @@
     justify-content: center;
     gap: 8px; /* Space between icon and text */
     text-decoration: none;
-    color: #1e90ff; /* Blue color for the "View" text */
+    color: #3E8400; /* Bright green instead of blue */
     font-size: 14px;
     font-weight: 500;
     margin-top: 8px;
@@ -80,11 +83,13 @@
 
 .view-details:hover {
     text-decoration: underline; /* Optional hover effect */
+    color: #0D330E; /* Darker green on hover */
 }
 
 .eye-icon {
     width: 20px; /* Adjust size as needed */
     height: 20px; /* Adjust size as needed */
+    filter: invert(36%) sepia(34%) saturate(809%) hue-rotate(51deg) brightness(94%) contrast(86%); /* Makes icon match the green theme */
 }
 
 /* Responsive Adjustments */
@@ -158,7 +163,7 @@
     .popular-item .item-price {
         font-size: 0.5rem; /* Match .products-grid p font size */
         font-weight: 400;
-        color: #171717;
+        color: #071E07; /* Darkest green */
     }
 
     .view-details {
@@ -166,7 +171,8 @@
     }
 
     .eye-icon {
-        width: 50px; /* Match .products-grid eye-icon size */
-        height: 50px; /* Match .products-grid eye-icon size */
+        width: 16px; /* Reduced from 50px */
+        height: 16px; /* Reduced from 50px */
+        filter: invert(36%) sepia(34%) saturate(809%) hue-rotate(51deg) brightness(94%) contrast(86%);
     }
 }

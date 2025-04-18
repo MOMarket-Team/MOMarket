@@ -36,30 +36,30 @@ const RelatedProducts = ({ selectedCategory }) => {
     fetchRelatedProducts();
   }, [selectedCategory]);
 
-  if (loading) {
-    return <p>Loading related products...</p>;
-  }
-
   return (
     <div className="relatedproducts">
       <h1>Related Products</h1>
       <hr />
-      <div className="relatedproducts-item">
-        {relatedProducts.length > 0 ? (
-          relatedProducts.map((item) => (
-            <Item
-              key={item.id}
-              id={item.id}
-              name={item.name}
-              image={item.image}
-              price={item.price}
-              category={item.category}
-            />
-          ))
-        ) : (
-          <p>No related products found.</p>
-        )}
-      </div>
+      {loading ? (
+        <div className="loading-message">Loading related products...</div>
+      ) : (
+        <div className="relatedproducts-item">
+          {relatedProducts.length > 0 ? (
+            relatedProducts.map((item) => (
+              <Item
+                key={item.id}
+                id={item.id}
+                name={item.name}
+                image={item.image}
+                price={item.price}
+                category={item.category}
+              />
+            ))
+          ) : (
+            <p className="no-products-message">No related products found.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
