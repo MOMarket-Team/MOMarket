@@ -44,38 +44,11 @@ const AddProduct = () => {
       return;
     }
   
-    // Validate required fields based on measurement
-    if (!productDetails.name || !productDetails.category) {
-      alert("Product name and category are required");
-      setIsSubmitting(false);
-      return;
-    }
-  
-    if (productDetails.measurement === "Whole") {
-      if (Object.keys(productDetails.sizeOptions).length === 0) {
-        alert("Please provide at least one size option for Whole measurement");
-        setIsSubmitting(false);
-        return;
-      }
-    } else if (productDetails.measurement === "Set") {
-      if (!productDetails.basePrice) {
-        alert("Set price is required for Set measurement");
-        setIsSubmitting(false);
-        return;
-      }
-    } else { // Kgs
-      if (!productDetails.price) {
-        alert("Price is required for Kgs measurement");
-        setIsSubmitting(false);
-        return;
-      }
-    }
-  
     let formData = new FormData();
     formData.append('product', image);
   
     try {
-      // Upload image
+      // 1. Upload image
       const uploadResponse = await fetch('https://momarket-7ata.onrender.com/uploads', {
         method: 'POST',
         body: formData,
@@ -87,24 +60,22 @@ const AddProduct = () => {
   
       const uploadData = await uploadResponse.json();
   
-      // Prepare product data
+      if (!uploadData.success) {
+        throw new Error(uploadData.message || "Image upload failed");
+      }
+  
+      // 2. Prepare product data with proper types
       const productData = {
         name: productDetails.name,
         image: uploadData.image_url,
         category: productDetails.category,
         measurement: productDetails.measurement,
-        ...(productDetails.measurement === "Whole" && { 
-          sizeOptions: productDetails.sizeOptions 
-        }),
-        ...(productDetails.measurement === "Set" && { 
-          basePrice: Number(productDetails.basePrice) 
-        }),
-        ...(productDetails.measurement === "Kgs" && { 
-          price: Number(productDetails.price) 
-        })
+        price: productDetails.measurement === "Set" ? productDetails.basePrice : productDetails.price,
+        basePrice: productDetails.measurement === "Set" ? productDetails.basePrice : 0,
+        sizeOptions: productDetails.sizeOptions
       };
   
-      // Add product
+      // 3. Add product
       const addProductResponse = await fetch('https://momarket-7ata.onrender.com/addproduct', {
         method: 'POST',
         headers: { 
@@ -122,7 +93,6 @@ const AddProduct = () => {
   
       if (responseData.success) {
         alert("Product Added Successfully");
-        console.log("Added product:", responseData.product);
         // Reset form
         setProductDetails({
           name: "",
@@ -134,6 +104,8 @@ const AddProduct = () => {
           basePrice: "",
         });
         setImage(null);
+      } else {
+        throw new Error(responseData.message || "Failed to Add Product");
       }
     } catch (error) {
       console.error("Error during product addition:", error);
