@@ -80,15 +80,33 @@ mongoose
 
 // Define Product model
 const Product = mongoose.model("Product", {
-  // id: { type: Number, required: true },
+  id: { 
+    type: Number, 
+    unique: true,
+    required: false // Make it optional since we'll use _id primarily
+  },
   name: { type: String, required: true },
   image: { type: String, required: true },
-  measurement: { type: String, enum: ["Kgs", "Whole", "Set"], default: "Kgs" },
+  measurement: { 
+    type: String, 
+    enum: ["Kgs", "Whole", "Set"], 
+    default: "Kgs",
+    required: true 
+  },
   category: { type: String, required: true },
   price: { type: Number, required: true },
-  sizeOptions: { type: Map, of: Number, default: {} }, // For "Whole" products
-  sizeImages: { type: Map, of: String, default: {} }, // For "Whole" products
-  basePrice: { type: Number, default: 0 }, // For "Set" products
+  sizeOptions: { 
+    type: Map, 
+    of: Number, 
+    default: {},
+    required: function() { return this.measurement === "Whole"; }
+  },
+  sizeImages: { type: Map, of: String, default: {} },
+  basePrice: { 
+    type: Number, 
+    default: 0,
+    required: function() { return this.measurement === "Set"; }
+  },
   date: { type: Date, default: Date.now },
   available: { type: Boolean, default: true },
 });
@@ -263,9 +281,14 @@ app.post("/addproduct", async (req, res) => {
         message: "Missing required fields: name, image, and category are required" 
       });
     }
+    
+    // Get the next available ID
+    const lastProduct = await Product.findOne().sort({ id: -1 });
+    const nextId = lastProduct ? lastProduct.id + 1 : 1;
 
     // Create product data with proper types
     const productData = {
+      id: nextId,
       name: String(name),
       image: String(image),
       category: String(category),
@@ -273,33 +296,52 @@ app.post("/addproduct", async (req, res) => {
       available: true,
       date: new Date(),
       sizeImages: {},
-      sizeOptions: {},
       basePrice: 0,
       price: 0
     };
 
     // Handle measurement-specific data
     if (productData.measurement === "Whole") {
-      // Convert size options to plain object (Mongoose will convert to Map)
-      const sizeOpts = {};
-      for (const [size, price] of Object.entries(sizeOptions)) {
-        sizeOpts[size] = Number(price);
+      // Validate size options
+      if (!sizeOptions || Object.keys(sizeOptions).length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Size options are required for Whole measurement"
+        });
       }
-      productData.sizeOptions = sizeOpts;
+
+      // Convert size options to plain object
+      const validatedSizeOptions = {};
+      for (const [size, price] of Object.entries(sizeOptions)) {
+        if (!price || isNaN(price)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid price for size ${size}`
+          });
+        }
+        validatedSizeOptions[size] = Number(price);
+      }
+      productData.sizeOptions = validatedSizeOptions;
       productData.price = 0; // Whole products use sizeOptions
     } 
     else if (productData.measurement === "Set") {
-      productData.basePrice = Number(basePrice) || 0;
+      if (!basePrice || isNaN(basePrice)) {
+        return res.status(400).json({
+          success: false,
+          message: "Valid basePrice is required for Set measurement"
+        });
+      }
+      productData.basePrice = Number(basePrice);
       productData.price = productData.basePrice;
     } 
     else { // "Kgs"
-      if (price === undefined) {
+      if (!price || isNaN(price)) {
         return res.status(400).json({
           success: false,
-          message: "Price is required for Kgs measurement"
+          message: "Valid price is required for Kgs measurement"
         });
       }
-      productData.price = Number(price) || 0;
+      productData.price = Number(price);
     }
 
     // Create and save product
@@ -309,21 +351,14 @@ app.post("/addproduct", async (req, res) => {
     res.json({ 
       success: true, 
       message: "Product added successfully",
-      product: {
-        id: newProduct._id,
-        name: newProduct.name,
-        image: newProduct.image,
-        category: newProduct.category,
-        price: newProduct.price,
-        measurement: newProduct.measurement
-      }
+      product: newProduct // Return the full product object
     });
   } catch (error) {
     console.error("Add product error:", error);
     res.status(500).json({ 
       success: false, 
       message: "Failed to add product",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined
+      error: error.message // Always return error message for debugging
     });
   }
 });
@@ -397,12 +432,19 @@ app.post("/removeproduct", async (req, res) => {
 
 app.get("/allproducts", async (req, res) => {
   try {
-    let products = await Product.find({});
+    let products = await Product.find({}).lean(); // Use lean() for plain JavaScript objects
+    // Ensure each product has an id field
+    products = products.map(product => ({
+      ...product,
+      id: product._id.toString()
+    }));
     res.send(products);
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch products", error });
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch products",
+      error: error.message
+    });
   }
 });
 app.get("/newcollections", async (req, res) => {

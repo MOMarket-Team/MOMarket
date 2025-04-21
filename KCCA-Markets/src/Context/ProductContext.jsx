@@ -51,6 +51,10 @@ const ProductContextProvider = (props) => {
   };
 
   const addTocart = (product) => {
+    // Ensure product has an id (_id from MongoDB)
+    if (!product.id && product._id) {
+      product.id = product._id;
+    }
     const existingItem = cartItems.find((item) => item.id === product.id);
   
     if (existingItem) {
