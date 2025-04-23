@@ -3,31 +3,29 @@ import './CSS/ProductCategory.css';
 import { ProductContext } from '../Context/ProductContext';
 import dropdown_icon from '../Components/Assets/dropdown_icon.png';
 import Item from '../Components/Item/Item';
+import Breadcrum from '../Components/Breadcrums/Breadcrum';
 
 const ProductsCategory = (props) => {
   const { all_product } = useContext(ProductContext);
   const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(true);
 
-  // Filter products based on category
   const categoryProducts = all_product.filter(item => item.category === props.category);
 
   useEffect(() => {
-    // Simulate loading delay
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
-    
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle "Explore More" click
   const handleExploreMore = () => {
     setVisibleCount(categoryProducts.length);
   };
 
   return (
     <div className='product-category'>
+      <Breadcrum category={props.category} />
       <img className='banner' src={props.banner} alt="" />
       <div className="indexsort">
         <p>
@@ -50,6 +48,7 @@ const ProductsCategory = (props) => {
                 name={item.name}
                 image={item.image}
                 price={item.price}
+                category={item.category}
               />
             ))}
           </div>

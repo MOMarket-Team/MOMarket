@@ -1,33 +1,77 @@
-.breadcrum{
+.breadcrum {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: #5e5e5e;
+    gap: 10px;
+    margin: 40px 170px 30px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.breadcrum a {
+    color: #3E8400; /* Bright green for links */
     font-size: 16px;
     font-weight: 600;
-    margin: 60px 170px;
+    text-decoration: none;
+    transition: color 0.3s ease;
     text-transform: capitalize;
 }
-@media(max-width:1280px){
-    .breadcrum{
-        margin: 30px 50px;
+
+.breadcrum a:hover {
+    color: #0D330E; /* Dark green on hover */
+    text-decoration: underline;
+}
+
+.breadcrum span {
+    color: #071E07; /* Darkest green for current page */
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.breadcrum img {
+    width: 12px;
+    height: 12px;
+    filter: invert(36%) sepia(34%) saturate(809%) hue-rotate(51deg) brightness(94%) contrast(86%); /* Green filter */
+}
+
+/* Responsive styles */
+@media (max-width: 1280px) {
+    .breadcrum {
+        margin: 35px 50px 25px;
+    }
+    .breadcrum a, .breadcrum span {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .breadcrum {
+        margin: 30px 30px 20px;
+    }
+    .breadcrum a, .breadcrum span {
         font-size: 14px;
     }
 }
-@media(max-width:1024px){
-    .breadcrum{
-        margin: 30px 30px;
+
+@media (max-width: 800px) {
+    .breadcrum {
+        margin: 25px 20px 15px;
+        gap: 8px;
+    }
+    .breadcrum a, .breadcrum span {
         font-size: 13px;
     }
 }
-@media(max-width:800px){
-    .breadcrum{
-        margin: 30px 10px;
+
+@media (max-width: 500px) {
+    .breadcrum {
+        margin: 20px 15px 10px;
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+    .breadcrum a, .breadcrum span {
         font-size: 12px;
     }
-}
-@media(max-width:500px){
-    .breadcrum{
-        font-size: 10px;
+    .breadcrum img {
+        width: 10px;
+        height: 10px;
     }
 }
