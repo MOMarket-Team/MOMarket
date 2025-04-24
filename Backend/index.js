@@ -80,7 +80,7 @@ mongoose
 
 // Define Product model
 const Product = mongoose.model("Product", {
-  // id: { type: Number, required: true },
+  id: { type: Number, required: true },
   name: { type: String, required: true },
   image: { type: String, required: true },
   measurement: { type: String, enum: ["Kgs", "Whole", "Set"], default: "Kgs" },
