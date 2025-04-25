@@ -1,40 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "./RelatedProducts.css";
 import Item from "../Item/Item";
+import { ProductContext } from "../../Context/ProductContext";
 
 const RelatedProducts = ({ selectedCategory }) => {
+  const { getProductsByCategory } = useContext(ProductContext);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRelatedProducts = async () => {
-      if (!selectedCategory) {
-        console.log("No category selected");
-        setLoading(false);
-        return;
-      }
+    if (!selectedCategory) {
+      console.log("No category selected");
+      setLoading(false);
+      return;
+    }
 
-      try {
-        console.log(`Fetching related products for category: ${selectedCategory}`);
-        const response = await fetch(`https://momarket-7ata.onrender.com/api/products/${selectedCategory}`);
-
-        if (!response.ok) {
-          console.error(`Server returned status: ${response.status}`);
-          setLoading(false);
-          return;
-        }
-
-        const products = await response.json();
-        setRelatedProducts(products);
-      } catch (error) {
-        console.error("Error fetching related products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRelatedProducts();
-  }, [selectedCategory]);
+    const products = getProductsByCategory(selectedCategory);
+    setRelatedProducts(products);
+    setLoading(false);
+  }, [selectedCategory, getProductsByCategory]);
 
   return (
     <div className="relatedproducts">

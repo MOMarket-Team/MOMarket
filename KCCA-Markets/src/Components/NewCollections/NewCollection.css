@@ -1,7 +1,6 @@
-/* Add this to your existing CSS */
 .loading-message {
   font-size: 1.2rem;
-  color: #477023; /* Muted green */
+  color: #477023;
   padding: 40px 0;
   font-style: italic;
   animation: pulse 1.5s infinite;
@@ -16,82 +15,85 @@
 .products-container {
   padding: 20px;
   text-align: center;
-  background-color: #EADCBB; /* Light beige background */
+  background-color: #EADCBB;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .products-container h1 {
   margin-bottom: 30px;
   font-size: 2rem;
-  color: #0D330E; /* Dark green for heading */
+  color: #0D330E;
 }
 
 .products-container hr {
   border: none;
   height: 2px;
-  background-color: #3E8400; /* Medium green divider */
+  background-color: #3E8400;
   width: 100%;
   margin: 0 auto 30px;
 }
 
-/* Rest of your existing CSS remains the same */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 15px;
   margin-top: 20px;
   padding: 0 10px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.product-card {
-  border: 1px solid #477023; /* Muted green border */
+.products-grid .item {
+  border: 1px solid #477023;
   border-radius: 8px;
   padding: 15px;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(7, 30, 7, 0.1); /* Green-tinted shadow */
+  box-shadow: 0 4px 6px rgba(7, 30, 7, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   background: #fff;
+  max-width: 100%;
 }
 
-.product-card:hover {
+.products-grid .item:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 10px rgba(7, 30, 7, 0.15); /* Darker green-tinted shadow */
+  box-shadow: 0 6px 10px rgba(7, 30, 7, 0.15);
   transition: 0.6s;
 }
 
-.product-card img {
+.products-grid .item img {
   max-width: 100%;
   height: auto;
   border-radius: 5px;
   cursor: pointer;
 }
 
-.product-card .product-name {
+.products-grid .item-name {
   margin: 10px 0;
   font-size: 1.2rem;
   font-weight: 600;
   text-decoration: none;
-  color: #071E07; /* Darkest green for product names */
+  color: #071E07;
 }
 
-.product-card .product-name:hover {
+.products-grid .item-name:hover {
   text-decoration: none;
-  color: #3E8400; /* Bright green on hover */
+  color: #3E8400;
 }
 
-.product-card p {
+.products-grid .item-price {
   font-size: 1rem;
-  color: #477023; /* Muted green for price */
+  color: #477023;
   font-weight: 600;
 }
 
-/* View Details Section */
 .view-details {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   text-decoration: none;
-  color: #3E8400; /* Bright green instead of blue */
+  color: #3E8400;
   font-size: 14px;
   font-weight: 500;
   margin-top: 8px;
@@ -100,16 +102,15 @@
 
 .view-details:hover {
   text-decoration: underline;
-  color: #0D330E; /* Darker green on hover */
+  color: #0D330E;
 }
 
 .eye-icon {
   width: 20px;
   height: 20px;
-  filter: invert(36%) sepia(34%) saturate(809%) hue-rotate(51deg) brightness(94%) contrast(86%); /* Green filter */
+  filter: invert(36%) sepia(34%) saturate(809%) hue-rotate(51deg) brightness(94%) contrast(86%);
 }
 
-/* Responsive Adjustments (keep your existing media queries) */
 @media (max-width: 1280px) {
   .products-grid {
     grid-template-columns: repeat(5, 1fr);
@@ -130,27 +131,18 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
   }
-  .product-card {
+  .products-grid .item {
     padding: 10px;
-    font-size: 2rem;
   }
-
-  .product-card img {
-    max-width: 100%;
-  }
-
-  .product-card h3 {
+  .products-grid .item-name {
     font-size: 0.9rem;
   }
-
-  .product-card p {
+  .products-grid .item-price {
     font-size: 0.9rem;
   }
-
   .view-details {
     font-size: 12px;
   }
-
   .eye-icon {
     width: 16px;
     height: 16px;
@@ -163,33 +155,22 @@
     gap: 5px;
     padding: 0 5px;
   }
-
-  .product-card {
+  .products-grid .item {
     padding: 10px;
-    font-size: 0.9rem;
   }
-
-  .product-card img {
-    max-width: 100%;
-  }
-
-  .product-card h3 {
+  .products-grid .item-name {
     font-size: 0.5rem;
   }
-
-  .product-card p {
+  .products-grid .item-price {
     font-size: 0.5rem;
   }
-
   .view-details {
     font-size: 10px;
   }
-
   .eye-icon {
     width: 12px;
     height: 12px;
   }
-  
   .loading-message {
     font-size: 1rem;
     padding: 30px 0;

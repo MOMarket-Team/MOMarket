@@ -405,17 +405,17 @@ app.get("/allproducts", async (req, res) => {
       .json({ success: false, message: "Failed to fetch products", error });
   }
 });
-app.get("/newcollections", async (req, res) => {
-  let products = await Product.find({});
-  let newcollection = products.slice(1).slice(-12);
-  res.send(newcollection);
-});
+// app.get("/newcollections", async (req, res) => {
+//   let products = await Product.find({});
+//   let newcollection = products.slice(1).slice(-12);
+//   res.send(newcollection);
+// });
 
-app.get("/popularinfruit", async (req, res) => {
-  let products = await Product.find({ category: "Fruits" });
-  let popular_in_fruit = products.slice(0, 6);
-  res.send(popular_in_fruit);
-});
+// app.get("/popularinfruit", async (req, res) => {
+//   let products = await Product.find({ category: "Fruits" });
+//   let popular_in_fruit = products.slice(0, 6);
+//   res.send(popular_in_fruit);
+// });
 
 // Routes for user authentication
 app.post("/signup", async (req, res) => {
@@ -694,32 +694,33 @@ app.post("/clearcart", fetchUser, async (req, res) => {
   }
 });
 
-app.get("/search", async (req, res) => {
-  try {
-    const query = req.query.q ? req.query.q.toLowerCase() : "";
+// app.get("/search", async (req, res) => {
+//   try {
+//     const query = req.query.q ? req.query.q.toLowerCase() : "";
 
-    // Handle empty query
-    if (!query.trim()) {
-      return res.json({ success: true, products: [] });
-    }
+//     // Handle empty query
+//     if (!query.trim()) {
+//       return res.json({ success: true, products: [] });
+//     }
 
-    // Search products using MongoDB query
-    const filteredProducts = await Product.find({
-      name: { $regex: query, $options: "i" }, // Case-insensitive search
-    });
+//     // Search products using MongoDB query
+//     const filteredProducts = await Product.find({
+//       name: { $regex: query, $options: "i" }, // Case-insensitive search
+//     });
 
-    res.json({
-      success: true,
-      products: filteredProducts,
-    });
-  } catch (error) {
-    console.error("Error during search:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to perform search",
-    });
-  }
-});
+//     res.json({
+//       success: true,
+//       products: filteredProducts,
+//     });
+//   } catch (error) {
+//     console.error("Error during search:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to perform search",
+//     });
+//   }
+// });
+
 
 // for statuses on delivery
 app.put("/admin/orders/:id/status", async (req, res) => {
@@ -794,31 +795,31 @@ app.delete("/admin/orders/:id", async (req, res) => {
 });
 
 // API to get products by category
-app.get("/api/products/:category", async (req, res) => {
-  try {
-    const { category } = req.params;
-    if (!category) {
-      return res.status(400).json({ error: "Category parameter is required" });
-    }
+// app.get("/api/products/:category", async (req, res) => {
+//   try {
+//     const { category } = req.params;
+//     if (!category) {
+//       return res.status(400).json({ error: "Category parameter is required" });
+//     }
 
-    console.log(`Category received: "${category}"`);
+//     console.log(`Category received: "${category}"`);
 
-    // Case-insensitive search for matching products
-    const products = await Product.find({
-      category: { $regex: new RegExp(`^${category.trim()}`, "i") },
-    });
+//     // Case-insensitive search for matching products
+//     const products = await Product.find({
+//       category: { $regex: new RegExp(`^${category.trim()}`, "i") },
+//     });
 
-    if (products.length === 0) {
-      console.log("No products found for this category.");
-    }
+//     if (products.length === 0) {
+//       console.log("No products found for this category.");
+//     }
 
-    console.log(`Products fetched: ${JSON.stringify(products)}`);
-    res.json(products);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).send("Failed to fetch products");
-  }
-});
+//     console.log(`Products fetched: ${JSON.stringify(products)}`);
+//     res.json(products);
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+//     res.status(500).send("Failed to fetch products");
+//   }
+// });
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });

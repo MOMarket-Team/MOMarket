@@ -122,6 +122,21 @@
 .search-result-item:hover {
   background-color: #f8f8f8;
 }
+.search-again-btn {
+  margin-top: 0.5rem;
+  background-color: #2e8b57;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.3s ease;
+}
+
+.search-again-btn:hover {
+  background-color: #256d45;
+}
 
 .product-name {
   font-weight: 600;
