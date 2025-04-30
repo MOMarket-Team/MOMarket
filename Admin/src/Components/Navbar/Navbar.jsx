@@ -38,11 +38,7 @@ const Navbar = () => {
     return (
         <div className="navbar">
             <img src={logo} alt="Logo" className="nav-logo" />
-            <p className="title">
-                MANGU<br />
-                ONLINE <br />
-                MARKET
-            </p>
+            <p className="title">MANGU MARKET</p>
             <div className="nav-dropdown">
                 <button
                     className="nav-button"

@@ -1,40 +1,110 @@
-.food{
-    width: 60px;
-    height: auto;
-}
-.sidebar{
+.sidebar {
     display: flex;
     flex-direction: column;
-    padding-top: 30px;
+    padding: 30px 0;
     gap: 20px;
-    width: 100%;
-    max-width: 250px;
-    height: 100px;
+    width: 250px;
+    min-width: 250px;
+    height: calc(100vh - 80px);
     background: white;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 900;
+    overflow-y: auto;
 }
-.sidebar-item{
+
+.sidebar-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin: 0px 20px;
-    padding: 5px 10px;
+    margin: 0 20px;
+    padding: 10px 15px;
     border-radius: 6px;
     background: #f6f6f6;
+    transition: all 0.3s ease;
+    color: #333;
 }
-@media(max-width:800px){
-    .sidebar{
-        padding: 0px 0px;
+
+.sidebar-item:hover {
+    background: #e0e0e0;
+    transform: translateX(5px);
+}
+
+.sidebar-item img {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.sidebar-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.food {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+/* Responsive styles */
+@media (max-width: 800px) {
+    .sidebar {
         flex-direction: row;
         width: 100%;
-        max-width: none;
-        height: auto;
+        height: 60px;
+        min-width: 100%;
+        position: fixed; /* Change to fixed */
+        top: 70px; /* Below navbar */
+        left: 0;
+        padding: 10px 0;
         justify-content: center;
-        /* margin: 1px 0px; */
-        /* margin-right: 23px; */
-        margin-left: 200px;
-        background-color: black;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background: white;
+        z-index: 899; /* Below navbar but above content */
+        overflow-x: auto; /* Allow horizontal scrolling if needed */
+        white-space: nowrap; /* Prevent wrapping */
     }
-    .sidebar-item{
-        margin: 10px 10px;
+    
+    .sidebar-item {
+        margin: 0 5px;
+        padding: 8px 12px;
+        flex-direction: column;
+        text-align: center;
+        min-width: 100px; /* Ensure items have minimum width */
+    }
+    
+    .sidebar-item img {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .sidebar-item p {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .sidebar {
+        height: 50px;
+        padding: 5px 0;
+    }
+    
+    .sidebar-item {
+        padding: 5px 8px;
+        margin: 0 3px;
+        min-width: 80px;
+    }
+    
+    .sidebar-item p {
+        font-size: 0.6rem;
+    }
+    
+    .sidebar-item img {
+        width: 15px;
+        height: 15px;
     }
 }

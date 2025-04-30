@@ -1,8 +1,40 @@
-.admin{
+.admin {
     display: flex;
+    min-height: calc(100vh - 80px);
+    margin-top: 80px;
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    transition: all 0.3s ease;
+    position: relative; /* Add this */
 }
-@media(max-width:800px){
-    .admin{
+
+/* Main content area */
+.admin > *:nth-child(2) {
+    flex: 1;
+    padding: 20px;
+    background: #f9f9f9;
+    min-height: calc(100vh - 80px);
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+@media (max-width: 800px) {
+    .admin {
         flex-direction: column;
+        margin-top: 70px;
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .admin > *:nth-child(2) {
+        padding: 15px;
+        min-height: calc(100vh - 140px);
+        margin-top: 60px; /* Add space for the horizontal sidebar */
+    }
+}
+
+@media (max-width: 500px) {
+    .admin > *:nth-child(2) {
+        padding: 10px;
+        margin-top: 50px; /* Adjust for smaller screens */
     }
 }
