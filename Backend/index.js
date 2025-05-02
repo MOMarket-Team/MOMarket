@@ -842,18 +842,12 @@ app.post('/loginA', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log('JWT_SECRET:', process.env.JWT_SECRET);
-    console.log('MONGODB_URI', process.env.MONGODB_URI);
-    console.log('Login request received:', email);
-
     const user = await AdminUser.findOne({ email });
     if (!user) {
-      console.error('User not found:', email);
       return res.status(404).json({ error: 'User not found' });
     }
 
     if (password !== user.password) {
-      console.error('Invalid password for user:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -862,12 +856,10 @@ app.post('/loginA', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-    console.log('Token generated successfully for user:', email);
 
-    res.status(200).json({ token });
+    res.status(200).json({ token, name: user.name }); // Include the admin's name
   } catch (err) {
-    console.error('JWT generation error:', err.message);
-    return res.status(500).json({ error: 'Failed to generate token' });
+    res.status(500).json({ error: 'Failed to generate token' });
   }
 });
 

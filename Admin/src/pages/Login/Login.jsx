@@ -1,22 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-const Login = () => {
+const Login = ({ setAdminName }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-
-    // Redirect to admin dashboard if already logged in
-    useEffect(() => {
-        const token = localStorage.getItem("adminToken");
-        if (token) {
-            navigate("/admin/orders");
-        }
-    }, [navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -30,8 +22,10 @@ const Login = () => {
                 { withCredentials: true }
             );
 
-            // Store the token in localStorage
-            localStorage.setItem("adminToken", data.token);
+            // Store the token and admin name in sessionStorage
+            sessionStorage.setItem("adminToken", data.token);
+            sessionStorage.setItem("adminName", data.name || "Admin");
+            setAdminName(data.name || "Admin"); // Update parent component state
 
             // Redirect to admin dashboard
             navigate("/admin/orders");

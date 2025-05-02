@@ -1,38 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Navbar.css';
 import logo from '../../assets/logo.png';
 
-const Navbar = () => {
-    const [adminName, setAdminName] = useState('Admin');
+const Navbar = ({ adminName, setAdminName }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
-    // Fetch the logged-in admin's name
-    useEffect(() => {
-        const fetchAdminDetails = async () => {
-            const token = localStorage.getItem('adminToken');
-            if (token) {
-                try {
-                    const response = await fetch('https://momarket-7ata.onrender.com/admin/details', {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setAdminName(data.name || 'Admin');
-                    } else {
-                        console.error('Failed to fetch admin details');
-                    }
-                } catch (error) {
-                    console.error('Error fetching admin details:', error);
-                }
-            }
-        };
-        fetchAdminDetails();
-    }, []);
-
-    // Logout function
     const handleLogout = () => {
-        localStorage.removeItem('adminToken');
-        window.location.href = '/login'; // Redirect to the login page
+        sessionStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminName');
+        setAdminName(null); // Clear admin name in parent state
+        window.location.href = '/login'; // Redirect to login page
     };
 
     return (
@@ -44,7 +21,7 @@ const Navbar = () => {
                     className="nav-button"
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                 >
-                    {adminName} ▼
+                    {adminName || "Admin"} ▼
                 </button>
                 {dropdownOpen && (
                     <div className="dropdown-menu">
