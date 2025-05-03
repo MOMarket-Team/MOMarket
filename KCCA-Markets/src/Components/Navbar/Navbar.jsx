@@ -12,8 +12,9 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userName, setUserName] = useState("User");
   const [typingTimeout, setTypingTimeout] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const { cartItems } = useContext(ProductContext);
+  const { cartItems, searchProducts } = useContext(ProductContext);
   const navigate = useNavigate();
 
   const dropdownRef = useRef(null);
@@ -40,9 +41,10 @@ const Navbar = () => {
     fetchUserName();
   }, []);
 
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
+    setHasSearched(false); // Reset hasSearched when typing
 
     if (typingTimeout) clearTimeout(typingTimeout);
 
@@ -51,31 +53,27 @@ const Navbar = () => {
       return;
     }
 
-    setTypingTimeout(
-      setTimeout(async () => {
-        try {
-          const response = await fetch(`https://momarket-7ata.onrender.com/search?q=${value}`);
-          if (!response.ok) throw new Error("Failed to fetch search results");
+    // Search immediately when space is pressed
+    if (value.endsWith(' ')) {
+      const matchedProducts = searchProducts(value.trim());
+      setSearchResults(matchedProducts);
+      setHasSearched(true);
+      return;
+    }
 
-          const data = await response.json();
-          if (data.success) {
-            setSearchResults(data.products);
-          } else {
-            setSearchResults([]);
-          }
-        } catch (error) {
-          console.error("Error fetching search results:", error);
-          setSearchResults([]);
-        }
-      }, 500)
+    // Set timeout to search after 5 seconds of inactivity
+    setTypingTimeout(
+      setTimeout(() => {
+        const matchedProducts = searchProducts(value.trim());
+        setSearchResults(matchedProducts);
+        setHasSearched(true);
+      }, 5000)
     );
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (searchTerm.trim() !== "") {
-      navigate(`/search?q=${searchTerm}`);
-    }
+    // No need to navigate, we're showing results inline
   };
 
   const toggleDropdown = () => {
@@ -130,7 +128,7 @@ const Navbar = () => {
               </button>
             </form>
 
-            {searchResults.length > 0 && (
+            {searchResults.length > 0 ? (
               <div className="search-results">
                 {searchResults.map((product) => (
                   <Link
@@ -142,12 +140,20 @@ const Navbar = () => {
                       setSearchTerm("");
                     }}
                   >
-                    <span className="product-name">{product.name}</span>
-                    <span className="product-category">{product.category}</span>
+                    <div className="search-result-content">
+                      <span className="product-name">{product.name}</span>
+                      <span className="product-price">UGX {product.price}</span>
+                    </div>
                   </Link>
                 ))}
               </div>
-            )}
+            ) : hasSearched && searchTerm ? (
+              <div className="search-results">
+                <div className="search-no-results">
+                  <p>No results found for "{searchTerm}"</p>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <nav className="nav-menu-container">
