@@ -66,14 +66,22 @@ const AdminOrders = () => {
     }
   };
 
-  const calculateProfit = (price, quantity) => {
-    return price * quantity * 0.2; // 20% profit
-  };
-  
-  const calculateActualPrice = (price, quantity) => {
-    const fullPrice = price * quantity;
-    const profit = fullPrice * 0.2;
-    return fullPrice - profit; // Actual price after subtracting 20% profit
+  const calculateOriginalCostAndProfit = (product, quantity) => {
+    if (!product) return { cost: 0, profit: 0 };
+
+    // For quantities over 2000, use quantity as the displayed price
+    const displayedPrice = quantity > 2000 ? quantity : product.price * quantity;
+    
+    // Calculate original cost (remove the 20% markup)
+    const originalCost = displayedPrice / 1.2;
+    
+    // Calculate profit (20% of original cost)
+    const profit = originalCost * 0.2;
+    
+    return {
+      cost: Math.round(originalCost),
+      profit: Math.round(profit)
+    };
   };
 
   const OrderCard = ({ order }) => {
@@ -87,20 +95,21 @@ const AdminOrders = () => {
           <p><strong>Customer:</strong> {order.userId?.name || 'N/A'}</p>
           <p><strong>Phone:</strong> {order.phone}</p>
           <p><strong>Location:</strong> {order.location}</p>
-          <p><strong>Total:</strong> UGX{order.totalAmount}</p>
+          <p><strong>Subtotal:</strong> UGX{order.subtotal.toLocaleString()}</p>
+          <p><strong>Delivery Fee:</strong> UGX{order.deliveryFee.toLocaleString()}</p>
+          <p><strong>Total:</strong> UGX{order.totalAmount.toLocaleString()}</p>
           <p><strong>Date:</strong> {new Date(order.date).toLocaleString()}</p>
           
           <div className="order-products">
             <strong>Products:</strong>
             {order.cartData?.map((item, index) => {
-              const actualPrice = calculateActualPrice(item.product?.price || 0, item.quantity);
-              const profit = calculateProfit(item.product?.price || 0, item.quantity);
+              const { cost, profit } = calculateOriginalCostAndProfit(item.product, item.quantity);
               return (
                 <div key={index} className="product-item">
                   {item.product?.name || 'Unknown Product'} ×{item.quantity}
                   <div className="price-details">
-                    <span>Cost: UGX{actualPrice.toFixed(0)}</span>
-                    <span>Profit: UGX{profit.toFixed(0)}</span>
+                    <span>Cost: UGX{cost.toLocaleString()}</span>
+                    <span>Profit: UGX{profit.toLocaleString()}</span>
                   </div>
                 </div>
               );
@@ -164,9 +173,9 @@ const AdminOrders = () => {
                 <td>{order.phone}</td>
                 <td>{order.location}</td>
                 <td>{order.deliveryTime || 'N/A'}</td>
-                <td>UGX{order.subtotal}</td>
-                <td>UGX{order.deliveryFee}</td>
-                <td>UGX{order.totalAmount}</td>
+                <td>UGX{order.subtotal.toLocaleString()}</td>
+                <td>UGX{order.deliveryFee.toLocaleString()}</td>
+                <td>UGX{order.totalAmount.toLocaleString()}</td>
                 <td>{order.paymentMethod}</td>
                 <td>
                   <select
@@ -181,13 +190,12 @@ const AdminOrders = () => {
                 <td>{new Date(order.date).toLocaleString()}</td>
                 <td>
                   {order.cartData?.map((item, index) => {
-                    const actualPrice = calculateActualPrice(item.product?.price || 0, item.quantity);
-                    const profit = calculateProfit(item.product?.price || 0, item.quantity);
+                    const { cost, profit } = calculateOriginalCostAndProfit(item.product, item.quantity);
                     return (
                       <div key={index} style={{ marginBottom: '10px' }}>
                         <strong>{item.product?.name || 'Unknown Product'}</strong> ×{item.quantity} <br />
-                        Product Cost (after Admin Profit): <strong>UGX{actualPrice.toFixed(0)}</strong> <br />
-                        Admin Profit: <strong>UGX{profit.toFixed(0)}</strong>
+                        Product Cost: <strong>UGX{cost.toLocaleString()}</strong> <br />
+                        Admin Profit: <strong>UGX{profit.toLocaleString()}</strong>
                         <hr />
                       </div>
                     );
