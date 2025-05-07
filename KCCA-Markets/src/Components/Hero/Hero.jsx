@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "./Hero.css";
-import groce from "../Assets/groce.jpg";
-import groce1 from "../Assets/grocei.jpg";
-import groce2 from "../Assets/groceii.jpg";
+import groce from "../Assets/groce.webp";
+import groce1 from "../Assets/grocei.webp";
+import groce2 from "../Assets/groceii.webp";
+import groce3 from "../Assets/groceiii.webp";
+import groce4 from "../Assets/groceiv.webp";
+import groce5 from "../Assets/grocev.webp";
 
-const images = [groce, groce1, groce2];
+const images = [groce, groce1, groce2, groce3, groce4, groce5];
 
 const Hero = ({ handleManualOrder }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
