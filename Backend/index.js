@@ -254,6 +254,9 @@ const ensureCartNotEmpty = (req, res, next) => {
 // Routes for product operations
 app.post("/addproduct", async (req, res) => {
   try {
+    // Get the highest existing ID
+    const lastProduct = await Product.findOne().sort({ id: -1 });
+    const newId = lastProduct ? lastProduct.id + 1 : 1;
     const { name, image, category, price, measurement, sizeOptions = {}, basePrice = 0 } = req.body;
 
     // Validate required fields
@@ -266,6 +269,7 @@ app.post("/addproduct", async (req, res) => {
 
     // Create product data with proper types
     const productData = {
+      id: newId, // Add the generated ID
       name: String(name),
       image: String(image),
       category: String(category),
