@@ -1,0 +1,5 @@
+{
+    "buildCommand": "cd Backend && npm install && npm run build",
+    "startCommand": "cd Backend && node index.js",
+    "installCommand": "cd Backend && npm install"
+  }
