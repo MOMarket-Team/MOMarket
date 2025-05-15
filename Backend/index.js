@@ -50,6 +50,20 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Apply to form
 // CORS configuration
 const BASE_URL = process.env.BASE_URL;
 
+// DEBUG: Monitor route registration
+const originalMethods = {};
+['get', 'post', 'put', 'delete', 'use', 'all'].forEach(method => {
+  originalMethods[method] = app[method];
+  app[method] = function(path, ...args) {
+    if (typeof path === 'string' && path.includes('://')) {
+      console.error(`🚨 CRITICAL: Invalid route path "${path}"`);
+      console.trace(); // Show where this route was registered
+      process.exit(1);
+    }
+    return originalMethods[method].call(this, path, ...args);
+  };
+});
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGINS.split(','),
