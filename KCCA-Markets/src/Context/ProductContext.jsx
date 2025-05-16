@@ -28,7 +28,7 @@ const ProductContextProvider = (props) => {
   };  
 
   useEffect(() => {
-    fetch("https://momarket-7ata.onrender.com/allproducts")
+    fetch("https://mangu-market.up.railway.app/allproducts")
       .then((response) => response.json())
       .then((data) => {
         setAll_Product(data);
