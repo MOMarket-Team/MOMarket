@@ -26,7 +26,7 @@ const CartItems = () => {
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const distanceCache = useRef(new Map());
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://momarket-7ata.onrender.com";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://mangumarket.up.railway.app";
   const companyLocation = { lat: 0.3113, lng: 32.5799 };
 
   // Fetch the Google Maps API key from the backend

@@ -95,7 +95,7 @@ const CheckOut = () => {
       };      
   
       const response = await axios.post(
-        "https://momarket-7ata.onrender.com/checkout",
+        "https://mangumarket.up.railway.app/checkout",
         checkoutData,
         {
           headers: {
@@ -111,7 +111,7 @@ const CheckOut = () => {
         alert("Order placed successfully.");
   
         const clearCartResponse = await axios.post(
-          "https://momarket-7ata.onrender.com/clearcart",
+          "https://mangumarket.up.railway.app/clearcart",
           {},
           {
             headers: {

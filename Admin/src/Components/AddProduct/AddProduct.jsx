@@ -49,7 +49,7 @@ const AddProduct = () => {
   
     try {
       // 1. Upload image
-      const uploadResponse = await fetch('https://momarket-7ata.onrender.com/uploads', {
+      const uploadResponse = await fetch('https://mangumarket.up.railway.app/uploads', {
         method: 'POST',
         body: formData,
       });
@@ -76,7 +76,7 @@ const AddProduct = () => {
       };
   
       // 3. Add product
-      const addProductResponse = await fetch('https://momarket-7ata.onrender.com/addproduct', {
+      const addProductResponse = await fetch('https://mangumarket.up.railway.app/addproduct', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

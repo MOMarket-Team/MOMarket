@@ -18,7 +18,7 @@ const ManualOrder = () => {
 
   useEffect(() => {
     // Fetch products from the backend
-    fetch("https://momarket-7ata.onrender.com/allproducts")
+    fetch("https://mangumarket.up.railway.app/allproducts")
       .then((response) => response.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error("Error fetching products:", err));

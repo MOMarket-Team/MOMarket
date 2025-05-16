@@ -26,7 +26,7 @@ const Navbar = () => {
       if (!token) return;
 
       try {
-        const response = await fetch("https://momarket-7ata.onrender.com/getuser", {
+        const response = await fetch("https://mangumarket.up.railway.app/getuser", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();

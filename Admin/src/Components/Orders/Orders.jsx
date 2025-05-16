@@ -6,7 +6,7 @@ const AdminOrders = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 800);
 
   useEffect(() => {
-    fetch('https://momarket-7ata.onrender.com/admin/orders')
+    fetch('https://mangumarket.up.railway.app/admin/orders')
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
@@ -25,7 +25,7 @@ const AdminOrders = () => {
   }, []);
 
   const updateOrderStatus = (orderId, newStatus) => {
-    fetch(`https://momarket-7ata.onrender.com/admin/orders/${orderId}/status`, {
+    fetch(`https://mangumarket.up.railway.app/admin/orders/${orderId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
@@ -48,7 +48,7 @@ const AdminOrders = () => {
 
   const deleteOrder = (orderId) => {
     if (window.confirm('Are you sure you want to delete this order?')) {
-      fetch(`https://momarket-7ata.onrender.com/admin/orders/${orderId}`, {
+      fetch(`https://mangumarket.up.railway.app/admin/orders/${orderId}`, {
         method: 'DELETE',
       })
         .then((response) => response.json())

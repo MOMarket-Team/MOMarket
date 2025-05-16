@@ -8,7 +8,7 @@ const ClientOrders = () => {
     // Fetch orders function
     const fetchOrders = async () => {
         try {
-            const response = await fetch('https://momarket-7ata.onrender.com/my-orders', {
+            const response = await fetch('https://mangumarket.up.railway.app/my-orders', {
                 headers: { 'auth-token': token },
             });
             const data = await response.json();
@@ -28,7 +28,7 @@ const ClientOrders = () => {
     }, [token]);
 
     const updateOrderStatus = (orderId, newStatus) => {
-        fetch(`https://momarket-7ata.onrender.com/admin/orders/${orderId}/status`, {
+        fetch(`https://mangumarket.up.railway.app/admin/orders/${orderId}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

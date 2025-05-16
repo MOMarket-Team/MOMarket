@@ -9,7 +9,7 @@ const ListProduct = () => {
 
   const fetchInfo = async () => {
     try {
-      const res = await fetch('https://momarket-7ata.onrender.com/allproducts');
+      const res = await fetch('https://mangumarket.up.railway.app/allproducts');
       const data = await res.json();
       console.log("Fetched products:", data);
       setAllProducts(data);
@@ -28,7 +28,7 @@ const ListProduct = () => {
       try {
         console.log("Attempting to remove product with ID:", _id); // Debugging
 
-        const response = await fetch('https://momarket-7ata.onrender.com/removeproduct', {
+        const response = await fetch('https://mangumarket.up.railway.app/removeproduct', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ _id }),
@@ -60,7 +60,7 @@ const ListProduct = () => {
     console.log("Updating product with payload:", editProduct); // Debugging
 
     try {
-      const response = await fetch('https://momarket-7ata.onrender.com/updateproduct', {
+      const response = await fetch('https://mangumarket.up.railway.app/updateproduct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editProduct),

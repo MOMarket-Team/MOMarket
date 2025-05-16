@@ -17,7 +17,7 @@ const Login = ({ setAdminName }) => {
 
         try {
             const { data } = await axios.post(
-                "https://momarket-7ata.onrender.com/loginA",
+                "https://mangumarket.up.railway.app/loginA",
                 { email, password },
                 { withCredentials: true }
             );
