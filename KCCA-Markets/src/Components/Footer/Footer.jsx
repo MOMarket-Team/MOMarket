@@ -62,13 +62,13 @@ const Footer = () => {
             <a href="https://wa.link/4wgyk8" target="_blank" rel="noopener noreferrer">
               <img src={what_icon} alt="WhatsApp" />
             </a>
-            <a href="https://www.instagram.com/momarket25/" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com/mangumarket25/" target="_blank" rel="noopener noreferrer">
               <img src={insta_icon} alt="Instagram" />
             </a>
             <a href="https://www.facebook.com/profile.php?id=61572943912444" target="_blank" rel="noopener noreferrer">
               <img src={facebook_icon} alt="Facebook" />
             </a>
-            <a href="https://x.com/MOMarket25" target="_blank" rel="noopener noreferrer">
+            <a href="https://x.com/mangumarket" target="_blank" rel="noopener noreferrer">
               <img src={x_icon} alt="X (Twitter)" />
             </a>
           </div>
