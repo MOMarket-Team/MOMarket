@@ -166,6 +166,7 @@ const Order = mongoose.model("Order", {
   phone: { type: String, required: true },
   location: { type: String, required: true },
   subtotal: { type: Number, required: true }, // Subtotal from products
+  serviceFee: { type: Number, required: true },
   deliveryFee: { type: Number, required: true }, // Delivery fee, default to 0
   totalAmount: { type: Number, required: true }, // Subtotal + delivery fee
   deliveryOption: { type: String, enum: ["deliver", "pickup"], required: true },
@@ -569,6 +570,7 @@ app.post(
       location,
       paymentMethod,
       subtotal,
+      serviceFee,
       totalAmount,
       transaction_id,
       cartData,
@@ -588,9 +590,11 @@ app.post(
       // Compute delivery fee
       const parsedDeliveryFee =
         deliveryOption === "deliver" ? deliveryFee || 0 : 0;
+      
+      const serviceFee = Math.round(subtotal * 0.2); // Always compute on backend
 
       // Compute total amount based on backend logic
-      const computedTotalAmount = subtotal + parsedDeliveryFee;
+      const computedTotalAmount = subtotal + serviceFee + parsedDeliveryFee;
 
       if (totalAmount !== computedTotalAmount) {
         console.warn(
@@ -616,6 +620,7 @@ app.post(
         phone,
         location,
         subtotal,
+        serviceFee,
         deliveryFee: parsedDeliveryFee,
         totalAmount: computedTotalAmount, // Always assign backend-computed total
         paymentMethod,

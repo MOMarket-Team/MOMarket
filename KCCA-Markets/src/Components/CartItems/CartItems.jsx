@@ -29,13 +29,10 @@ const CartItems = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://mangumarket.up.railway.app";
   const companyLocation = { lat: 0.3113, lng: 32.5799 };
 
-  // Fetch the Google Maps API key from the backend
   const fetchGoogleMapsApiKey = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/maps-key`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch Google Maps API key");
-      }
+      if (!response.ok) throw new Error("Failed to fetch Google Maps API key");
       const data = await response.json();
       return data.key;
     } catch (error) {
@@ -47,16 +44,9 @@ const CartItems = () => {
   useEffect(() => {
     const initializeGoogleMaps = async () => {
       const apiKey = await fetchGoogleMapsApiKey();
-      if (!apiKey) {
-        console.error("Google Maps API key is missing");
-        return;
-      }
+      if (!apiKey) return console.error("Google Maps API key is missing");
 
-      const loader = new Loader({
-        apiKey: apiKey,
-        version: "weekly",
-        libraries: ["places"],
-      });
+      const loader = new Loader({ apiKey, version: "weekly", libraries: ["places"] });
 
       loader
         .load()
@@ -81,28 +71,19 @@ const CartItems = () => {
                 setDeliveryLocation(place.formatted_address);
                 if (mapsLoaded) {
                   debouncedCalculateDeliveryFee(place.geometry.location);
-                } else {
-                  console.warn("Google Maps API is still loading.");
                 }
-              } else {
-                console.error("No geometry found for the selected place");
               }
             });
           }
         })
-        .catch((error) => {
-          console.error("Error loading Google Maps API:", error);
-        });
+        .catch((error) => console.error("Error loading Google Maps API:", error));
     };
 
     initializeGoogleMaps();
   }, [mapsLoaded]);
 
   const calculateDeliveryFee = (userCoords) => {
-    if (!mapsLoaded || !googleMaps) {
-      console.error("Google Maps not loaded");
-      return;
-    }
+    if (!mapsLoaded || !googleMaps) return console.error("Google Maps not loaded");
 
     const cacheKey = `${userCoords.lat()},${userCoords.lng()}`;
     if (distanceCache.current.has(cacheKey)) {
@@ -123,11 +104,7 @@ const CartItems = () => {
           const distanceInKm = response.rows[0].elements[0].distance.value / 1000;
           const roundedDistance = Math.ceil(distanceInKm);
           let fee = roundedDistance * 800;
-
-          if (fee < 2000) {
-            fee = 2000;
-          }
-
+          if (fee < 2000) fee = 2000;
           setDeliveryFee(fee);
           distanceCache.current.set(cacheKey, fee);
         } else {
@@ -145,8 +122,9 @@ const CartItems = () => {
     }
 
     const subtotal = getTotalCartAmount();
+    const serviceFee = subtotal * 0.2;
     const deliveryFeeToUse = deliveryOption === "deliver" ? deliveryFee : 0;
-    const finalTotal = subtotal + deliveryFeeToUse; // Ensure deliveryFee is added
+    const finalTotal = subtotal + serviceFee + deliveryFeeToUse;
 
     navigate("/checkout", {
       state: {
@@ -154,18 +132,18 @@ const CartItems = () => {
         deliveryFee: deliveryFeeToUse,
         deliveryLocation,
         subtotal,
-        totalAmount: finalTotal, // Ensure totalAmount includes delivery fee
+        serviceFee,
+        totalAmount: finalTotal,
       },
     });
-};
+  };
 
-const finalTotal = useMemo(() => {
-    return getTotalCartAmount() + (deliveryOption === "deliver" ? deliveryFee : 0);
-}, [getTotalCartAmount, deliveryOption, deliveryFee]);
-  
+  const subtotal = getTotalCartAmount();
+  const serviceFee = useMemo(() => subtotal * 0.2, [subtotal]);
+  const finalTotal = useMemo(() => subtotal + serviceFee + (deliveryOption === "deliver" ? deliveryFee : 0), [subtotal, serviceFee, deliveryOption, deliveryFee]);
+
   return (
     <div className="cartitems">
-      {/* Cart Header */}
       <div className="format-main">
         <p>Products</p>
         <p>Title</p>
@@ -175,8 +153,7 @@ const finalTotal = useMemo(() => {
         <p>Remove</p>
       </div>
       <hr />
-  
-      {/* Cart Items */}
+
       {cartItems.length === 0 ? (
         <h1>Cart is empty</h1>
       ) : (
@@ -185,13 +162,13 @@ const finalTotal = useMemo(() => {
             <div className="format format-main">
               <img src={e.image} alt="" className="product-icon" />
               <p>{e.name}</p>
-              <p>
-                {e.measurement === "Set"
-                  ? `${prodprice.format(e.basePrice)}`
+              <p>{
+                e.measurement === "Set"
+                  ? prodprice.format(e.basePrice)
                   : e.measurement === "Whole"
-                  ? `${prodprice.format(e.sizeOptions[e.selectedSize])}`
-                  : `${prodprice.format(e.price)}`}
-              </p>
+                  ? prodprice.format(e.sizeOptions[e.selectedSize])
+                  : prodprice.format(e.price)
+              }</p>
               <div className="quantity-control">
                 <input
                   type="number"
@@ -207,13 +184,13 @@ const finalTotal = useMemo(() => {
                 />
                 <span>{e.measurement === "Set" ? "" : "kg"}</span>
               </div>
-              <p>
-                {e.measurement === "Set"
-                  ? `${prodprice.format(e.quantity)}`
+              <p>{
+                e.measurement === "Set"
+                  ? prodprice.format(e.quantity)
                   : e.measurement === "Whole"
-                  ? `${prodprice.format(e.sizeOptions[e.selectedSize] * e.quantity)}`
-                  : `${prodprice.format(e.price * e.quantity)}`}
-              </p>
+                  ? prodprice.format(e.sizeOptions[e.selectedSize] * e.quantity)
+                  : prodprice.format(e.price * e.quantity)
+              }</p>
               <img
                 className="remove-icon"
                 src={remove_icon}
@@ -225,33 +202,35 @@ const finalTotal = useMemo(() => {
           </div>
         ))
       )}
+
       {!mapsLoaded && (
         <div className="loading-message">
           <p>Google Maps API is still loading. Please wait...</p>
         </div>
       )}
-  
-      {/* Cart Totals */}
+
       <div className="down">
         <div className="total">
           <h1>Cart Totals</h1>
           <div>
             <div className="total-item">
               <p>Subtotal</p>
-              <p>{prodprice.format(cartTotal)}</p>
+              <p>{prodprice.format(subtotal)}</p>
+            </div>
+            <hr />
+            <div className="total-item">
+              <p>Service Fee</p>
+              <p>{prodprice.format(serviceFee)}</p>
             </div>
             <hr />
             <div className="total-item">
               <p>Delivery Option</p>
-              <select
-                value={deliveryOption}
-                onChange={(e) => setDeliveryOption(e.target.value)}
-              >
+              <select value={deliveryOption} onChange={(e) => setDeliveryOption(e.target.value)}>
                 <option value="deliver">Deliver</option>
                 <option value="pickup">Pickup (No Delivery Fee)</option>
               </select>
             </div>
-  
+
             {deliveryOption === "deliver" && (
               <>
                 <hr />
@@ -272,7 +251,7 @@ const finalTotal = useMemo(() => {
                 </div>
               </>
             )}
-  
+
             <hr />
             <div className="total-item">
               <h3>Total</h3>

@@ -24,6 +24,11 @@ const AdminOrders = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Calculate service fee consistently
+  const calculateServiceFee = (subtotal) => {
+    return Math.round(subtotal * 0.2);
+  };
+
   const updateOrderStatus = (orderId, newStatus) => {
     fetch(`https://mangumarket.up.railway.app/admin/orders/${orderId}/status`, {
       method: 'PUT',
@@ -66,25 +71,8 @@ const AdminOrders = () => {
     }
   };
 
-  const calculateOriginalCostAndProfit = (product, quantity) => {
-    if (!product) return { cost: 0, profit: 0 };
-
-    // For quantities over 2000, use quantity as the displayed price
-    const displayedPrice = quantity > 2000 ? quantity : product.price * quantity;
-    
-    // Calculate original cost (remove the 20% markup)
-    const originalCost = displayedPrice / 1.2;
-    
-    // Calculate profit (20% of original cost)
-    const profit = originalCost * 0.2;
-    
-    return {
-      cost: Math.round(originalCost),
-      profit: Math.round(profit)
-    };
-  };
-
   const OrderCard = ({ order }) => {
+    const serviceFee = calculateServiceFee(order.subtotal);
     return (
       <div className="order-card">
         <div className="order-card-header">
@@ -96,24 +84,21 @@ const AdminOrders = () => {
           <p><strong>Phone:</strong> {order.phone}</p>
           <p><strong>Location:</strong> {order.location}</p>
           <p><strong>Subtotal:</strong> UGX{order.subtotal.toLocaleString()}</p>
+          <p><strong>Service Fee (20%):</strong> UGX{serviceFee.toLocaleString()}</p>
           <p><strong>Delivery Fee:</strong> UGX{order.deliveryFee.toLocaleString()}</p>
           <p><strong>Total:</strong> UGX{order.totalAmount.toLocaleString()}</p>
           <p><strong>Date:</strong> {new Date(order.date).toLocaleString()}</p>
           
           <div className="order-products">
             <strong>Products:</strong>
-            {order.cartData?.map((item, index) => {
-              const { cost, profit } = calculateOriginalCostAndProfit(item.product, item.quantity);
-              return (
-                <div key={index} className="product-item">
-                  {item.product?.name || 'Unknown Product'} ×{item.quantity}
-                  <div className="price-details">
-                    <span>Cost: UGX{cost.toLocaleString()}</span>
-                    <span>Profit: UGX{profit.toLocaleString()}</span>
-                  </div>
+            {order.cartData?.map((item, index) => (
+              <div key={index} className="product-item">
+                {item.product?.name || 'Unknown Product'} ×{item.quantity}
+                <div className="price-details">
+                  <span>Price: UGX{item.product?.price ? (item.product.price * item.quantity).toLocaleString() : 'N/A'}</span>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
           
           <div className="order-actions">
@@ -156,61 +141,62 @@ const AdminOrders = () => {
               <th>Phone</th>
               <th>Location</th>
               <th>Delivery Time</th>
-              <th>Subtotal (Without Delivery)</th>
+              <th>Subtotal</th>
+              <th>Service Fee</th>
               <th>Delivery Fee</th>
               <th>Total Amount</th>
               <th>Payment Method</th>
               <th>Status</th>
               <th>Date</th>
-              <th>Products Details</th>
+              <th>Products</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
-              <tr key={order._id}>
-                <td>{order.userId?.name || 'N/A'}</td>
-                <td>{order.phone}</td>
-                <td>{order.location}</td>
-                <td>{order.deliveryTime || 'N/A'}</td>
-                <td>UGX{order.subtotal.toLocaleString()}</td>
-                <td>UGX{order.deliveryFee.toLocaleString()}</td>
-                <td>UGX{order.totalAmount.toLocaleString()}</td>
-                <td>{order.paymentMethod}</td>
-                <td>
-                  <select
-                    value={order.status}
-                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </td>
-                <td>{new Date(order.date).toLocaleString()}</td>
-                <td>
-                  {order.cartData?.map((item, index) => {
-                    const { cost, profit } = calculateOriginalCostAndProfit(item.product, item.quantity);
-                    return (
+            {orders.map((order) => {
+              const serviceFee = calculateServiceFee(order.subtotal);
+              return (
+                <tr key={order._id}>
+                  <td>{order.userId?.name || 'N/A'}</td>
+                  <td>{order.phone}</td>
+                  <td>{order.location}</td>
+                  <td>{order.deliveryTime || 'N/A'}</td>
+                  <td>UGX{order.subtotal.toLocaleString()}</td>
+                  <td>UGX{serviceFee.toLocaleString()}</td>
+                  <td>UGX{order.deliveryFee.toLocaleString()}</td>
+                  <td>UGX{order.totalAmount.toLocaleString()}</td>
+                  <td>{order.paymentMethod}</td>
+                  <td>
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </td>
+                  <td>{new Date(order.date).toLocaleString()}</td>
+                  <td>
+                    {order.cartData?.map((item, index) => (
                       <div key={index} style={{ marginBottom: '10px' }}>
                         <strong>{item.product?.name || 'Unknown Product'}</strong> ×{item.quantity} <br />
-                        Product Cost: <strong>UGX{cost.toLocaleString()}</strong> <br />
-                        Admin Profit: <strong>UGX{profit.toLocaleString()}</strong>
+                        Price: <strong>UGX{item.product?.price ? (item.product.price * item.quantity).toLocaleString() : 'N/A'}</strong>
                         <hr />
                       </div>
-                    );
-                  })}
-                </td>
-                <td>
-                  <button
-                    onClick={() => deleteOrder(order._id)}
-                    className="delete-button"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    ))}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => deleteOrder(order._id)}
+                      className="delete-button"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
