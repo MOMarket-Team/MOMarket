@@ -26,7 +26,7 @@ const AdminOrders = () => {
 
   // Calculate service fee consistently
   const calculateServiceFee = (subtotal) => {
-    return Math.round(subtotal * 0.2);
+    return Math.round(subtotal * 0.07);
   };
 
   const updateOrderStatus = (orderId, newStatus) => {

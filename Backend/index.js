@@ -591,7 +591,7 @@ app.post(
       const parsedDeliveryFee =
         deliveryOption === "deliver" ? deliveryFee || 0 : 0;
       
-      const serviceFee = Math.round(subtotal * 0.2); // Always compute on backend
+      const serviceFee = Math.round(subtotal * 0.07); // Always compute on backend
 
       // Compute total amount based on backend logic
       const computedTotalAmount = subtotal + serviceFee + parsedDeliveryFee;

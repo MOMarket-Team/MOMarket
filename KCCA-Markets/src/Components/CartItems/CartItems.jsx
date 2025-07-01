@@ -122,7 +122,7 @@ const CartItems = () => {
     }
 
     const subtotal = getTotalCartAmount();
-    const serviceFee = subtotal * 0.2;
+    const serviceFee = subtotal * 0.07;
     const deliveryFeeToUse = deliveryOption === "deliver" ? deliveryFee : 0;
     const finalTotal = subtotal + serviceFee + deliveryFeeToUse;
 
@@ -139,7 +139,7 @@ const CartItems = () => {
   };
 
   const subtotal = getTotalCartAmount();
-  const serviceFee = useMemo(() => subtotal * 0.2, [subtotal]);
+  const serviceFee = useMemo(() => subtotal * 0.07, [subtotal]);
   const finalTotal = useMemo(() => subtotal + serviceFee + (deliveryOption === "deliver" ? deliveryFee : 0), [subtotal, serviceFee, deliveryOption, deliveryFee]);
 
   return (

@@ -79,7 +79,7 @@ const CheckOut = () => {
       // Ensure finalTotal is computed before sending to the backend
       const subtotal = getTotalCartAmount();
       const deliveryFeeToUse = deliveryOption === "deliver" ? deliveryFee : 0;
-      const serviceFee = subtotal * 0.2;
+      const serviceFee = subtotal * 0.07;
       const totalAmount = subtotal + serviceFee + deliveryFeeToUse;
 
       const checkoutData = {
