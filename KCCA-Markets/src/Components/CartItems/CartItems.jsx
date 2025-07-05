@@ -12,7 +12,6 @@ const CartItems = () => {
     cartItems,
     removeFromcart,
     updateItemQuantity,
-    cartTotal,
     getTotalCartAmount,
   } = useContext(ProductContext);
   const navigate = useNavigate();
@@ -20,14 +19,18 @@ const CartItems = () => {
   const [deliveryOption, setDeliveryOption] = useState("deliver");
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [deliveryLocation, setDeliveryLocation] = useState("");
+  const [pinCoords, setPinCoords] = useState(null);
+
   const inputRef = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
 
   const [googleMaps, setGoogleMaps] = useState(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const distanceCache = useRef(new Map());
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://mangumarket.up.railway.app";
-  const companyLocation = { lat: 0.3113, lng: 32.5799 };
+  const companyLocation = { lat: 0.3113, lng: 32.5799 }; // Kampala
 
   const fetchGoogleMapsApiKey = async () => {
     try {
@@ -53,7 +56,6 @@ const CartItems = () => {
         .then((google) => {
           setGoogleMaps(google.maps);
           setMapsLoaded(true);
-          console.log("Google Maps API loaded successfully");
 
           if (inputRef.current) {
             const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
@@ -61,18 +63,54 @@ const CartItems = () => {
               fields: ["formatted_address", "geometry"],
             });
 
-            const debouncedCalculateDeliveryFee = debounce((userCoords) => {
-              calculateDeliveryFee(userCoords);
+            const debouncedCalculateDeliveryFee = debounce((location) => {
+              calculateDeliveryFee(location);
             }, 500);
 
             autocomplete.addListener("place_changed", () => {
               const place = autocomplete.getPlace();
               if (place.geometry) {
                 setDeliveryLocation(place.formatted_address);
-                if (mapsLoaded) {
-                  debouncedCalculateDeliveryFee(place.geometry.location);
-                }
+                debouncedCalculateDeliveryFee(place.geometry.location);
               }
+            });
+          }
+
+          if (mapRef.current) {
+            const map = new google.maps.Map(mapRef.current, {
+              center: companyLocation,
+              zoom: 12,
+              mapTypeControl: false,
+              streetViewControl: false,
+              fullscreenControl: true,
+            });
+
+            map.addListener("click", (e) => {
+              const coords = {
+                lat: e.latLng.lat(),
+                lng: e.latLng.lng(),
+              };
+              setPinCoords(coords);
+
+              if (!markerRef.current) {
+                markerRef.current = new google.maps.Marker({
+                  position: coords,
+                  map,
+                  draggable: true,
+                });
+              } else {
+                markerRef.current.setPosition(coords);
+              }
+
+              const geocoder = new google.maps.Geocoder();
+              geocoder.geocode({ location: coords }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                  setDeliveryLocation(results[0].formatted_address);
+                }
+              });
+
+              const latLng = new google.maps.LatLng(coords.lat, coords.lng);
+              calculateDeliveryFee(latLng);
             });
           }
         })
@@ -83,7 +121,7 @@ const CartItems = () => {
   }, [mapsLoaded]);
 
   const calculateDeliveryFee = (userCoords) => {
-    if (!mapsLoaded || !googleMaps) return console.error("Google Maps not loaded");
+    if (!mapsLoaded || !googleMaps) return;
 
     const cacheKey = `${userCoords.lat()},${userCoords.lng()}`;
     if (distanceCache.current.has(cacheKey)) {
@@ -102,21 +140,21 @@ const CartItems = () => {
       (response, status) => {
         if (status === "OK") {
           const distanceInKm = response.rows[0].elements[0].distance.value / 1000;
-          const roundedDistance = Math.ceil(distanceInKm);
-          let fee = roundedDistance * 800;
+          const rounded = Math.ceil(distanceInKm);
+          let fee = rounded * 800;
           if (fee < 2000) fee = 2000;
           setDeliveryFee(fee);
           distanceCache.current.set(cacheKey, fee);
         } else {
-          console.error("Error fetching distance:", status);
+          console.error("Distance matrix error:", status);
         }
       }
     );
   };
 
   const handleCheckout = () => {
-    if (deliveryOption === "deliver" && !deliveryLocation.trim()) {
-      alert("Please first fill in your delivery location or change the delivery option");
+    if (deliveryOption === "deliver" && !deliveryLocation.trim() && !pinCoords) {
+      alert("Please enter a delivery location or drop a pin.");
       inputRef.current.focus();
       return;
     }
@@ -124,23 +162,24 @@ const CartItems = () => {
     const subtotal = getTotalCartAmount();
     const serviceFee = subtotal * 0.07;
     const deliveryFeeToUse = deliveryOption === "deliver" ? deliveryFee : 0;
-    const finalTotal = subtotal + serviceFee + deliveryFeeToUse;
+    const totalAmount = subtotal + serviceFee + deliveryFeeToUse;
 
     navigate("/checkout", {
       state: {
         deliveryOption,
         deliveryFee: deliveryFeeToUse,
         deliveryLocation,
+        pinCoords,
         subtotal,
         serviceFee,
-        totalAmount: finalTotal,
+        totalAmount,
       },
     });
   };
 
   const subtotal = getTotalCartAmount();
   const serviceFee = useMemo(() => subtotal * 0.07, [subtotal]);
-  const finalTotal = useMemo(() => subtotal + serviceFee + (deliveryOption === "deliver" ? deliveryFee : 0), [subtotal, serviceFee, deliveryOption, deliveryFee]);
+  const totalAmount = useMemo(() => subtotal + serviceFee + (deliveryOption === "deliver" ? deliveryFee : 0), [subtotal, serviceFee, deliveryOption, deliveryFee]);
 
   return (
     <div className="cartitems">
@@ -208,56 +247,49 @@ const CartItems = () => {
           <p>Google Maps API is still loading. Please wait...</p>
         </div>
       )}
-
       <div className="down">
         <div className="total">
           <h1>Cart Totals</h1>
-          <div>
-            <div className="total-item">
-              <p>Subtotal</p>
-              <p>{prodprice.format(subtotal)}</p>
-            </div>
-            <hr />
-            <div className="total-item">
-              <p>Service Fee</p>
-              <p>{prodprice.format(serviceFee)}</p>
-            </div>
-            <hr />
-            <div className="total-item">
-              <p>Delivery Option</p>
-              <select value={deliveryOption} onChange={(e) => setDeliveryOption(e.target.value)}>
-                <option value="deliver">Deliver</option>
-                <option value="pickup">Pickup (No Delivery Fee)</option>
-              </select>
-            </div>
-
-            {deliveryOption === "deliver" && (
-              <>
-                <hr />
-                <div className="total-item">
-                  <p>Delivery Location</p>
-                  <input
-                    type="text"
-                    placeholder="Enter your delivery location"
-                    ref={inputRef}
-                    value={deliveryLocation}
-                    onChange={(e) => setDeliveryLocation(e.target.value)}
-                    className="delivery-location-input"
-                  />
-                </div>
-                <div className="total-item">
-                  <p>Delivery Fee</p>
-                  <span>{prodprice.format(deliveryFee)}</span>
-                </div>
-              </>
-            )}
-
-            <hr />
-            <div className="total-item">
-              <h3>Total</h3>
-              <h3>{prodprice.format(finalTotal)}</h3>
-            </div>
+          <div className="total-item"><p>Subtotal</p><p>{prodprice.format(subtotal)}</p></div>
+          <hr />
+          <div className="total-item"><p>Service Fee</p><p>{prodprice.format(serviceFee)}</p></div>
+          <hr />
+          <div className="total-item">
+            <p>Delivery Option</p>
+            <select value={deliveryOption} onChange={(e) => setDeliveryOption(e.target.value)}>
+              <option value="deliver">Deliver</option>
+              <option value="pickup">Pickup (No Delivery Fee)</option>
+            </select>
           </div>
+
+          {deliveryOption === "deliver" && (
+            <>
+              <hr />
+              <div className="total-item">
+                <p>Delivery Location</p>
+                <input
+                  type="text"
+                  placeholder="Enter your delivery location"
+                  ref={inputRef}
+                  value={deliveryLocation}
+                  onChange={(e) => setDeliveryLocation(e.target.value)}
+                  className="delivery-location-input"
+                />
+              </div>
+              <div className="total-item"><p>Or Drop a Pin</p></div>
+              <div
+                ref={mapRef}
+                style={{ width: "100%", height: "400px", marginTop: "10px", borderRadius: "8px" }}
+              ></div>
+              <div className="total-item">
+                <p>Delivery Fee</p>
+                <span>{prodprice.format(deliveryFee)}</span>
+              </div>
+            </>
+          )}
+
+          <hr />
+          <div className="total-item"><h3>Total</h3><h3>{prodprice.format(totalAmount)}</h3></div>
           <button onClick={handleCheckout}>PROCEED TO CHECKOUT</button>
         </div>
       </div>
