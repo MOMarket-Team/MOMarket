@@ -251,12 +251,10 @@ app.post("/uploads", upload.single("product"), async (req, res) => {
 
 const fetchUser = async (req, res, next) => {
   let token = req.header("auth-token");
-
-  // If not found, check standard Authorization: Bearer format
   if (!token) {
     const authHeader = req.header("Authorization");
     if (authHeader && authHeader.startsWith("Bearer ")) {
-      token = authHeader.substring(7); // remove "Bearer "
+      token = authHeader.substring(7);
     }
   }
 
@@ -265,8 +263,8 @@ const fetchUser = async (req, res, next) => {
   }
 
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    const data = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = data.user; // restore original behavior
     next();
   } catch (err) {
     res.status(400).json({ error: "Invalid token" });
