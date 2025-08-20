@@ -164,11 +164,14 @@ const CartItems = () => {
     const deliveryFeeToUse = deliveryOption === "deliver" ? deliveryFee : 0;
     const totalAmount = subtotal + serviceFee + deliveryFeeToUse;
 
+    // For pickup option, set location to "Pickup"
+    const checkoutLocation = deliveryOption === "pickup" ? "Pickup" : deliveryLocation;
+
     navigate("/checkout", {
       state: {
         deliveryOption,
         deliveryFee: deliveryFeeToUse,
-        deliveryLocation,
+        deliveryLocation: checkoutLocation,
         pinCoords,
         subtotal,
         serviceFee,
@@ -256,7 +259,13 @@ const CartItems = () => {
           <hr />
           <div className="total-item">
             <p>Delivery Option</p>
-            <select value={deliveryOption} onChange={(e) => setDeliveryOption(e.target.value)}>
+            <select value={deliveryOption} onChange={(e) => {
+              setDeliveryOption(e.target.value);
+              // Clear delivery fee when switching to pickup
+              if (e.target.value === "pickup") {
+                setDeliveryFee(0);
+              }
+            }}>
               <option value="deliver">Deliver</option>
               <option value="pickup">Pickup (No Delivery Fee)</option>
             </select>
@@ -286,6 +295,13 @@ const CartItems = () => {
                 <span>{prodprice.format(deliveryFee)}</span>
               </div>
             </>
+          )}
+
+          {deliveryOption === "pickup" && (
+            <div className="pickup-info">
+              <p>Pickup Location: Mangu Market - Main Store</p>
+              <p>123 Market Street, Kampala, Uganda</p>
+            </div>
           )}
 
           <hr />

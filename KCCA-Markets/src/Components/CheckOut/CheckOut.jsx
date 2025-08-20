@@ -35,6 +35,15 @@ const CheckOut = () => {
     }
   }, [navigate, locationState.pathname]);
 
+  // Set initial location based on delivery option
+  useEffect(() => {
+    if (deliveryOption === "pickup") {
+      setLocation("Pickup");
+    } else if (initialDeliveryLocation) {
+      setLocation(initialDeliveryLocation);
+    }
+  }, [deliveryOption, initialDeliveryLocation]);
+
   // Flutterwave configuration
   const config = {
     public_key: "FLWPUBK_TEST-37204d00156d46b5e6c40d9a27f4c5bc-X",
@@ -72,7 +81,10 @@ const CheckOut = () => {
       alert("Please enter a valid Ugandan phone number before checking out.");
       return;
     }
-  
+
+    // For pickup option, set location to "Pickup"
+    const finalLocation = deliveryOption === "pickup" ? "Pickup" : location;
+
     try {
       const token = localStorage.getItem("auth-token");
 
@@ -84,7 +96,7 @@ const CheckOut = () => {
 
       const checkoutData = {
         phone,
-        location: location || initialDeliveryLocation,
+        location: finalLocation, // Use the final location value
         paymentMethod,
         subtotal, // Send subtotal separately
         serviceFee,
@@ -95,7 +107,7 @@ const CheckOut = () => {
         deliveryOption: deliveryOption || "deliver",
         deliveryFee: deliveryFeeToUse, // Send delivery fee separately
       };      
-  
+
       const response = await axios.post(
         "https://mangumarket.up.railway.app/checkout",
         checkoutData,
@@ -106,12 +118,12 @@ const CheckOut = () => {
           },
         }
       );
-  
+
       if (response.data.success) {
         setDelivererNumber(response.data.deliveryContact);
         setIsOrderStatusVisible(true);
         alert("Order placed successfully.");
-  
+
         const clearCartResponse = await axios.post(
           "https://mangumarket.up.railway.app/clearcart",
           {},
@@ -121,7 +133,7 @@ const CheckOut = () => {
             },
           }
         );
-  
+
         if (clearCartResponse.data.success) {
           clearCart();
         } else {
@@ -134,7 +146,7 @@ const CheckOut = () => {
       console.error("Checkout error:", error);
       alert("An error occurred during checkout. Please try again.");
     }
-};
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("auth-token");
@@ -172,14 +184,26 @@ const CheckOut = () => {
           {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
 
-        <label htmlFor="location">Location:</label>
-        <input
-          id="location"
-          type="text"
-          value={location || initialDeliveryLocation || ""}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Enter your delivery location"
-        />
+        {deliveryOption === "deliver" && (
+          <>
+            <label htmlFor="location">Delivery Location:</label>
+            <input
+              id="location"
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Enter your delivery location"
+            />
+          </>
+        )}
+
+        {deliveryOption === "pickup" && (
+          <div className="pickup-info">
+            <h3>Pickup Location</h3>
+            <p>Mangu Market - Main Store</p>
+            <p>123 Market Street, Kampala, Uganda</p>
+          </div>
+        )}
 
         <label htmlFor="payment-method">Payment Method:</label>
         <select
